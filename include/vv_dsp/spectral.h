@@ -9,6 +9,8 @@ int vv_dsp_spectral_dummy(void);
 
 // FFT public API
 #include "vv_dsp/spectral/fft.h"
+// Spectral utilities (fftshift/ifftshift)
+#include "vv_dsp/spectral/utils.h"
 
 // Spectral utilities
 #include "vv_dsp/spectral/utils.h"

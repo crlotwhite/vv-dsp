@@ -12,7 +12,7 @@ static int nearly_equal(vv_dsp_real a, vv_dsp_real b, vv_dsp_real tol) {
 static int test_fft_c2c_basic(void) {
     const size_t n = 8;
     vv_dsp_fft_plan* plan_f = NULL;
-    vv_dsp_fft_make_plan(n, VV_DSP_FFT_C2C, VV_DSP_FFT_FORWARD, &plan_f);
+    if (vv_dsp_fft_make_plan(n, VV_DSP_FFT_C2C, VV_DSP_FFT_FORWARD, &plan_f) != VV_DSP_OK) return 0;
 
     vv_dsp_cpx x[n];
     vv_dsp_cpx X[n];
@@ -22,7 +22,7 @@ static int test_fft_c2c_basic(void) {
     for (size_t i = 0; i < n; ++i) x[i] = vv_dsp_cpx_make(0,0);
     x[0] = vv_dsp_cpx_make(1,0);
 
-    vv_dsp_fft_execute(plan_f, x, X);
+    if (vv_dsp_fft_execute(plan_f, x, X) != VV_DSP_OK) { vv_dsp_fft_destroy(plan_f); return 0; }
 
     int ok = 1;
     for (size_t k = 0; k < n; ++k) {
@@ -36,8 +36,8 @@ static int test_fft_c2c_basic(void) {
 static int test_fft_r2c_c2r_roundtrip(void) {
     const size_t n = 8;
     vv_dsp_fft_plan *pf = NULL, *pb = NULL;
-    vv_dsp_fft_make_plan(n, VV_DSP_FFT_R2C, VV_DSP_FFT_FORWARD, &pf);
-    vv_dsp_fft_make_plan(n, VV_DSP_FFT_C2R, VV_DSP_FFT_BACKWARD, &pb);
+    if (vv_dsp_fft_make_plan(n, VV_DSP_FFT_R2C, VV_DSP_FFT_FORWARD, &pf) != VV_DSP_OK) return 0;
+    if (vv_dsp_fft_make_plan(n, VV_DSP_FFT_C2R, VV_DSP_FFT_BACKWARD, &pb) != VV_DSP_OK) { vv_dsp_fft_destroy(pf); return 0; }
 
     vv_dsp_real xr[n];
     for (size_t i = 0; i < n; ++i) xr[i] = (vv_dsp_real)sin(2*M_PI*i/n);
@@ -45,8 +45,8 @@ static int test_fft_r2c_c2r_roundtrip(void) {
     vv_dsp_cpx Xh[n/2+1];
     vv_dsp_real xr2[n];
 
-    vv_dsp_fft_execute(pf, xr, Xh);
-    vv_dsp_fft_execute(pb, Xh, xr2);
+    if (vv_dsp_fft_execute(pf, xr, Xh) != VV_DSP_OK) { vv_dsp_fft_destroy(pf); vv_dsp_fft_destroy(pb); return 0; }
+    if (vv_dsp_fft_execute(pb, Xh, xr2) != VV_DSP_OK) { vv_dsp_fft_destroy(pf); vv_dsp_fft_destroy(pb); return 0; }
 
     int ok = 1;
     for (size_t i = 0; i < n; ++i) {
