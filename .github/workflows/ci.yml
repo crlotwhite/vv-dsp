@@ -66,12 +66,26 @@ jobs:
           -DVV_DSP_BUILD_TESTS=ON
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
 
-      - name: Build
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        run: cmake --build build --config ${{ matrix.build_type }} -j
+
+      - name: Build (macOS/Linux)
+        if: runner.os != 'Windows'
         run: cmake --build build -j
 
       - name: Run validation tests (Linux)
         if: runner.os == 'Linux'
         run: ctest --test-dir build -L validation --output-on-failure
 
-      - name: Run full test suite
+      - name: Run validation tests (Windows - reserved)
+        if: runner.os == 'Windows' && false
+        run: ctest --test-dir build -C ${{ matrix.build_type }} -L validation --output-on-failure
+
+      - name: Run full test suite (Windows)
+        if: runner.os == 'Windows'
+        run: ctest --test-dir build -C ${{ matrix.build_type }} --output-on-failure
+
+      - name: Run full test suite (macOS/Linux)
+        if: runner.os != 'Windows'
         run: ctest --test-dir build --output-on-failure
