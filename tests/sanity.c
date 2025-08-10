@@ -8,7 +8,11 @@ int main(void) {
     ok &= (vv_dsp_filter_dummy() == 7);
     ok &= (vv_dsp_resample_dummy() == 3);
     ok &= (vv_dsp_envelope_dummy() == 5);
-    ok &= (vv_dsp_window_dummy() == 11);
+    // window module sanity: boxcar(1) should return 1.0
+    {
+        vv_dsp_real w1[1] = {0};
+        ok &= (vv_dsp_window_boxcar(1, w1) == VV_DSP_OK) && (w1[0] == (vv_dsp_real)1.0);
+    }
     ok &= (vv_dsp_adapters_dummy() == 1);
 
     // basic core types and math

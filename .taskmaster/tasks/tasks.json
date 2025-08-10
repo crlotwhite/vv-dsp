@@ -139,15 +139,15 @@
         "dependencies": [
           2
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
             "title": "윈도우 함수 헤더 파일 및 기본 구조 정의",
             "description": "window.h에서 윈도우 함수들의 함수 선언과 공통 데이터 구조를 정의합니다",
             "dependencies": [],
-            "details": "src/window/window.h 파일에서 모든 윈도우 함수들(vv_dsp_window_boxcar, vv_dsp_window_hann, vv_dsp_window_hamming, vv_dsp_window_blackman, vv_dsp_window_blackman_harris, vv_dsp_window_nuttall)의 함수 시그니처를 정의합니다. 각 함수는 size_t N(윈도우 크기)과 vv_dsp_real* out(출력 버퍼)를 매개변수로 받고 vv_dsp_status를 반환합니다. 필요한 수학 상수들(M_PI 등)과 인클루드 헤더를 정의합니다.",
-            "status": "pending",
+            "details": "src/window/window.h 파일에서 모든 윈도우 함수들(vv_dsp_window_boxcar, vv_dsp_window_hann, vv_dsp_window_hamming, vv_dsp_window_blackman, vv_dsp_window_blackman_harris, vv_dsp_window_nuttall)의 함수 시그니처를 정의합니다. 각 함수는 size_t N(윈도우 크기)과 vv_dsp_real* out(출력 버퍼)를 매개변수로 받고 vv_dsp_status를 반환합니다. 필요한 수학 상수들(M_PI 등)과 인클루드 헤더를 정의합니다.\n<info added on 2025-08-10T10:51:09.823Z>\nPublic API는 `include/vv_dsp/window.h`에 정의하며, `src/window/window.c`에서 입력 유효성 검사 및 윈도우 계수 생성을 포함한 실제 구현을 담당합니다. `vv_dsp_real` 및 `vv_dsp_status` 타입은 `vv_dsp_types.h`를 통해 제공되며, `M_PI`와 같은 수학 상수는 `<math.h>`를 포함하고 필요한 경우 폴백을 제공합니다.\n</info added on 2025-08-10T10:51:09.823Z>",
+            "status": "done",
             "testStrategy": "헤더 파일이 올바르게 컴파일되고 함수 시그니처가 정확한지 확인"
           },
           {
@@ -158,7 +158,7 @@
               "3.1"
             ],
             "details": "src/window/window.c에서 vv_dsp_window_boxcar (모든 값이 1.0인 rectangular 윈도우)와 vv_dsp_window_hann (0.5 * (1 - cos(2*π*n/(N-1))) 공식 사용) 함수를 구현합니다. 입력 검증(NULL 포인터, 크기 0 체크), 경계값 처리, 효율적인 반복문 구조를 포함합니다. C99 표준 준수와 인라인 최적화를 고려합니다.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "scipy.signal.windows의 boxcar, hann 함수 결과와 수치적 비교, 대칭성 검증"
           },
           {
@@ -169,7 +169,7 @@
               "3.2"
             ],
             "details": "vv_dsp_window_hamming (0.54 - 0.46*cos(2*π*n/(N-1)) 공식)과 vv_dsp_window_blackman (0.42 - 0.5*cos(2*π*n/(N-1)) + 0.08*cos(4*π*n/(N-1)) 공식)을 구현합니다. 삼각함수 계산 최적화를 위해 필요시 룩업테이블이나 점진적 계산 방식을 고려합니다. 메모리 접근 패턴과 캐시 효율성을 고려한 구현을 합니다.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "scipy.signal의 hamming, blackman 윈도우와 정확도 비교, 주파수 특성 검증"
           },
           {
@@ -180,7 +180,7 @@
               "3.3"
             ],
             "details": "vv_dsp_window_blackman_harris (4-term Blackman-Harris: a0=0.35875, a1=0.48829, a2=0.14128, a3=0.01168 계수 사용)와 vv_dsp_window_nuttall (Nuttall 윈도우: a0=0.3635819, a1=0.4891775, a2=0.1365995, a3=0.0106411 계수) 함수를 구현합니다. 고차 코사인 항들의 정확한 계산과 수치적 안정성을 보장합니다.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "scipy.signal의 blackmanharris, nuttall 윈도우와 비교, 스펙트럼 누설 특성 검증"
           },
           {
@@ -190,8 +190,8 @@
             "dependencies": [
               "3.4"
             ],
-            "details": "CMakeLists.txt에 window 모듈 추가, 메인 헤더(vv_dsp.h)에 window.h 인클루드, 모든 윈도우 함수의 통합 테스트 구현. SIMD 최적화 가능성 검토, 메모리 정렬 최적화, 공통 계산 부분 팩터링. 에러 핸들링 일관성 검증과 API 문서 주석 추가.",
-            "status": "pending",
+            "details": "CMakeLists.txt에 window 모듈 추가, 메인 헤더(vv_dsp.h)에 window.h 인클루드, 모든 윈도우 함수의 통합 테스트 구현. SIMD 최적화 가능성 검토, 메모리 정렬 최적화, 공통 계산 부분 팩터링. 에러 핸들링 일관성 검증과 API 문서 주석 추가.\n<info added on 2025-08-10T10:54:15.162Z>\n모듈이 vv-dsp 메인 타겟에 성공적으로 연결되었고, tests/CMakeLists.txt에 새로운 윈도우 테스트가 추가됨. 기존 sanity 테스트도 윈도우 API를 사용하도록 업데이트되었으며, ctest를 통해 모든 테스트가 통과함.\n</info added on 2025-08-10T10:54:15.162Z>",
+            "status": "done",
             "testStrategy": "전체 윈도우 함수 슈트의 정확도 및 성능 벤치마크, 메모리 사용량 및 캐시 효율성 측정"
           }
         ]
@@ -778,7 +778,7 @@
     ],
     "metadata": {
       "created": "2025-08-10T09:22:31.972Z",
-      "updated": "2025-08-10T10:35:05.870Z",
+      "updated": "2025-08-10T10:54:22.022Z",
       "description": "Tasks for master context"
     }
   }

@@ -15,3 +15,8 @@ add_test(NAME vv-dsp-core COMMAND vv-dsp-core-tests)
 add_executable(vv-dsp-spectral-tests spectral_tests.c)
 target_link_libraries(vv-dsp-spectral-tests PRIVATE vv-dsp)
 add_test(NAME vv-dsp-spectral COMMAND vv-dsp-spectral-tests)
+
+# Window tests
+add_executable(vv-dsp-window-tests window_tests.c)
+target_link_libraries(vv-dsp-window-tests PRIVATE vv-dsp)
+add_test(NAME vv-dsp-window COMMAND vv-dsp-window-tests)
