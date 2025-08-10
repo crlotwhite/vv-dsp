@@ -49,5 +49,6 @@ Testing/
 *.lcov
 
 # IDE configs
-.vscode/
 .vs/
+
+__pycache__/

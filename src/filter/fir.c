@@ -115,9 +115,9 @@ vv_dsp_status vv_dsp_fir_apply_fft(vv_dsp_fir_state* st,
         Y[k].re = ar*br - ai*bi;
         Y[k].im = ar*bi + ai*br;
     }
-    // IFFT to time domain
+    // IFFT to time domain (backend inverse already scales by 1/Nfft)
     s = vv_dsp_fft_execute(p_c2r, Y, xb); if (s!=VV_DSP_OK) goto cleanup;
-    // xb now holds linear convolution length Nfft with scale 1/Nfft due to inverse; first n samples are output overlap with initial history zeros -> truncate to n
+    // Copy first n samples for linear convolution result (zero initial conditions)
     for (size_t i = 0; i < n; ++i) y[i] = xb[i];
 
 cleanup:
@@ -161,15 +161,10 @@ vv_dsp_status vv_dsp_fir_apply(vv_dsp_fir_state* st,
     size_t L = st->num_taps;
     // For each sample, we convolve using history + current input window
     for (size_t i = 0; i < n; ++i) {
-        // Write new sample into circular history (treat history as previous samples)
-        if (st->history_size) {
-            st->history[st->history_idx] = x[i];
-            st->history_idx = (st->history_idx + 1) % st->history_size;
-        }
         vv_dsp_real acc = 0;
         // h[0] multiplies current sample, h[k] multiplies sample k steps ago
         // Compose a virtual window: [x[i], x[i-1], ..., history]
-        // Start with current input and previous history
+        // Start with current input and previous history (do not push x[i] yet)
         size_t tap = 0;
         acc += h[tap++] * x[i];
         // Pull from history newest->oldest
@@ -182,6 +177,12 @@ vv_dsp_status vv_dsp_fir_apply(vv_dsp_fir_state* st,
             }
         }
         y[i] = acc;
+
+        // Now push current input into history for future samples
+        if (st->history_size) {
+            st->history[st->history_idx] = x[i];
+            st->history_idx = (st->history_idx + 1) % st->history_size;
+        }
     }
 
     return VV_DSP_OK;

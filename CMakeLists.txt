@@ -62,6 +62,7 @@ add_subdirectory(src/resample)
 add_subdirectory(src/envelope)
 add_subdirectory(src/window)
 add_subdirectory(src/adapters)
+add_subdirectory(tools)
 
 # Umbrella interface target that aggregates module libraries
 add_library(vv-dsp INTERFACE)
@@ -106,4 +107,30 @@ endif()
 if(VV_DSP_BUILD_EXAMPLES)
   add_executable(vv-dsp-filter-example examples/filter_example.c)
   target_link_libraries(vv-dsp-filter-example PRIVATE vv-dsp)
+endif()
+
+# Python-based verification harness (optional)
+find_package(Python3 COMPONENTS Interpreter QUIET)
+if(Python3_Interpreter_FOUND)
+  # Pass fully-qualified binary paths to Python scripts
+  set(FFT_BIN $<TARGET_FILE:vv_dsp_dump_fft>)
+  set(FIR_BIN $<TARGET_FILE:vv_dsp_dump_fir>)
+  set(IIR_BIN $<TARGET_FILE:vv_dsp_dump_iir>)
+  set(STFT_BIN $<TARGET_FILE:vv_dsp_dump_stft_roundtrip>)
+  set(RESAMPLE_BIN $<TARGET_FILE:vv_dsp_dump_resample>)
+
+  add_test(NAME py-fft
+     COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/python/test_fft.py
+       --fft-bin ${FFT_BIN})
+  add_test(NAME py-filters
+     COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/python/test_filters.py
+       --fir-bin ${FIR_BIN} --iir-bin ${IIR_BIN})
+  add_test(NAME py-stft
+     COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/python/test_stft.py
+       --stft-bin ${STFT_BIN})
+  add_test(NAME py-resampler
+     COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/python/test_resampler.py
+       --resample-bin ${RESAMPLE_BIN})
+else()
+  message(STATUS "Python3 interpreter not found; Python-based verification tests will be skipped by CTest.")
 endif()
