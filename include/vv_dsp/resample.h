@@ -5,6 +5,10 @@
 extern "C" {
 #endif
 
+#include "vv_dsp/vv_dsp_types.h"
+#include "vv_dsp/resample/interpolate.h"
+#include "vv_dsp/resample/resampler.h"
+
 int vv_dsp_resample_dummy(void);
 
 #ifdef __cplusplus

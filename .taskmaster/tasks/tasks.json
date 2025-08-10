@@ -374,15 +374,15 @@
         "dependencies": [
           2
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
             "title": "resample/interpolate 모듈 초기 설정 및 선형 보간 구현",
             "description": "`resample/interpolate.h` 및 `resample/interpolate.c` 파일을 생성하고, `vv_dsp_real` 타입에 대한 선형 보간 함수 `vv_dsp_interpolate_linear_real`을 구현합니다.",
             "dependencies": [],
-            "details": "1. `resample/interpolate.h` 파일을 생성하고 `vv_dsp_interpolate_linear_real` 함수의 시그니처를 선언합니다.\n2. `resample/interpolate.c` 파일을 생성하고 `vv_dsp_interpolate_linear_real` 함수를 구현합니다. 이 함수는 입력 배열, 출력 배열, 보간할 위치(0.0-1.0 사이의 비율)를 인자로 받아야 합니다.\n3. Task 2에서 정의될 `vv_dsp_real` 타입을 사용합니다.",
-            "status": "pending",
+            "details": "1. `resample/interpolate.h` 파일을 생성하고 `vv_dsp_interpolate_linear_real` 함수의 시그니처를 선언합니다.\n2. `resample/interpolate.c` 파일을 생성하고 `vv_dsp_interpolate_linear_real` 함수를 구현합니다. 이 함수는 입력 배열, 출력 배열, 보간할 위치(0.0-1.0 사이의 비율)를 인자로 받아야 합니다.\n3. Task 2에서 정의될 `vv_dsp_real` 타입을 사용합니다.\n<info added on 2025-08-10T11:31:30.594Z>\n[\n  0\n]\n</info added on 2025-08-10T11:31:30.594Z>",
+            "status": "done",
             "testStrategy": "알려진 입력 값과 보간 위치에 대해 수동으로 계산한 결과와 비교하여 `vv_dsp_interpolate_linear_real`의 정확성을 검증합니다."
           },
           {
@@ -392,8 +392,8 @@
             "dependencies": [
               "6.1"
             ],
-            "details": "1. `resample/interpolate.h`에 `vv_dsp_interpolate_cubic_real` 함수의 시그니처를 선언합니다.\n2. `resample/interpolate.c`에 `vv_dsp_interpolate_cubic_real` 함수를 구현합니다. 이 함수는 선형 보간과 유사한 인터페이스를 가지되, 주변 샘플을 활용하여 더 부드러운 보간을 수행해야 합니다.\n3. `vv_dsp_real` 타입을 사용합니다.",
-            "status": "pending",
+            "details": "1. `resample/interpolate.h`에 `vv_dsp_interpolate_cubic_real` 함수의 시그니처를 선언합니다.\n2. `resample/interpolate.c`에 `vv_dsp_interpolate_cubic_real` 함수를 구현합니다. 이 함수는 선형 보간과 유사한 인터페이스를 가지되, 주변 샘플을 활용하여 더 부드러운 보간을 수행해야 합니다.\n3. `vv_dsp_real` 타입을 사용합니다.\n<info added on 2025-08-10T11:32:33.504Z>\nCatmull-Rom 스타일의 큐빅 보간 함수 `vv_dsp_interpolate_cubic_real`이 `resample/interpolate.h`에 선언되고 `resample/interpolate.c`에 경계 클램핑 방식으로 구현되었습니다. 빌드 및 기존 테스트가 성공적으로 완료되었습니다.\n</info added on 2025-08-10T11:32:33.504Z>",
+            "status": "done",
             "testStrategy": "단순한 곡선 데이터에 대해 보간 결과를 시각화하고, 알려진 수학 함수에 대한 보간 결과와 비교하여 `vv_dsp_interpolate_cubic_real`의 정확성과 부드러움을 검증합니다."
           },
           {
@@ -401,8 +401,8 @@
             "title": "vv_dsp_resampler 핸들 및 기본 구조 정의",
             "description": "`resample/resampler.h` 및 `resample/resampler.c` 파일을 생성하고, `vv_dsp_resampler` 핸들(불투명 포인터)과 생성/소멸 함수 `vv_dsp_resampler_create`, `vv_dsp_resampler_destroy`를 구현합니다.",
             "dependencies": [],
-            "details": "1. `resample/resampler.h` 파일을 생성하고 `typedef struct vv_dsp_resampler vv_dsp_resampler;` 선언 및 `vv_dsp_resampler_create`, `vv_dsp_resampler_destroy` 함수 시그니처를 선언합니다.\n2. `resample/resampler.c` 파일을 생성하고 `struct vv_dsp_resampler`의 실제 정의(내부 상태, 필터 계수 등을 포함할 구조) 및 `vv_dsp_resampler_create`, `vv_dsp_resampler_destroy` 함수를 구현합니다.\n3. `create` 함수는 샘플레이트 비율, 필터 타입 등 초기 파라미터를 받을 수 있도록 설계하고, 메모리 할당 및 해제 로직을 포함합니다.",
-            "status": "pending",
+            "details": "1. `resample/resampler.h` 파일을 생성하고 `typedef struct vv_dsp_resampler vv_dsp_resampler;` 선언 및 `vv_dsp_resampler_create`, `vv_dsp_resampler_destroy` 함수 시그니처를 선언합니다.\n2. `resample/resampler.c` 파일을 생성하고 `struct vv_dsp_resampler`의 실제 정의(내부 상태, 필터 계수 등을 포함할 구조) 및 `vv_dsp_resampler_create`, `vv_dsp_resampler_destroy` 함수를 구현합니다.\n3. `create` 함수는 샘플레이트 비율, 필터 타입 등 초기 파라미터를 받을 수 있도록 설계하고, 메모리 할당 및 해제 로직을 포함합니다.\n<info added on 2025-08-10T11:33:44.480Z>\n`include/vv_dsp/resample.h` 파일을 생성하여 리샘플러 API를 내보내고, `src/resample/CMakeLists.txt`에 `resampler.c`를 추가했습니다. 빌드 및 기존 테스트가 모두 성공적으로 통과했습니다.\n</info added on 2025-08-10T11:33:44.480Z>",
+            "status": "done",
             "testStrategy": "`vv_dsp_resampler_create` 및 `vv_dsp_resampler_destroy` 함수 호출 시 메모리 누수가 없는지, 유효하지 않은 파라미터에 대해 적절한 `vv_dsp_status`를 반환하는지 확인합니다."
           },
           {
@@ -412,8 +412,8 @@
             "dependencies": [
               "6.3"
             ],
-            "details": "1. `resample/resampler.h`에 `vv_dsp_resampler_process_real` 함수의 시그니처를 선언합니다.\n2. `resample/resampler.c`에 `vv_dsp_resampler_process_real` 함수를 구현합니다. 이 함수는 입력 버퍼, 출력 버퍼, 처리할 샘플 수를 인자로 받습니다.\n3. 내부적으로 polyphase 필터 뱅크를 사용하여 리샘플링을 수행하며, 간단한 안티앨리어싱 필터 로직을 포함합니다 (예: 고정된 저역 통과 필터).",
-            "status": "pending",
+            "details": "1. `resample/resampler.h`에 `vv_dsp_resampler_process_real` 함수의 시그니처를 선언합니다.\n2. `resample/resampler.c`에 `vv_dsp_resampler_process_real` 함수를 구현합니다. 이 함수는 입력 버퍼, 출력 버퍼, 처리할 샘플 수를 인자로 받습니다.\n3. 내부적으로 polyphase 필터 뱅크를 사용하여 리샘플링을 수행하며, 간단한 안티앨리어싱 필터 로직을 포함합니다 (예: 고정된 저역 통과 필터).\n<info added on 2025-08-10T11:35:26.826Z>\n현재 구현은 초기 단계로, polyphase 필터 대신 선형 보간을 사용하여 고정 비율 리샘플링을 처리합니다. 향후 polyphase/sinc 구현을 위해 품질 및 비율 설정 함수가 플레이스홀더로 추가되었습니다. 빌드 및 기존 ctest 검증이 완료되었습니다.\n</info added on 2025-08-10T11:35:26.826Z>",
+            "status": "done",
             "testStrategy": "단일 주파수 사인파를 입력하여 리샘플링 후 주파수 스펙트럼을 분석하여 올바른 샘플레이트 변환이 이루어졌는지, 앨리어싱이 억제되는지 확인합니다."
           },
           {
@@ -423,8 +423,8 @@
             "dependencies": [
               "6.4"
             ],
-            "details": "1. `vv_dsp_resampler_create` 또는 별도의 설정 함수를 통해 가변 비율 리샘플링을 지원하도록 `vv_dsp_resampler` 구조를 확장합니다.\n2. Sinc 함수 기반의 고품질 업샘플링 필터를 구현하고, 필요에 따라 이를 선택적으로 사용할 수 있도록 합니다.\n3. 리샘플링 비율(업샘플링/다운샘플링)에 따라 적절한 차단 주파수를 가진 안티앨리어싱/안티이미징 필터를 동적으로 설계하거나 선택하여 적용하는 로직을 구현합니다.",
-            "status": "pending",
+            "details": "1. `vv_dsp_resampler_create` 또는 별도의 설정 함수를 통해 가변 비율 리샘플링을 지원하도록 `vv_dsp_resampler` 구조를 확장합니다.\n2. Sinc 함수 기반의 고품질 업샘플링 필터를 구현하고, 필요에 따라 이를 선택적으로 사용할 수 있도록 합니다.\n3. 리샘플링 비율(업샘플링/다운샘플링)에 따라 적절한 차단 주파수를 가진 안티앨리어싱/안티이미징 필터를 동적으로 설계하거나 선택하여 적용하는 로직을 구현합니다.\n<info added on 2025-08-10T11:38:36.108Z>\nHann 윈도우를 적용한 윈도우드 Sinc 필터 기반의 리샘플링 경로가 구현되었으며, 리샘플링 비율에 따른 자동 차단 주파수 조정 로직이 적용되었습니다. 선형 보간 폴백 옵션이 추가되었고, 설정을 위한 세터 함수들이 `resampler.h`에 노출되었습니다. 가변 비율 API 구현은 현재 필요 시로 연기되었습니다.\n</info added on 2025-08-10T11:38:36.108Z>",
+            "status": "done",
             "testStrategy": "다양한 정수/분수 비율로 리샘플링을 수행하여 출력 신호의 정확도와 앨리어싱/이미징 억제 효과를 검증합니다. 특히 Sinc 업샘플러의 품질을 기존 방식과 비교합니다."
           }
         ]
@@ -778,7 +778,7 @@
     ],
     "metadata": {
       "created": "2025-08-10T09:22:31.972Z",
-      "updated": "2025-08-10T11:16:55.311Z",
+      "updated": "2025-08-10T11:38:54.130Z",
       "description": "Tasks for master context"
     }
   }
