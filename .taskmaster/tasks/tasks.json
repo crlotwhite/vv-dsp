@@ -206,7 +206,7 @@
         "dependencies": [
           2
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -214,7 +214,7 @@
             "description": "vv_dsp_fft_plan 오opaque 핸들 구조체와 API 선언(생성/실행/파기)을 정의합니다",
             "dependencies": [],
             "details": "include/vv_dsp/spectral/fft.h에 vv_dsp_fft_plan(오opaque) 유형, vv_dsp_fft_dir 방향(전/역), vv_dsp_fft_type(R2C/C2R/C2C) enum 정의. vv_dsp_fft_make_plan(n, type, dir, plan**), vv_dsp_fft_execute(plan, in, out), vv_dsp_fft_destroy(plan) 선언. stride/in-place 옵션은 효율성 고려로 향후 지표 선택(기본: 연속 메모리, 아웃오브플레이스). vv_dsp_status 반환, NULL/크기 검증, C++ extern 지원",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "헤더 컴파일 및 타입/인터페이스 일관성 확인, 반환 코드 일관성 검증"
           },
           {
@@ -225,7 +225,7 @@
               "4.1"
             ],
             "details": "src/spectral/fft_backend.h 내부 인터페이스(공통 함수 헤더) 정의, VV_DSP_BACKEND_FFT=KISS/FFTS/FFTW 매크로 선택. CMakeLists.txt에 백엔드 선택식 포함(기본 KISS), FFTW find_package, FFTS pkg-config 검사. VV_DSP_SINGLE_FILE 배포 방식 고려",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "CMake 구성에서 각 백엔드 선택/활성화 확인, 선택 X 시 기본 KISS 백엔드 활성화 확인"
           },
           {
@@ -236,7 +236,7 @@
               "4.2"
             ],
             "details": "src/spectral/fft.c에 vv_dsp_fft_make_plan/vv_dsp_fft_destroy 구현: n>0, 자연수 체크, type(dir) 유효성 검증, 필요 메모리 할당(입/출력 버퍼, scratch). 크기 변경과 다유 백엔드 가능성 점검, 에러 코드 반환",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "다양한 n(2^k, 속수, 소수)에서 plan 생성/파기 테스트, 메모리 누수 검사"
           },
           {
@@ -247,7 +247,7 @@
               "4.3"
             ],
             "details": "src/spectral/fft_kiss.c 또는 동향 파일에 KISS FFT 엔진 래퍼 구현(별도 포함 또는 submodule). vv_dsp_fft_execute 구현: C2C forward/backward, 연속 버퍼 입/출력(아웃에 대한 in-place 선택 가능). NaN/Inf 에러 판별",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "알려진 단발 주파수 신호에 대한 C2C FFT/IFFT 역변환 정확도 검증(원본 복원), NumPy numpy.fft.fft 비교"
           },
           {
@@ -258,7 +258,7 @@
               "4.4"
             ],
             "details": "vv_dsp_fft_type=R2C/C2R 포함 plan 지원 및 vv_dsp_fft_execute 내부 변환 로직. 반환 포맷과 출력 크기(훅킹) 명시, Nyquist 항 처리, 내부 재정규화(의미론 대체 안함). 다무한 n 지원",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "numpy.fft.rfft/irfft 결과와 비교(표준화 처리 포함), 역변환 통해 L2 오차 측정"
           },
           {
@@ -269,7 +269,7 @@
               "4.3"
             ],
             "details": "src/spectral/fft_ffs.c(또는 .c)에 FFTS API 래퍼. CMake 선택 시에만 컴파일, 미 설치 시 폴백 또는 기본 KISS 환경 바로 회귀. C2C/R2C/C2R 기본 지원",
-            "status": "pending",
+            "status": "deferred",
             "testStrategy": "FFTS 설치 환경에서 동일 테스트 지향, 기본 KISS 결과와 수치 일관성 확인"
           },
           {
@@ -280,7 +280,7 @@
               "4.3"
             ],
             "details": "src/spectral/fft_fftw.c에 FFTW planner 래퍼. find_package(FFTW3) 성공 시에만 컴파일, plan 생성 파라미터(시간 vs. 가능함) 바로 고려. optional: wisdom load/save, threads 지원(FFTW 키포드)",
-            "status": "pending",
+            "status": "deferred",
             "testStrategy": "FFTW 환경에서 NumPy/SciPy 결과와 비교, plan 선택 옵션 변환 시 성능 변화 확인"
           },
           {
@@ -291,7 +291,7 @@
               "4.5"
             ],
             "details": "src/spectral/utils.c에 vv_dsp_fftshift/vv_dsp_ifftshift 구현(연속 버퍼, in-place 또는 out-of-place 버전). CMake에 spectral 모듈 강화, include/vv_dsp/vv_dsp.h에 fft.h 포함. 통합 테스트: C2C/R2C/C2R 반환 정확도, 사용성/성능 벤치마크",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "NumPy numpy.fft.fftshift/ifftshift 비교, STFT 요소런 조합에서 위상 검증, 전체 FFT 통합 테스트"
           }
         ]
@@ -778,7 +778,7 @@
     ],
     "metadata": {
       "created": "2025-08-10T09:22:31.972Z",
-      "updated": "2025-08-10T10:19:14.852Z",
+      "updated": "2025-08-10T10:35:05.870Z",
       "description": "Tasks for master context"
     }
   }

@@ -15,7 +15,7 @@ endif()
 # Build options
 option(VV_DSP_BUILD_TESTS "Build vv-dsp tests" ON)
 option(VV_DSP_USE_SIMD "Enable SIMD optimizations where available" OFF)
-set(VV_DSP_BACKEND_FFT "none" CACHE STRING "FFT backend to use: none|fftw|kissfft")
+set(VV_DSP_BACKEND_FFT "kissfft" CACHE STRING "FFT backend to use: none|fftw|kissfft")
 set_property(CACHE VV_DSP_BACKEND_FFT PROPERTY STRINGS none fftw kissfft)
 option(VV_DSP_SINGLE_FILE "Build as a single-file amalgamation" OFF)
 
