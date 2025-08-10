@@ -3,25 +3,24 @@
 #include <string.h>
 #include "vv_dsp/vv_dsp.h"
 
-static void test_fir_design_basic() {
-    const size_t N = 11;
+static void test_fir_design_basic(void) {
+    enum { N = 11 };
     vv_dsp_real h[N];
-    vv_dsp_status s = vv_dsp_fir_design_lowpass(h, N, (vv_dsp_real)0.2, VV_DSP_WINDOW_HAMMING);
-    assert(s == VV_DSP_OK);
+    assert(vv_dsp_fir_design_lowpass(h, N, (vv_dsp_real)0.2, VV_DSP_WINDOW_HAMMING) == VV_DSP_OK);
     // Symmetry check for linear-phase low-pass
     for (size_t i = 0; i < N/2; ++i) {
         assert(fabs((double)h[i] - (double)h[N-1-i]) < 1e-5);
     }
 }
 
-static void test_fir_apply_impulse() {
-    const size_t N = 7;
+static void test_fir_apply_impulse(void) {
+    enum { N = 7 };
     vv_dsp_real h[N];
     assert(vv_dsp_fir_design_lowpass(h, N, (vv_dsp_real)0.3, VV_DSP_WINDOW_HANNING) == VV_DSP_OK);
 
-    const size_t L = 32;
-    vv_dsp_real x[L] = {0}; x[0] = 1; // impulse
-    vv_dsp_real y[L] = {0};
+    enum { L = 32 };
+    vv_dsp_real x[L]; memset(x, 0, sizeof(x)); x[0] = (vv_dsp_real)1; // impulse
+    vv_dsp_real y[L]; memset(y, 0, sizeof(y));
 
     vv_dsp_fir_state st; assert(vv_dsp_fir_state_init(&st, N) == VV_DSP_OK);
     assert(vv_dsp_fir_apply(&st, h, x, y, L) == VV_DSP_OK);
@@ -39,7 +38,7 @@ static void test_fir_apply_impulse() {
     assert(e > 0);
 }
 
-static void test_biquad_init_reset_process() {
+static void test_biquad_init_reset_process(void) {
     vv_dsp_biquad bq; assert(vv_dsp_biquad_init(&bq, 1, 0, 0, 0, 0) == VV_DSP_OK);
     // Pass-through: y[n]=x[n]
     vv_dsp_real x = (vv_dsp_real)0.5;
@@ -48,7 +47,7 @@ static void test_biquad_init_reset_process() {
     vv_dsp_biquad_reset(&bq);
 }
 
-static void test_iir_apply_two_stage() {
+static void test_iir_apply_two_stage(void) {
     vv_dsp_biquad bqs[2];
     assert(vv_dsp_biquad_init(&bqs[0], 1, 0, 0, 0, 0) == VV_DSP_OK);
     assert(vv_dsp_biquad_init(&bqs[1], 1, 0, 0, 0, 0) == VV_DSP_OK);
@@ -58,10 +57,11 @@ static void test_iir_apply_two_stage() {
     for (size_t i=0;i<L;++i) assert(fabs((double)(y[i]-x[i]))<1e-6);
 }
 
-static void test_filtfilt_basic() {
-    const size_t N = 9; vv_dsp_real h[N];
+static void test_filtfilt_basic(void) {
+    enum { N = 9, L = 64 };
+    vv_dsp_real h[N];
     assert(vv_dsp_fir_design_lowpass(h, N, (vv_dsp_real)0.25, VV_DSP_WINDOW_HAMMING) == VV_DSP_OK);
-    const size_t L = 64; vv_dsp_real x[L]; vv_dsp_real y[L];
+    vv_dsp_real x[L]; vv_dsp_real y[L];
     for (size_t i=0;i<L;++i) x[i] = (vv_dsp_real)((i%8)<4 ? 1.0f : -1.0f); // square-ish
     assert(vv_dsp_filtfilt_fir(h, N, x, y, L) == VV_DSP_OK);
     // Mean should remain near zero for symmetric input
