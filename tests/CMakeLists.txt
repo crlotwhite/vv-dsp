@@ -60,3 +60,13 @@ add_test(NAME vv-dsp-cpp-math COMMAND vv-dsp-cpp-math)
 add_executable(vv-dsp-cpp-iir test_cpp_iir.cpp)
 target_link_libraries(vv-dsp-cpp-iir PRIVATE vv-dsp)
 add_test(NAME vv-dsp-cpp-iir COMMAND vv-dsp-cpp-iir)
+
+# Simple micro-benchmark (not part of pass/fail by default)
+add_executable(vv-dsp-bench bench_fft_stft.cpp)
+target_link_libraries(vv-dsp-bench PRIVATE vv-dsp)
+if(UNIX)
+  target_link_libraries(vv-dsp-bench PRIVATE m)
+endif()
+# You can run manually: ctest -R bench -V or just execute vv-dsp-bench binary
+add_test(NAME vv-dsp-bench-run COMMAND vv-dsp-bench)
+set_tests_properties(vv-dsp-bench-run PROPERTIES DISABLED TRUE)

@@ -21,6 +21,8 @@ option(VV_DSP_USE_SIMD "Enable SIMD optimizations where available" OFF)
 set(VV_DSP_BACKEND_FFT "kissfft" CACHE STRING "FFT backend to use: none|fftw|kissfft")
 set_property(CACHE VV_DSP_BACKEND_FFT PROPERTY STRINGS none fftw kissfft)
 option(VV_DSP_SINGLE_FILE "Build as a single-file amalgamation" OFF)
+option(VV_DSP_ENABLE_ASAN "Enable AddressSanitizer for sanitizing builds" OFF)
+option(VV_DSP_ENABLE_UBSAN "Enable UBSanitizer for sanitizing builds" OFF)
 
 # Public compile definitions
 if(VV_DSP_USE_SIMD)
@@ -33,6 +35,20 @@ add_compile_definitions(
 
 if(VV_DSP_SINGLE_FILE)
   add_compile_definitions(VV_DSP_SINGLE_FILE=1)
+endif()
+
+# Sanitizers (non-MSVC)
+if(NOT MSVC)
+  if(VV_DSP_ENABLE_ASAN)
+    message(STATUS "vv-dsp: AddressSanitizer enabled")
+    add_compile_options(-fsanitize=address -fno-omit-frame-pointer)
+    add_link_options(-fsanitize=address)
+  endif()
+  if(VV_DSP_ENABLE_UBSAN)
+    message(STATUS "vv-dsp: UBSanitizer enabled")
+    add_compile_options(-fsanitize=undefined)
+    add_link_options(-fsanitize=undefined)
+  endif()
 endif()
 
 # Include directories
@@ -77,6 +93,13 @@ endif()
 if(VV_DSP_BUILD_TESTS)
   enable_testing()
   add_subdirectory(tests)
+  # Optional: configure CTest MemCheck to use valgrind if available
+  find_program(VALGRIND_EXECUTABLE valgrind)
+  if(VALGRIND_EXECUTABLE)
+    set(CTEST_MEMORYCHECK_COMMAND ${VALGRIND_EXECUTABLE})
+    set(MEMORYCHECK_COMMAND ${VALGRIND_EXECUTABLE})
+    set(MEMORYCHECK_SUPPRESSIONS_FILE "${CMAKE_CURRENT_SOURCE_DIR}/tests/valgrind.supp" CACHE FILEPATH "Valgrind suppressions file")
+  endif()
 endif()
 
 # Examples
