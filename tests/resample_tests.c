@@ -4,10 +4,6 @@
 #include <stdlib.h>
 #include "vv_dsp/vv_dsp.h"
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
 static int approx_equal(vv_dsp_real a, vv_dsp_real b, vv_dsp_real tol) {
     vv_dsp_real d = (a > b) ? (a - b) : (b - a);
     return d <= tol;
@@ -33,7 +29,7 @@ static int test_resampler_up_down_roundtrip(void) {
     const size_t N = 480;    // 10ms
     vv_dsp_real x[N];
     for (size_t n = 0; n < N; ++n) {
-        x[n] = (vv_dsp_real)sin(2.0 * M_PI * f * (double)n / (double)Fs);
+    x[n] = (vv_dsp_real)sin(VV_DSP_TWO_PI_D * f * (double)n / (double)Fs);
     }
 
     // Upsample by 2 -> ratio 2/1

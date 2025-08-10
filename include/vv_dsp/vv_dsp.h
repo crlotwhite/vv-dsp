@@ -8,6 +8,7 @@ extern "C" {
 // vv-dsp umbrella header
 // Include public headers for submodules as they become available
 #include "vv_dsp/vv_dsp_types.h"
+#include "vv_dsp/vv_dsp_math.h"
 #include "vv_dsp/core.h"
 #include "vv_dsp/spectral.h"
 #include "vv_dsp/spectral/fft.h"

@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <math.h>
+#include "vv_dsp/vv_dsp_math.h"
 #include "vv_dsp/resample/resampler.h"
 #include "vv_dsp/resample/interpolate.h"
 
@@ -52,13 +53,13 @@ int vv_dsp_resampler_set_quality(vv_dsp_resampler* rs, int use_sinc, unsigned in
 
 static VV_DSP_INLINE vv_dsp_real sinc_fn(double x) {
     if (x == 0.0) return (vv_dsp_real)1.0;
-    double pix = M_PI * x;
+    double pix = VV_DSP_PI_D * x;
     return (vv_dsp_real)(sin(pix) / pix);
 }
 
 static VV_DSP_INLINE double hann_window(unsigned int m, unsigned int N) {
     if (N <= 1) return 1.0;
-    return 0.5 - 0.5 * cos((2.0 * M_PI * (double)m) / (double)(N - 1));
+    return 0.5 - 0.5 * cos((VV_DSP_TWO_PI_D * (double)m) / (double)(N - 1));
 }
 
 int vv_dsp_resampler_process_real(vv_dsp_resampler* rs,

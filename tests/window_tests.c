@@ -3,10 +3,6 @@
 #include <string.h>
 #include "vv_dsp/vv_dsp.h"
 
-#ifndef M_PI
-#define M_PI 3.14159265358979323846
-#endif
-
 static int almost_equal(vv_dsp_real a, vv_dsp_real b, vv_dsp_real tol) {
     vv_dsp_real da = a - b;
     if (da < 0) da = -da;
@@ -18,7 +14,7 @@ static void compute_ref_hann(size_t N, vv_dsp_real* out) {
     if (N == 1) { out[0] = (vv_dsp_real)1.0; return; }
     vv_dsp_real denom = (vv_dsp_real)(N - 1);
     for (size_t n = 0; n < N; ++n) {
-        out[n] = (vv_dsp_real)0.5 - (vv_dsp_real)0.5 * (vv_dsp_real)cos((vv_dsp_real)(2.0*M_PI) * (vv_dsp_real)n / denom);
+    out[n] = (vv_dsp_real)0.5 - (vv_dsp_real)0.5 * (vv_dsp_real)VV_DSP_COS((vv_dsp_real)(VV_DSP_TWO_PI) * (vv_dsp_real)n / denom);
     }
 }
 
@@ -27,7 +23,7 @@ static void compute_ref_hamming(size_t N, vv_dsp_real* out) {
     if (N == 1) { out[0] = (vv_dsp_real)1.0; return; }
     vv_dsp_real denom = (vv_dsp_real)(N - 1);
     for (size_t n = 0; n < N; ++n) {
-        out[n] = (vv_dsp_real)0.54 - (vv_dsp_real)0.46 * (vv_dsp_real)cos((vv_dsp_real)(2.0*M_PI) * (vv_dsp_real)n / denom);
+    out[n] = (vv_dsp_real)0.54 - (vv_dsp_real)0.46 * (vv_dsp_real)VV_DSP_COS((vv_dsp_real)(VV_DSP_TWO_PI) * (vv_dsp_real)n / denom);
     }
 }
 
@@ -36,8 +32,8 @@ static void compute_ref_blackman(size_t N, vv_dsp_real* out) {
     if (N == 1) { out[0] = (vv_dsp_real)1.0; return; }
     vv_dsp_real denom = (vv_dsp_real)(N - 1);
     for (size_t n = 0; n < N; ++n) {
-        vv_dsp_real x = (vv_dsp_real)(2.0*M_PI) * (vv_dsp_real)n / denom;
-        out[n] = (vv_dsp_real)0.42 - (vv_dsp_real)0.5*(vv_dsp_real)cos(x) + (vv_dsp_real)0.08*(vv_dsp_real)cos((vv_dsp_real)2.0*x);
+    vv_dsp_real x = (vv_dsp_real)(VV_DSP_TWO_PI) * (vv_dsp_real)n / denom;
+    out[n] = (vv_dsp_real)0.42 - (vv_dsp_real)0.5*(vv_dsp_real)VV_DSP_COS(x) + (vv_dsp_real)0.08*(vv_dsp_real)VV_DSP_COS((vv_dsp_real)2.0*x);
     }
 }
 
@@ -50,8 +46,8 @@ static void compute_ref_bharris(size_t N, vv_dsp_real* out) {
     const vv_dsp_real a3 = (vv_dsp_real)0.01168;
     vv_dsp_real denom = (vv_dsp_real)(N - 1);
     for (size_t n = 0; n < N; ++n) {
-        vv_dsp_real x = (vv_dsp_real)(2.0*M_PI) * (vv_dsp_real)n / denom;
-        out[n] = a0 - a1*(vv_dsp_real)cos(x) + a2*(vv_dsp_real)cos((vv_dsp_real)2.0*x) - a3*(vv_dsp_real)cos((vv_dsp_real)3.0*x);
+    vv_dsp_real x = (vv_dsp_real)(VV_DSP_TWO_PI) * (vv_dsp_real)n / denom;
+    out[n] = a0 - a1*(vv_dsp_real)VV_DSP_COS(x) + a2*(vv_dsp_real)VV_DSP_COS((vv_dsp_real)2.0*x) - a3*(vv_dsp_real)VV_DSP_COS((vv_dsp_real)3.0*x);
     }
 }
 
@@ -64,8 +60,8 @@ static void compute_ref_nuttall(size_t N, vv_dsp_real* out) {
     const vv_dsp_real a3 = (vv_dsp_real)0.0106411;
     vv_dsp_real denom = (vv_dsp_real)(N - 1);
     for (size_t n = 0; n < N; ++n) {
-        vv_dsp_real x = (vv_dsp_real)(2.0*M_PI) * (vv_dsp_real)n / denom;
-        out[n] = a0 - a1*(vv_dsp_real)cos(x) + a2*(vv_dsp_real)cos((vv_dsp_real)2.0*x) - a3*(vv_dsp_real)cos((vv_dsp_real)3.0*x);
+    vv_dsp_real x = (vv_dsp_real)(VV_DSP_TWO_PI) * (vv_dsp_real)n / denom;
+    out[n] = a0 - a1*(vv_dsp_real)VV_DSP_COS(x) + a2*(vv_dsp_real)VV_DSP_COS((vv_dsp_real)2.0*x) - a3*(vv_dsp_real)VV_DSP_COS((vv_dsp_real)3.0*x);
     }
 }
 
