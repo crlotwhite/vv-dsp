@@ -1,0 +1,44 @@
+name: CI
+
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+
+jobs:
+  build-and-test:
+    name: ${{ matrix.os }} - CMake Build & Test
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, macos-latest, windows-latest]
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Configure (CMake)
+        run: |
+          cmake -S . -B build -DVV_DSP_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Release
+
+      - name: Build (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          cmake --build build -j
+
+      - name: Build (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          cmake --build build --config Release -- /m
+
+      - name: Test (Unix)
+        if: runner.os != 'Windows'
+        run: |
+          ctest --test-dir build --output-on-failure
+
+      - name: Test (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          ctest --test-dir build -C Release --output-on-failure

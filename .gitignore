@@ -22,3 +22,32 @@ node_modules/
 
 # OS specific
 .DS_Store
+
+# C/C++ build outputs
+build/
+CMakeFiles/
+CMakeCache.txt
+cmake-build-*/
+compile_commands.json
+Testing/
+
+# Object and library files
+*.o
+*.obj
+*.a
+*.la
+*.lo
+*.lib
+*.so
+*.so.*
+*.dylib
+*.dll
+
+# Coverage
+*.gcno
+*.gcda
+*.lcov
+
+# IDE configs
+.vscode/
+.vs/

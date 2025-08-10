@@ -9,7 +9,7 @@
         "testStrategy": "CMake 구성이 올바르게 빌드되고 기본 타겟이 생성되는지 확인",
         "priority": "high",
         "dependencies": [],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -17,7 +17,7 @@
             "description": "프로젝트 루트에 CMakeLists.txt를 생성하고 빌드 옵션들을 구성합니다",
             "dependencies": [],
             "details": "루트 CMakeLists.txt에서 프로젝트 이름을 vv-dsp로 설정, C99 표준 지정, 빌드 옵션들(VV_DSP_BUILD_TESTS, VV_DSP_USE_SIMD, VV_DSP_BACKEND_FFT, VV_DSP_SINGLE_FILE) 추가. CMake 최소 버전 3.15 설정, 기본 컴파일러 플래그 및 경고 옵션 구성",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "cmake -B build 명령으로 configure가 성공하고 기본 빌드 타겟이 생성되는지 확인"
           },
           {
@@ -26,7 +26,7 @@
             "description": "PRD에 명시된 모든 모듈 디렉토리와 서브디렉토리를 생성합니다",
             "dependencies": [],
             "details": "다음 디렉토리들을 생성: src/core/, src/spectral/, src/filter/, src/resample/, src/envelope/, src/window/, src/adapters/, include/vv_dsp/, tests/, examples/, docs/. 각 모듈별로 헤더 파일(.h)과 소스 파일(.c) 디렉토리 구조 준비",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "모든 필요한 디렉토리가 존재하고 적절한 권한으로 생성되었는지 확인"
           },
           {
@@ -35,7 +35,7 @@
             "description": "MIT 라이선스 파일과 기본 프로젝트 문서들을 생성합니다",
             "dependencies": [],
             "details": "LICENSE 파일에 표준 MIT 라이선스 텍스트 추가 (저작권자 정보 포함). README.md에 프로젝트 소개, 빌드 방법, 기본 사용법 작성. 프로젝트 목표, 기능 개요, 빌드 옵션 설명 포함",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "라이선스 파일이 유효한 MIT 형식이고 README가 마크다운으로 올바르게 렌더링되는지 확인"
           },
           {
@@ -44,7 +44,7 @@
             "description": "프로젝트에 적합한 .gitignore 파일과 개발 환경 설정을 추가합니다",
             "dependencies": [],
             "details": "C/C++ 프로젝트용 .gitignore 생성 (build/, .vscode/, .vs/, *.o, *.so, *.dylib, *.dll 등). CMake 빌드 아티팩트, IDE 설정 파일, OS별 임시 파일들을 제외하도록 설정. 선택적으로 .clang-format 설정 파일 추가",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "일반적인 빌드 아티팩트들이 git status에서 무시되는지 테스트"
           },
           {
@@ -56,7 +56,7 @@
               "1.2"
             ],
             "details": "include/vv_dsp/vv_dsp.h에 메인 헤더 생성, 각 모듈별 헤더 파일들(core.h, spectral.h, filter.h, resample.h, envelope.h, window.h) 기본 구조 작성. src/ 하위 각 모듈별 CMakeLists.txt 생성하여 라이브러리 타겟 설정. 메인 CMakeLists.txt에서 add_subdirectory로 연결",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "cmake --build build 명령으로 기본 라이브러리 타겟이 성공적으로 빌드되는지 확인"
           }
         ]
@@ -778,7 +778,7 @@
     ],
     "metadata": {
       "created": "2025-08-10T09:22:31.972Z",
-      "updated": "2025-08-10T09:22:31.972Z",
+      "updated": "2025-08-10T10:04:06.109Z",
       "description": "Tasks for master context"
     }
   }
