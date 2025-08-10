@@ -307,7 +307,7 @@
           3,
           4
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -315,7 +315,7 @@
             "description": "vv_dsp_stft 핸들 구조체와 생성/소멸 함수를 정의합니다",
             "dependencies": [],
             "details": "src/spectral/stft.h에서 vv_dsp_stft 구조체 정의 (FFT 플랜, 윈도우 버퍼, 홉 크기, 프레임 크기, 오버랩 버퍼 포함), vv_dsp_stft_create, vv_dsp_stft_destroy 함수 선언. src/spectral/stft.c에서 메모리 할당/해제, FFT 플랜 초기화, 파라미터 검증 구현. 윈도우 크기, 홉 크기, FFT 크기 설정 가능하도록 구성",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "핸들 생성/소멸의 메모리 누수 검사, 다양한 파라미터 조합에서 초기화 성공 확인"
           },
           {
@@ -326,7 +326,7 @@
               "5.1"
             ],
             "details": "vv_dsp_stft_fetch_frame 헬퍼 함수로 입력 버퍼에서 현재 프레임 추출, 제로 패딩 처리. 윈도우 함수 적용을 위한 임시 버퍼 관리, 선택된 윈도우 타입(hann, hamming 등)에 따른 윈도우 계수 적용. 프레임 경계 처리 및 부족한 샘플에 대한 제로 패딩 로직 구현",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "다양한 프레임 크기와 윈도우 타입으로 프레임 추출 정확도 확인, 경계 조건 테스트"
           },
           {
@@ -337,7 +337,7 @@
               "5.2"
             ],
             "details": "vv_dsp_stft_process 함수로 입력 프레임에 윈도우 적용 후 FFT 실행, 복소수 스펙트럼 출력. 실시간 처리를 위한 스트리밍 인터페이스 구현, 내부 상태 관리 (이전 프레임 오버랩 부분). 홉 크기에 따른 프레임 진행 관리, 출력 스펙트럼 포맷 (크기/위상 또는 실수/허수) 선택 가능",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "알려진 주파수 신호의 STFT 결과와 NumPy/SciPy 비교, 다양한 홉 크기에서 정확도 검증"
           },
           {
@@ -348,7 +348,7 @@
               "5.3"
             ],
             "details": "vv_dsp_stft_reconstruct 함수로 복소수 스펙트럼에 IFFT 적용, overlap-add 방식으로 출력 신호 재구성. 오버랩 버퍼 관리 (이전 프레임과의 중첩 부분 누적), 윈도우 정규화 처리 (COLA 조건 보장). 프레임 간 연속성 유지를 위한 상태 관리, 지연 보상 옵션 제공",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "STFT->ISTFT 완전 재구성 테스트 (원본 신호와 비교), 다양한 윈도우와 홉 크기 조합에서 재구성 품질 측정"
           },
           {
@@ -359,7 +359,7 @@
               "5.4"
             ],
             "details": "vv_dsp_stft_spectrogram 함수로 전체 신호의 스펙트로그램 행렬 생성, 시간-주파수 표현 출력. 위상 일관성 유지를 위한 위상 vocoder 기반 처리 옵션, 스펙트럼 크기/위상 분리 추출 기능. CMakeLists.txt에 spectral 모듈 통합, 메인 헤더에 STFT 인터페이스 포함, 종합 테스트와 성능 최적화 적용",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "전체 신호 스펙트로그램 생성 정확도 검증, 실시간 처리 성능 벤치마크, 위상 일관성 측정"
           }
         ]
@@ -778,7 +778,7 @@
     ],
     "metadata": {
       "created": "2025-08-10T09:22:31.972Z",
-      "updated": "2025-08-10T10:54:22.022Z",
+      "updated": "2025-08-10T11:11:42.669Z",
       "description": "Tasks for master context"
     }
   }

@@ -15,7 +15,6 @@ static int test_fft_c2c_basic(void) {
     const size_t n = N8;
     vv_dsp_fft_plan* plan_f = NULL;
     if (vv_dsp_fft_make_plan(n, VV_DSP_FFT_C2C, VV_DSP_FFT_FORWARD, &plan_f) != VV_DSP_OK) return 0;
-
     vv_dsp_cpx x[N8];
     vv_dsp_cpx X[N8];
     memset(X, 0, sizeof(X));
@@ -75,6 +74,41 @@ int main(void) {
     if (!ok1) { fprintf(stderr, "FFT C2C basic test failed\n"); return 1; }
     if (!ok2) { fprintf(stderr, "FFT R2C/C2R roundtrip test failed\n"); return 1; }
     if (!ok3) { fprintf(stderr, "fftshift/ifftshift test failed\n"); return 1; }
+    // STFT/ISTFT roundtrip (simple)
+    {
+        const size_t n = 256;
+        vv_dsp_real x[n];
+        const double PI = 3.14159265358979323846264338327950288;
+        for (size_t i=0;i<n;++i) x[i] = (vv_dsp_real)sin(2.0*PI*(double)i/32.0);
+
+        vv_dsp_stft_params p; p.fft_size = 64; p.hop_size = 32; p.window = VV_DSP_STFT_WIN_HANN;
+        vv_dsp_stft* st = NULL;
+        if (vv_dsp_stft_create(&p, &st) != VV_DSP_OK) { fprintf(stderr, "stft create failed\n"); return 1; }
+        vv_dsp_cpx X[64];
+        vv_dsp_real y[n+64]; memset(y, 0, sizeof(y));
+        vv_dsp_real norm[n+64]; memset(norm, 0, sizeof(norm));
+        for (size_t start=0; start + p.fft_size <= n + (p.fft_size - p.hop_size); start += p.hop_size) {
+            vv_dsp_real frame[64];
+            for (size_t i=0;i<p.fft_size;++i) {
+                size_t idx = start + i;
+                frame[i] = (idx < n) ? x[idx] : (vv_dsp_real)0;
+            }
+            if (vv_dsp_stft_process(st, frame, X) != VV_DSP_OK) { fprintf(stderr, "stft process failed\n"); vv_dsp_stft_destroy(st); return 1; }
+            if (vv_dsp_stft_reconstruct(st, X, y + start, norm + start) != VV_DSP_OK) { fprintf(stderr, "istft failed\n"); vv_dsp_stft_destroy(st); return 1; }
+        }
+        for (size_t i=0;i<n+64;++i) if (norm[i] > (vv_dsp_real)1e-12) y[i] /= norm[i];
+        // Compare central n samples (ignore start/end transient)
+        vv_dsp_real mse = 0;
+        size_t count = 0;
+        for (size_t i=0;i<n; ++i) {
+            vv_dsp_real d = x[i] - y[i];
+            mse += d*d; count++;
+        }
+        mse /= (vv_dsp_real)count;
+        vv_dsp_stft_destroy(st);
+        if (!(mse < (vv_dsp_real)1e-2)) { fprintf(stderr, "STFT roundtrip MSE too high: %f\n", (double)mse); return 1; }
+    }
+
     printf("spectral tests passed\n");
     return 0;
 }
