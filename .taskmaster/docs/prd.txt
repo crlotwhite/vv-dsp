@@ -1,0 +1,150 @@
+PRD: vv-dsp (VoceVersa Lightweight DSP Library)
+
+1. 개요
+
+목적
+vv-dsp는 VoceVersa 프로젝트 및 기타 음성/노래 합성 파이프라인에서 재사용 가능한 경량 DSP 라이브러리입니다.
+MIT 호환, 이식성, 실시간 처리 성능을 목표로 FFT, STFT, 윈도우, 보간, 리샘플, 필터, 켑스트럼, LPC 등의 기본 DSP 연산을 표준화하고 제공합니다.
+
+핵심 목표
+	•	재사용성: 음성 합성에 반복적으로 사용되는 DSP 프리미티브 표준화
+	•	경량성: 외부 의존성 최소화, 선택적 SIMD/FFT 백엔드 지원
+	•	실시간성: 48kHz 모노 기준 싱글스레드 실시간 처리
+	•	라이선스 안정성: MIT/BSD 계열만 직접 링크
+	•	통합 용이성: CMake, FetchContent, vcpkg 등으로 손쉬운 통합
+
+⸻
+
+2. 범위
+
+2.1 기능 범위 (Functional Requirements)
+	•	코어 수치 연산: sum/mean/var, min/max, 복소수 헬퍼, 누적합, diff, clamp, denormal flush
+	•	윈도우 생성: boxcar, hann, hamming, blackman(-harris), nuttall
+	•	스펙트럼 분석: FFT/IFFT 래퍼, STFT/ISTFT, fftshift, 위상 랩/언랩, 위상차
+	•	보간/리샘플링: 선형/구간 보간, sinc 업샘플(옵션), polyphase/ratio 리샘플러
+	•	필터: FIR(fir1, conv), IIR(biquad) 최소 세트, filtfilt(옵션)
+	•	켑스트럼/최소위상 변환: rceps/irceps, minphase
+	•	LPC/스펙트럴 엔벨로프 추정: levinson, lpc, lpspec
+	•	신호 프레이밍: fetch_frame, overlap-add, 창/프레임 처리 헬퍼
+	•	오디오 I/O: 기본 제외, 선택 빌드 옵션 제공
+
+2.2 비범위 (Non-Goals)
+	•	F0 추정, LLSM 등 고급 모델 포함 X
+	•	대형 DSP 프레임워크 수준의 광범위 기능 제공 X
+
+⸻
+
+3. 비기능 요구사항 (Non-Functional Requirements)
+
+항목	요구사항
+언어/표준	C99 필수, 선택적 C++ 헤더 전용 래퍼
+라이선스	MIT (GPL 계열 직접 링크 금지)
+이식성	macOS, Linux, Windows / x86_64, arm64
+성능	48kHz 모노 실시간 처리 (싱글스레드 기준)
+정확도	float32 기본, double 옵션 / 오차 허용: float 1e-4, double 1e-6
+스레드 안전성	순수 함수 재진입 안전, 상태 변경 시 외부 동기화
+메모리 관리	내부 루프 동적 할당 금지, 사전 plan/buffer 할당 API
+
+
+⸻
+
+4. API 설계
+	•	네임스페이스: vv_dsp_ (C), vv::dsp (C++)
+	•	기본 타입
+	•	vv_dsp_real (float/double)
+	•	vv_dsp_cpx (복소수 구조체)
+	•	vv_dsp_status (상태 코드)
+	•	핸들 타입
+	•	vv_dsp_fft_plan*
+	•	vv_dsp_stft*
+	•	vv_dsp_resampler*
+	•	vv_dsp_fir*
+	•	vv_dsp_biquad*
+	•	에러 처리
+	•	정수 상태코드 반환, out-parameter에 결과 저장
+	•	대표 함수 예시
+	•	FFT:
+
+int vv_dsp_fft_make_plan(size_t n, int dir, vv_dsp_fft_plan** out);
+
+
+	•	FIR 설계:
+
+int vv_dsp_fir_design_lowpass(float fc, size_t taps, float* out_taps);
+
+
+
+⸻
+
+5. 아키텍처
+
+vv-dsp
+ ├─ core       # 타입, 상태 코드, math 유틸
+ ├─ spectral   # FFT/STFT, 위상 처리
+ ├─ filter     # FIR, biquad, filtfilt
+ ├─ resample   # linear/sinc/polyphase 리샘플러
+ ├─ envelope   # LPC, 켑스트럼, 최소위상
+ ├─ window     # 윈도우 생성
+ └─ adapters   # C++ RAII 래퍼, span/strided view
+
+
+⸻
+
+6. 빌드/배포
+	•	빌드 옵션
+	•	VV_DSP_BUILD_TESTS (기본 ON)
+	•	VV_DSP_USE_SIMD (자동 감지)
+	•	VV_DSP_BACKEND_FFT = KISS / FFTS / FFTW
+	•	VV_DSP_SINGLE_FILE (amalgamation)
+	•	통합 방법
+	•	Git Submodule
+	•	FetchContent
+	•	vcpkg 포트
+
+⸻
+
+7. 품질 보증
+	•	단위 테스트: NumPy/Scipy 참조값 검증
+	•	마이크로벤치: FFT, STFT, conv, resample
+	•	정적 분석: UBSan/ASan (옵션)
+
+⸻
+
+8. 플랫폼/에지케이스 정책
+	•	NaN/Inf 전파 규칙 명시
+	•	Denormal flush-to-zero 옵션
+	•	Overlap-save 긴 컨볼루션 지원
+
+⸻
+
+9. 라이선스 및 제3자 의존성
+	•	MIT (본 라이브러리)
+	•	MIT/BSD 계열만 직접 링크 허용
+	•	GPL 계열은 프로세스 분리/플러그인 방식
+
+⸻
+
+10. VoceVersa 통합 계획
+	•	VOCEVERSA_USE_VV_DSP 옵션 추가
+	•	기존 FFTWrapper 등 교체
+	•	WORLD 기반 모듈은 유지
+
+⸻
+
+11. 마이그레이션 단계
+	1.	vv-dsp 레포 생성 (MIT, CMake 스켈레톤)
+	2.	최소 기능 구현 및 테스트
+	3.	VoceVersa 서브모듈 추가
+	4.	기존 코드 vv-dsp 기반으로 점진 교체
+	5.	vcpkg 포트 작성
+
+⸻
+
+12. 부록 (FetchContent 예시)
+
+include(FetchContent)
+FetchContent_Declare(vv_dsp
+  GIT_REPOSITORY https://github.com/your-org/vv-dsp.git
+  GIT_TAG        v0.1.0)
+FetchContent_MakeAvailable(vv_dsp)
+target_link_libraries(voceversa_core PRIVATE vv::dsp)

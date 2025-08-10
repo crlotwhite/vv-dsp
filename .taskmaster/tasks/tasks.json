@@ -1,0 +1,785 @@
+{
+  "master": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "프로젝트 저장소 초기 설정 및 구조 생성",
+        "description": "vv-dsp 프로젝트의 기본 디렉토리 구조와 빌드 시스템을 설정합니다",
+        "details": "CMakeLists.txt 생성, 디렉토리 구조 생성 (core, spectral, filter, resample, envelope, window, adapters), MIT 라이선스 파일 추가, README.md 작성, .gitignore 설정, 빌드 옵션 구성 (VV_DSP_BUILD_TESTS, VV_DSP_USE_SIMD, VV_DSP_BACKEND_FFT, VV_DSP_SINGLE_FILE)",
+        "testStrategy": "CMake 구성이 올바르게 빌드되고 기본 타겟이 생성되는지 확인",
+        "priority": "high",
+        "dependencies": [],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "CMakeLists.txt 및 빌드 시스템 설정",
+            "description": "프로젝트 루트에 CMakeLists.txt를 생성하고 빌드 옵션들을 구성합니다",
+            "dependencies": [],
+            "details": "루트 CMakeLists.txt에서 프로젝트 이름을 vv-dsp로 설정, C99 표준 지정, 빌드 옵션들(VV_DSP_BUILD_TESTS, VV_DSP_USE_SIMD, VV_DSP_BACKEND_FFT, VV_DSP_SINGLE_FILE) 추가. CMake 최소 버전 3.15 설정, 기본 컴파일러 플래그 및 경고 옵션 구성",
+            "status": "pending",
+            "testStrategy": "cmake -B build 명령으로 configure가 성공하고 기본 빌드 타겟이 생성되는지 확인"
+          },
+          {
+            "id": 2,
+            "title": "프로젝트 디렉토리 구조 생성",
+            "description": "PRD에 명시된 모든 모듈 디렉토리와 서브디렉토리를 생성합니다",
+            "dependencies": [],
+            "details": "다음 디렉토리들을 생성: src/core/, src/spectral/, src/filter/, src/resample/, src/envelope/, src/window/, src/adapters/, include/vv_dsp/, tests/, examples/, docs/. 각 모듈별로 헤더 파일(.h)과 소스 파일(.c) 디렉토리 구조 준비",
+            "status": "pending",
+            "testStrategy": "모든 필요한 디렉토리가 존재하고 적절한 권한으로 생성되었는지 확인"
+          },
+          {
+            "id": 3,
+            "title": "MIT 라이선스 및 기본 문서 작성",
+            "description": "MIT 라이선스 파일과 기본 프로젝트 문서들을 생성합니다",
+            "dependencies": [],
+            "details": "LICENSE 파일에 표준 MIT 라이선스 텍스트 추가 (저작권자 정보 포함). README.md에 프로젝트 소개, 빌드 방법, 기본 사용법 작성. 프로젝트 목표, 기능 개요, 빌드 옵션 설명 포함",
+            "status": "pending",
+            "testStrategy": "라이선스 파일이 유효한 MIT 형식이고 README가 마크다운으로 올바르게 렌더링되는지 확인"
+          },
+          {
+            "id": 4,
+            "title": ".gitignore 및 개발 환경 설정",
+            "description": "프로젝트에 적합한 .gitignore 파일과 개발 환경 설정을 추가합니다",
+            "dependencies": [],
+            "details": "C/C++ 프로젝트용 .gitignore 생성 (build/, .vscode/, .vs/, *.o, *.so, *.dylib, *.dll 등). CMake 빌드 아티팩트, IDE 설정 파일, OS별 임시 파일들을 제외하도록 설정. 선택적으로 .clang-format 설정 파일 추가",
+            "status": "pending",
+            "testStrategy": "일반적인 빌드 아티팩트들이 git status에서 무시되는지 테스트"
+          },
+          {
+            "id": 5,
+            "title": "기본 헤더 파일 및 CMake 모듈 설정 완료",
+            "description": "각 모듈별 기본 헤더 파일을 생성하고 CMake 서브디렉토리를 연결합니다",
+            "dependencies": [
+              "1.1",
+              "1.2"
+            ],
+            "details": "include/vv_dsp/vv_dsp.h에 메인 헤더 생성, 각 모듈별 헤더 파일들(core.h, spectral.h, filter.h, resample.h, envelope.h, window.h) 기본 구조 작성. src/ 하위 각 모듈별 CMakeLists.txt 생성하여 라이브러리 타겟 설정. 메인 CMakeLists.txt에서 add_subdirectory로 연결",
+            "status": "pending",
+            "testStrategy": "cmake --build build 명령으로 기본 라이브러리 타겟이 성공적으로 빌드되는지 확인"
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "코어 타입 시스템 및 기본 유틸리티 구현",
+        "description": "vv_dsp_real, vv_dsp_cpx, vv_dsp_status 등 핵심 데이터 타입과 기본 수학 연산을 구현합니다",
+        "details": "vv_dsp_types.h에서 vv_dsp_real (float/double), vv_dsp_cpx 복소수 구조체, vv_dsp_status 상태 코드 정의. core/math.c에서 sum/mean/var, min/max, 복소수 헬퍼, 누적합, diff, clamp, denormal flush 함수 구현. C99 표준 준수, 인라인 함수 활용",
+        "testStrategy": "각 수학 연산에 대한 단위 테스트 작성, NumPy 결과와 비교 검증, 경계값 테스트",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "기본 데이터 타입 및 상태 코드 정의",
+            "description": "vv_dsp_types.h에서 vv_dsp_real, vv_dsp_cpx, vv_dsp_status 등 핵심 데이터 타입을 정의합니다",
+            "dependencies": [],
+            "details": "include/vv_dsp/vv_dsp_types.h 파일에서 vv_dsp_real을 조건부 컴파일로 float 또는 double로 정의 (VV_DSP_USE_DOUBLE 매크로 사용), vv_dsp_cpx 복소수 구조체를 real과 imag 멤버로 정의, vv_dsp_status 열거형으로 성공/실패/에러 코드 정의 (VV_DSP_OK, VV_DSP_ERROR_NULL_POINTER, VV_DSP_ERROR_INVALID_SIZE 등). C99 표준 준수, include guards와 C++ extern 지원 추가",
+            "status": "pending",
+            "testStrategy": "타입 정의가 올바르게 컴파일되고 크기가 예상값과 일치하는지 확인, C/C++ 호환성 테스트"
+          },
+          {
+            "id": 2,
+            "title": "복소수 연산 헬퍼 함수 구현",
+            "description": "복소수 덧셈, 곱셈, 켤레복소수 등 기본 복소수 연산 함수들을 구현합니다",
+            "dependencies": [
+              "2.1"
+            ],
+            "details": "src/core/complex.c에서 vv_dsp_cpx_add (복소수 덧셈), vv_dsp_cpx_mul (복소수 곱셈), vv_dsp_cpx_conj (켤레복소수), vv_dsp_cpx_abs (크기), vv_dsp_cpx_phase (위상) 함수 구현. 인라인 함수 또는 매크로로 최적화 고려, NaN/Inf 처리 정책 명시. vv_dsp_cpx_from_polar (극형식 변환) 등 유틸리티 함수 포함",
+            "status": "pending",
+            "testStrategy": "복소수 연산의 수학적 정확성 검증, 특별한 값(0, 무한대, NaN)에 대한 처리 테스트"
+          },
+          {
+            "id": 3,
+            "title": "기본 수학 연산 함수 구현",
+            "description": "sum, mean, variance, min/max 등 기본적인 배열 연산 함수들을 구현합니다",
+            "dependencies": [
+              "2.1"
+            ],
+            "details": "src/core/math.c에서 vv_dsp_sum (배열 합계), vv_dsp_mean (평균), vv_dsp_var (분산), vv_dsp_min/vv_dsp_max (최솟값/최댓값), vv_dsp_argmin/vv_dsp_argmax (인덱스 반환) 함수 구현. 실수와 복소수 버전 모두 지원, 큰 배열에서의 수치 안정성 고려 (Kahan 합산 알고리즘 등). 입력 검증과 경계값 처리 포함",
+            "status": "pending",
+            "testStrategy": "NumPy의 동일 함수들과 결과 비교, 큰 배열과 작은 배열에서의 정확도 검증, 수치 안정성 테스트"
+          },
+          {
+            "id": 4,
+            "title": "신호 처리 유틸리티 함수 구현",
+            "description": "누적합, 차분, clamp, denormal flush 등 신호 처리에 필요한 유틸리티 함수들을 구현합니다",
+            "dependencies": [
+              "2.3"
+            ],
+            "details": "src/core/utils.c에서 vv_dsp_cumsum (누적합), vv_dsp_diff (차분), vv_dsp_clamp (값 제한), vv_dsp_flush_denormals (비정규화 수 처리) 함수 구현. 배열 기반 일괄 처리와 실시간 스트리밍을 위한 단일 값 처리 버전 모두 제공. SIMD 최적화 가능성을 고려한 메모리 정렬 처리",
+            "status": "pending",
+            "testStrategy": "각 유틸리티 함수의 정확성 검증, 경계 조건과 특별한 입력값에 대한 견고성 테스트"
+          },
+          {
+            "id": 5,
+            "title": "코어 모듈 통합 및 성능 최적화",
+            "description": "모든 코어 함수들을 통합하고 인라인 최적화와 SIMD 준비 작업을 완료합니다",
+            "dependencies": [
+              "2.2",
+              "2.4"
+            ],
+            "details": "src/core/CMakeLists.txt에서 모든 코어 소스 파일들을 libvv_dsp_core 타겟으로 통합, include/vv_dsp/core.h에서 모든 코어 함수들의 공개 인터페이스 정의. 자주 사용되는 함수들의 인라인 최적화 적용, SIMD 준비를 위한 메모리 정렬 함수들 추가. 컴파일 시간 상수들과 매크로 정의, 전역 초기화/종료 함수 구현",
+            "status": "pending",
+            "testStrategy": "전체 코어 모듈의 통합 테스트, 성능 벤치마크 측정, 메모리 사용량 프로파일링, 다양한 컴파일러에서의 최적화 효과 검증"
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "윈도우 함수 생성 모듈 구현",
+        "description": "boxcar, hann, hamming, blackman, nuttall 등 다양한 윈도우 함수를 구성합니다",
+        "details": "window/window.h와 window/window.c에서 vv_dsp_window_boxcar, vv_dsp_window_hann, vv_dsp_window_hamming, vv_dsp_window_blackman, vv_dsp_window_blackman_harris, vv_dsp_window_nuttall 함수 구현. 각 함수는 크기와 출력 버퍼를 받아 윈도우 계수를 생성",
+        "testStrategy": "scipy.signal의 윈도우 함수 결과와 비교, 대칭성 및 정규화 검증",
+        "priority": "medium",
+        "dependencies": [
+          2
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "윈도우 함수 헤더 파일 및 기본 구조 정의",
+            "description": "window.h에서 윈도우 함수들의 함수 선언과 공통 데이터 구조를 정의합니다",
+            "dependencies": [],
+            "details": "src/window/window.h 파일에서 모든 윈도우 함수들(vv_dsp_window_boxcar, vv_dsp_window_hann, vv_dsp_window_hamming, vv_dsp_window_blackman, vv_dsp_window_blackman_harris, vv_dsp_window_nuttall)의 함수 시그니처를 정의합니다. 각 함수는 size_t N(윈도우 크기)과 vv_dsp_real* out(출력 버퍼)를 매개변수로 받고 vv_dsp_status를 반환합니다. 필요한 수학 상수들(M_PI 등)과 인클루드 헤더를 정의합니다.",
+            "status": "pending",
+            "testStrategy": "헤더 파일이 올바르게 컴파일되고 함수 시그니처가 정확한지 확인"
+          },
+          {
+            "id": 2,
+            "title": "Boxcar 및 Hann 윈도우 함수 구현",
+            "description": "가장 기본적인 boxcar 윈도우와 hann 윈도우 함수를 구현합니다",
+            "dependencies": [
+              "3.1"
+            ],
+            "details": "src/window/window.c에서 vv_dsp_window_boxcar (모든 값이 1.0인 rectangular 윈도우)와 vv_dsp_window_hann (0.5 * (1 - cos(2*π*n/(N-1))) 공식 사용) 함수를 구현합니다. 입력 검증(NULL 포인터, 크기 0 체크), 경계값 처리, 효율적인 반복문 구조를 포함합니다. C99 표준 준수와 인라인 최적화를 고려합니다.",
+            "status": "pending",
+            "testStrategy": "scipy.signal.windows의 boxcar, hann 함수 결과와 수치적 비교, 대칭성 검증"
+          },
+          {
+            "id": 3,
+            "title": "Hamming 및 Blackman 윈도우 함수 구현",
+            "description": "hamming과 blackman 윈도우 함수를 구현합니다",
+            "dependencies": [
+              "3.2"
+            ],
+            "details": "vv_dsp_window_hamming (0.54 - 0.46*cos(2*π*n/(N-1)) 공식)과 vv_dsp_window_blackman (0.42 - 0.5*cos(2*π*n/(N-1)) + 0.08*cos(4*π*n/(N-1)) 공식)을 구현합니다. 삼각함수 계산 최적화를 위해 필요시 룩업테이블이나 점진적 계산 방식을 고려합니다. 메모리 접근 패턴과 캐시 효율성을 고려한 구현을 합니다.",
+            "status": "pending",
+            "testStrategy": "scipy.signal의 hamming, blackman 윈도우와 정확도 비교, 주파수 특성 검증"
+          },
+          {
+            "id": 4,
+            "title": "Blackman-Harris 및 Nuttall 윈도우 함수 구현",
+            "description": "고급 윈도우 함수인 blackman-harris와 nuttall 윈도우를 구현합니다",
+            "dependencies": [
+              "3.3"
+            ],
+            "details": "vv_dsp_window_blackman_harris (4-term Blackman-Harris: a0=0.35875, a1=0.48829, a2=0.14128, a3=0.01168 계수 사용)와 vv_dsp_window_nuttall (Nuttall 윈도우: a0=0.3635819, a1=0.4891775, a2=0.1365995, a3=0.0106411 계수) 함수를 구현합니다. 고차 코사인 항들의 정확한 계산과 수치적 안정성을 보장합니다.",
+            "status": "pending",
+            "testStrategy": "scipy.signal의 blackmanharris, nuttall 윈도우와 비교, 스펙트럼 누설 특성 검증"
+          },
+          {
+            "id": 5,
+            "title": "윈도우 함수 모듈 통합 및 최적화",
+            "description": "모든 윈도우 함수를 통합하고 성능 최적화와 종합 테스트를 수행합니다",
+            "dependencies": [
+              "3.4"
+            ],
+            "details": "CMakeLists.txt에 window 모듈 추가, 메인 헤더(vv_dsp.h)에 window.h 인클루드, 모든 윈도우 함수의 통합 테스트 구현. SIMD 최적화 가능성 검토, 메모리 정렬 최적화, 공통 계산 부분 팩터링. 에러 핸들링 일관성 검증과 API 문서 주석 추가.",
+            "status": "pending",
+            "testStrategy": "전체 윈도우 함수 슈트의 정확도 및 성능 벤치마크, 메모리 사용량 및 캐시 효율성 측정"
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "FFT/IFFT 백엔드 시스템 및 래퍼 구현",
+        "description": "선택 가능한 FFT 백엔드(KISS, FFTS, FFTW)와 통합 래퍼 인터페이스를 구현합니다",
+        "details": "spectral/fft.h에서 vv_dsp_fft_plan 핸들 정의, vv_dsp_fft_make_plan, vv_dsp_fft_execute, vv_dsp_fft_destroy 함수 구현. 백엔드별 조건부 컴파일로 KISS FFT(기본), FFTS, FFTW 지원. 복소수-복소수 및 실수-복소수 변환 모두 지원",
+        "testStrategy": "다양한 크기의 FFT에 대해 NumPy/SciPy FFT 결과와 비교, 역변환 정확도 검증",
+        "priority": "high",
+        "dependencies": [
+          2
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "FFT API 헤더 및 기본 타입/파라미터 설계",
+            "description": "vv_dsp_fft_plan 오opaque 핸들 구조체와 API 선언(생성/실행/파기)을 정의합니다",
+            "dependencies": [],
+            "details": "include/vv_dsp/spectral/fft.h에 vv_dsp_fft_plan(오opaque) 유형, vv_dsp_fft_dir 방향(전/역), vv_dsp_fft_type(R2C/C2R/C2C) enum 정의. vv_dsp_fft_make_plan(n, type, dir, plan**), vv_dsp_fft_execute(plan, in, out), vv_dsp_fft_destroy(plan) 선언. stride/in-place 옵션은 효율성 고려로 향후 지표 선택(기본: 연속 메모리, 아웃오브플레이스). vv_dsp_status 반환, NULL/크기 검증, C++ extern 지원",
+            "status": "pending",
+            "testStrategy": "헤더 컴파일 및 타입/인터페이스 일관성 확인, 반환 코드 일관성 검증"
+          },
+          {
+            "id": 2,
+            "title": "백엔드 추상화 계층 및 CMake 옵션 연결",
+            "description": "KISS/FFTS/FFTW 백엔드 선택 및 컴파일-시 조건부 구조를 만듭니다",
+            "dependencies": [
+              "4.1"
+            ],
+            "details": "src/spectral/fft_backend.h 내부 인터페이스(공통 함수 헤더) 정의, VV_DSP_BACKEND_FFT=KISS/FFTS/FFTW 매크로 선택. CMakeLists.txt에 백엔드 선택식 포함(기본 KISS), FFTW find_package, FFTS pkg-config 검사. VV_DSP_SINGLE_FILE 배포 방식 고려",
+            "status": "pending",
+            "testStrategy": "CMake 구성에서 각 백엔드 선택/활성화 확인, 선택 X 시 기본 KISS 백엔드 활성화 확인"
+          },
+          {
+            "id": 3,
+            "title": "플랜 생성/파기 및 파라미터 검증 구현",
+            "description": "크기/방향/유형에 따른 plan 생성, 메모리 할당, 값 검증 및 파기를 구현합니다",
+            "dependencies": [
+              "4.2"
+            ],
+            "details": "src/spectral/fft.c에 vv_dsp_fft_make_plan/vv_dsp_fft_destroy 구현: n>0, 자연수 체크, type(dir) 유효성 검증, 필요 메모리 할당(입/출력 버퍼, scratch). 크기 변경과 다유 백엔드 가능성 점검, 에러 코드 반환",
+            "status": "pending",
+            "testStrategy": "다양한 n(2^k, 속수, 소수)에서 plan 생성/파기 테스트, 메모리 누수 검사"
+          },
+          {
+            "id": 4,
+            "title": "KISS 백엔드 C2C 실행 기반 구현",
+            "description": "기본 백엔드(KISS)로 복소수-복소수 전/역 FFT 실행을 구현합니다",
+            "dependencies": [
+              "4.3"
+            ],
+            "details": "src/spectral/fft_kiss.c 또는 동향 파일에 KISS FFT 엔진 래퍼 구현(별도 포함 또는 submodule). vv_dsp_fft_execute 구현: C2C forward/backward, 연속 버퍼 입/출력(아웃에 대한 in-place 선택 가능). NaN/Inf 에러 판별",
+            "status": "pending",
+            "testStrategy": "알려진 단발 주파수 신호에 대한 C2C FFT/IFFT 역변환 정확도 검증(원본 복원), NumPy numpy.fft.fft 비교"
+          },
+          {
+            "id": 5,
+            "title": "KISS 백엔드 R2C/C2R 변환 호출 구현",
+            "description": "실수-복소수 및 복소수-실수 변환을 지원하는 API 를 구현합니다",
+            "dependencies": [
+              "4.4"
+            ],
+            "details": "vv_dsp_fft_type=R2C/C2R 포함 plan 지원 및 vv_dsp_fft_execute 내부 변환 로직. 반환 포맷과 출력 크기(훅킹) 명시, Nyquist 항 처리, 내부 재정규화(의미론 대체 안함). 다무한 n 지원",
+            "status": "pending",
+            "testStrategy": "numpy.fft.rfft/irfft 결과와 비교(표준화 처리 포함), 역변환 통해 L2 오차 측정"
+          },
+          {
+            "id": 6,
+            "title": "FFTS 백엔드 연결(선택) 및 적용 인터페이스",
+            "description": "FFTS 백엔드 선택 시 적용되도록 adapter 를 구현합니다",
+            "dependencies": [
+              "4.3"
+            ],
+            "details": "src/spectral/fft_ffs.c(또는 .c)에 FFTS API 래퍼. CMake 선택 시에만 컴파일, 미 설치 시 폴백 또는 기본 KISS 환경 바로 회귀. C2C/R2C/C2R 기본 지원",
+            "status": "pending",
+            "testStrategy": "FFTS 설치 환경에서 동일 테스트 지향, 기본 KISS 결과와 수치 일관성 확인"
+          },
+          {
+            "id": 7,
+            "title": "FFTW 백엔드 연결(선택) 및 plan 플래그 지원",
+            "description": "FFTW3 연결 및 wisdom/threads(선택) 지원 adapter 구현",
+            "dependencies": [
+              "4.3"
+            ],
+            "details": "src/spectral/fft_fftw.c에 FFTW planner 래퍼. find_package(FFTW3) 성공 시에만 컴파일, plan 생성 파라미터(시간 vs. 가능함) 바로 고려. optional: wisdom load/save, threads 지원(FFTW 키포드)",
+            "status": "pending",
+            "testStrategy": "FFTW 환경에서 NumPy/SciPy 결과와 비교, plan 선택 옵션 변환 시 성능 변화 확인"
+          },
+          {
+            "id": 8,
+            "title": "스펙트럼 유틸(fftshift/ifftshift) 및 모듈 통합/테스트",
+            "description": "fftshift/ifftshift 유틸리티를 구현하고 spectral 모듈 통합 및 종합 테스트를 수행합니다",
+            "dependencies": [
+              "4.5"
+            ],
+            "details": "src/spectral/utils.c에 vv_dsp_fftshift/vv_dsp_ifftshift 구현(연속 버퍼, in-place 또는 out-of-place 버전). CMake에 spectral 모듈 강화, include/vv_dsp/vv_dsp.h에 fft.h 포함. 통합 테스트: C2C/R2C/C2R 반환 정확도, 사용성/성능 벤치마크",
+            "status": "pending",
+            "testStrategy": "NumPy numpy.fft.fftshift/ifftshift 비교, STFT 요소런 조합에서 위상 검증, 전체 FFT 통합 테스트"
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "STFT/ISTFT 스펙트로그램 분석 모듈 구현",
+        "description": "Short-Time Fourier Transform과 역변환을 위한 프레이밍 및 overlap-add 처리를 구현합니다",
+        "details": "spectral/stft.h와 stft.c에서 vv_dsp_stft 핸들 생성, 프레임 단위 STFT 처리, overlap-add를 통한 ISTFT 재구성. 윈도우 적용, 홉 크기 설정, 프레임 버퍼 관리 포함. fetch_frame과 overlap-add 헬퍼 함수 구현",
+        "testStrategy": "완전 재구성 테스트 (STFT->ISTFT 후 원본 신호 복원), 위상 일관성 검증",
+        "priority": "high",
+        "dependencies": [
+          3,
+          4
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "STFT 핸들 구조체 정의 및 기본 인터페이스 구현",
+            "description": "vv_dsp_stft 핸들 구조체와 생성/소멸 함수를 정의합니다",
+            "dependencies": [],
+            "details": "src/spectral/stft.h에서 vv_dsp_stft 구조체 정의 (FFT 플랜, 윈도우 버퍼, 홉 크기, 프레임 크기, 오버랩 버퍼 포함), vv_dsp_stft_create, vv_dsp_stft_destroy 함수 선언. src/spectral/stft.c에서 메모리 할당/해제, FFT 플랜 초기화, 파라미터 검증 구현. 윈도우 크기, 홉 크기, FFT 크기 설정 가능하도록 구성",
+            "status": "pending",
+            "testStrategy": "핸들 생성/소멸의 메모리 누수 검사, 다양한 파라미터 조합에서 초기화 성공 확인"
+          },
+          {
+            "id": 2,
+            "title": "프레임 버퍼 관리 및 윈도우 적용 시스템 구현",
+            "description": "입력 신호로부터 프레임을 추출하고 윈도우 함수를 적용하는 기능을 구현합니다",
+            "dependencies": [
+              "5.1"
+            ],
+            "details": "vv_dsp_stft_fetch_frame 헬퍼 함수로 입력 버퍼에서 현재 프레임 추출, 제로 패딩 처리. 윈도우 함수 적용을 위한 임시 버퍼 관리, 선택된 윈도우 타입(hann, hamming 등)에 따른 윈도우 계수 적용. 프레임 경계 처리 및 부족한 샘플에 대한 제로 패딩 로직 구현",
+            "status": "pending",
+            "testStrategy": "다양한 프레임 크기와 윈도우 타입으로 프레임 추출 정확도 확인, 경계 조건 테스트"
+          },
+          {
+            "id": 3,
+            "title": "STFT 분석 처리 함수 구현",
+            "description": "프레임 단위로 STFT를 수행하는 핵심 분석 함수를 구현합니다",
+            "dependencies": [
+              "5.2"
+            ],
+            "details": "vv_dsp_stft_process 함수로 입력 프레임에 윈도우 적용 후 FFT 실행, 복소수 스펙트럼 출력. 실시간 처리를 위한 스트리밍 인터페이스 구현, 내부 상태 관리 (이전 프레임 오버랩 부분). 홉 크기에 따른 프레임 진행 관리, 출력 스펙트럼 포맷 (크기/위상 또는 실수/허수) 선택 가능",
+            "status": "pending",
+            "testStrategy": "알려진 주파수 신호의 STFT 결과와 NumPy/SciPy 비교, 다양한 홉 크기에서 정확도 검증"
+          },
+          {
+            "id": 4,
+            "title": "ISTFT overlap-add 재구성 시스템 구현",
+            "description": "STFT 결과로부터 시간 영역 신호를 재구성하는 ISTFT 기능을 구현합니다",
+            "dependencies": [
+              "5.3"
+            ],
+            "details": "vv_dsp_stft_reconstruct 함수로 복소수 스펙트럼에 IFFT 적용, overlap-add 방식으로 출력 신호 재구성. 오버랩 버퍼 관리 (이전 프레임과의 중첩 부분 누적), 윈도우 정규화 처리 (COLA 조건 보장). 프레임 간 연속성 유지를 위한 상태 관리, 지연 보상 옵션 제공",
+            "status": "pending",
+            "testStrategy": "STFT->ISTFT 완전 재구성 테스트 (원본 신호와 비교), 다양한 윈도우와 홉 크기 조합에서 재구성 품질 측정"
+          },
+          {
+            "id": 5,
+            "title": "STFT 모듈 통합 및 고급 기능 구현",
+            "description": "STFT 모듈을 완성하고 스펙트로그램 생성, 위상 처리 등 고급 기능을 추가합니다",
+            "dependencies": [
+              "5.4"
+            ],
+            "details": "vv_dsp_stft_spectrogram 함수로 전체 신호의 스펙트로그램 행렬 생성, 시간-주파수 표현 출력. 위상 일관성 유지를 위한 위상 vocoder 기반 처리 옵션, 스펙트럼 크기/위상 분리 추출 기능. CMakeLists.txt에 spectral 모듈 통합, 메인 헤더에 STFT 인터페이스 포함, 종합 테스트와 성능 최적화 적용",
+            "status": "pending",
+            "testStrategy": "전체 신호 스펙트로그램 생성 정확도 검증, 실시간 처리 성능 벤치마크, 위상 일관성 측정"
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "보간 및 리샘플링 모듈 구현",
+        "description": "선형/구간 보간과 polyphase 리샘플러를 구현하여 샘플레이트 변환을 지원합니다",
+        "details": "resample/interpolate.c에서 선형 및 구간 보간 함수, resample/resampler.c에서 vv_dsp_resampler 핸들과 polyphase 필터 기반 리샘플러 구현. 정수/분수 비율 리샘플링 지원, 선택적 sinc 업샘플러 추가. 안티앨리어싱 필터 자동 적용",
+        "testStrategy": "알려진 주파수 신호의 리샘플링 정확도 검증, 앨리어싱 방지 효과 측정",
+        "priority": "medium",
+        "dependencies": [
+          2
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "resample/interpolate 모듈 초기 설정 및 선형 보간 구현",
+            "description": "`resample/interpolate.h` 및 `resample/interpolate.c` 파일을 생성하고, `vv_dsp_real` 타입에 대한 선형 보간 함수 `vv_dsp_interpolate_linear_real`을 구현합니다.",
+            "dependencies": [],
+            "details": "1. `resample/interpolate.h` 파일을 생성하고 `vv_dsp_interpolate_linear_real` 함수의 시그니처를 선언합니다.\n2. `resample/interpolate.c` 파일을 생성하고 `vv_dsp_interpolate_linear_real` 함수를 구현합니다. 이 함수는 입력 배열, 출력 배열, 보간할 위치(0.0-1.0 사이의 비율)를 인자로 받아야 합니다.\n3. Task 2에서 정의될 `vv_dsp_real` 타입을 사용합니다.",
+            "status": "pending",
+            "testStrategy": "알려진 입력 값과 보간 위치에 대해 수동으로 계산한 결과와 비교하여 `vv_dsp_interpolate_linear_real`의 정확성을 검증합니다."
+          },
+          {
+            "id": 2,
+            "title": "resample/interpolate 모듈에 구간 보간 함수 추가",
+            "description": "`resample/interpolate.c`에 `vv_dsp_real` 타입에 대한 구간 보간 (예: 큐빅 또는 라그랑주) 함수 `vv_dsp_interpolate_cubic_real`을 구현합니다.",
+            "dependencies": [
+              "6.1"
+            ],
+            "details": "1. `resample/interpolate.h`에 `vv_dsp_interpolate_cubic_real` 함수의 시그니처를 선언합니다.\n2. `resample/interpolate.c`에 `vv_dsp_interpolate_cubic_real` 함수를 구현합니다. 이 함수는 선형 보간과 유사한 인터페이스를 가지되, 주변 샘플을 활용하여 더 부드러운 보간을 수행해야 합니다.\n3. `vv_dsp_real` 타입을 사용합니다.",
+            "status": "pending",
+            "testStrategy": "단순한 곡선 데이터에 대해 보간 결과를 시각화하고, 알려진 수학 함수에 대한 보간 결과와 비교하여 `vv_dsp_interpolate_cubic_real`의 정확성과 부드러움을 검증합니다."
+          },
+          {
+            "id": 3,
+            "title": "vv_dsp_resampler 핸들 및 기본 구조 정의",
+            "description": "`resample/resampler.h` 및 `resample/resampler.c` 파일을 생성하고, `vv_dsp_resampler` 핸들(불투명 포인터)과 생성/소멸 함수 `vv_dsp_resampler_create`, `vv_dsp_resampler_destroy`를 구현합니다.",
+            "dependencies": [],
+            "details": "1. `resample/resampler.h` 파일을 생성하고 `typedef struct vv_dsp_resampler vv_dsp_resampler;` 선언 및 `vv_dsp_resampler_create`, `vv_dsp_resampler_destroy` 함수 시그니처를 선언합니다.\n2. `resample/resampler.c` 파일을 생성하고 `struct vv_dsp_resampler`의 실제 정의(내부 상태, 필터 계수 등을 포함할 구조) 및 `vv_dsp_resampler_create`, `vv_dsp_resampler_destroy` 함수를 구현합니다.\n3. `create` 함수는 샘플레이트 비율, 필터 타입 등 초기 파라미터를 받을 수 있도록 설계하고, 메모리 할당 및 해제 로직을 포함합니다.",
+            "status": "pending",
+            "testStrategy": "`vv_dsp_resampler_create` 및 `vv_dsp_resampler_destroy` 함수 호출 시 메모리 누수가 없는지, 유효하지 않은 파라미터에 대해 적절한 `vv_dsp_status`를 반환하는지 확인합니다."
+          },
+          {
+            "id": 4,
+            "title": "Polyphase 리샘플러 핵심 처리 로직 구현 (고정 비율)",
+            "description": "`resample/resampler.c`에 `vv_dsp_resampler_process_real` 함수를 구현하여 `vv_dsp_real` 데이터에 대한 polyphase 필터 기반 리샘플링을 수행합니다. 초기에는 고정된 정수 또는 간단한 분수 비율 리샘플링을 지원합니다.",
+            "dependencies": [
+              "6.3"
+            ],
+            "details": "1. `resample/resampler.h`에 `vv_dsp_resampler_process_real` 함수의 시그니처를 선언합니다.\n2. `resample/resampler.c`에 `vv_dsp_resampler_process_real` 함수를 구현합니다. 이 함수는 입력 버퍼, 출력 버퍼, 처리할 샘플 수를 인자로 받습니다.\n3. 내부적으로 polyphase 필터 뱅크를 사용하여 리샘플링을 수행하며, 간단한 안티앨리어싱 필터 로직을 포함합니다 (예: 고정된 저역 통과 필터).",
+            "status": "pending",
+            "testStrategy": "단일 주파수 사인파를 입력하여 리샘플링 후 주파수 스펙트럼을 분석하여 올바른 샘플레이트 변환이 이루어졌는지, 앨리어싱이 억제되는지 확인합니다."
+          },
+          {
+            "id": 5,
+            "title": "가변 비율 리샘플링, Sinc 업샘플러 및 자동 안티앨리어싱 필터 구현",
+            "description": "`vv_dsp_resampler`에 가변 비율 리샘플링 기능을 추가하고, 선택적 Sinc 업샘플러를 구현하며, 리샘플링 비율에 따른 안티앨리어싱 필터를 자동으로 적용하는 로직을 완성합니다.",
+            "dependencies": [
+              "6.4"
+            ],
+            "details": "1. `vv_dsp_resampler_create` 또는 별도의 설정 함수를 통해 가변 비율 리샘플링을 지원하도록 `vv_dsp_resampler` 구조를 확장합니다.\n2. Sinc 함수 기반의 고품질 업샘플링 필터를 구현하고, 필요에 따라 이를 선택적으로 사용할 수 있도록 합니다.\n3. 리샘플링 비율(업샘플링/다운샘플링)에 따라 적절한 차단 주파수를 가진 안티앨리어싱/안티이미징 필터를 동적으로 설계하거나 선택하여 적용하는 로직을 구현합니다.",
+            "status": "pending",
+            "testStrategy": "다양한 정수/분수 비율로 리샘플링을 수행하여 출력 신호의 정확도와 앨리어싱/이미징 억제 효과를 검증합니다. 특히 Sinc 업샘플러의 품질을 기존 방식과 비교합니다."
+          }
+        ]
+      },
+      {
+        "id": 7,
+        "title": "필터 설계 및 처리 모듈 구현",
+        "description": "FIR 및 IIR(biquad) 필터 설계와 적용 함수를 구현합니다",
+        "details": "filter/fir.h와 fir.c에서 vv_dsp_fir_design_lowpass, 컨볼루션 기반 FIR 필터 적용. filter/iir.c에서 vv_dsp_biquad 구조체와 2차 IIR 필터 처리. 선택적으로 filtfilt (영위상 필터링) 구현. FFT 기반 긴 컨볼루션 지원",
+        "testStrategy": "주파수 응답 검증, 필터 안정성 테스트, 임펄스/스텝 응답 확인",
+        "priority": "medium",
+        "dependencies": [
+          2,
+          4
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "API/File Scaffolding for Filter Module",
+            "description": "Create the necessary header and source files for the filter module: `filter/fir.h`, `filter/fir.c`, `filter/iir.h`, `filter/iir.c`, and `filter/common.h`/`filter/common.c` for shared utilities. Establish basic file structure, include guards, and `extern \"C\"` blocks. Define common enums like `vv_dsp_window_type`.",
+            "dependencies": [],
+            "details": "Files to create: `filter/fir.h`, `filter/fir.c`, `filter/iir.h`, `filter/iir.c`, `filter/common.h`, `filter/common.c`. Each `.h` file must have standard header guards and `extern \"C\"` blocks. Include `core/vv_dsp_types.h` in all `.c` files and relevant `.h` files. Define `typedef enum { VV_DSP_WINDOW_RECTANGULAR, VV_DSP_WINDOW_HAMMING, VV_DSP_WINDOW_HANNING, VV_DSP_WINDOW_BLACKMAN } vv_dsp_window_type;` in `filter/common.h`.",
+            "status": "pending",
+            "testStrategy": "Verify file existence and correct header guard/C linkage. Ensure compilation without errors for empty files."
+          },
+          {
+            "id": 2,
+            "title": "FIR Low-pass Filter Design Implementation",
+            "description": "Implement the `vv_dsp_fir_design_lowpass` function to calculate FIR filter coefficients using a windowing method. Support configurable window types (e.g., Rectangular, Hamming, Hanning, Blackman) as defined in `vv_dsp_window_type`.",
+            "dependencies": [
+              "7.1"
+            ],
+            "details": "File: `filter/fir.h`, `filter/fir.c`. Public API: `vv_dsp_status vv_dsp_fir_design_lowpass(vv_dsp_real* coeffs, size_t num_taps, vv_dsp_real cutoff_norm, vv_dsp_window_type window_type);`. Input: `coeffs` (output buffer for coefficients), `num_taps` (filter order + 1), `cutoff_norm` (normalized cutoff frequency 0-1, 1 = Nyquist), `window_type`. Output: `coeffs` array populated, `vv_dsp_status` (e.g., `VV_DSP_SUCCESS`, `VV_DSP_ERROR_INVALID_ARGUMENT` for `cutoff_norm` out of range). Completion: Coefficients are correctly calculated for various window types and cutoff frequencies.",
+            "status": "pending",
+            "testStrategy": "Unit tests comparing generated coefficients against known values (e.g., SciPy/MATLAB) for various `num_taps`, `cutoff_norm`, and `window_type`. Check edge cases like `cutoff_norm` near 0 or 1."
+          },
+          {
+            "id": 3,
+            "title": "FIR Time-Domain Convolution Application",
+            "description": "Implement a function to apply an FIR filter to a block of input samples using direct time-domain convolution. This function should manage internal state for streaming processing.",
+            "dependencies": [
+              "7.1"
+            ],
+            "details": "File: `filter/fir.h`, `filter/fir.c`. Public API: `typedef struct { vv_dsp_real* history; size_t history_size; size_t history_idx; size_t num_taps; } vv_dsp_fir_state;`. Functions: `vv_dsp_status vv_dsp_fir_state_init(vv_dsp_fir_state* state, size_t num_taps);`, `void vv_dsp_fir_state_free(vv_dsp_fir_state* state);`, `vv_dsp_status vv_dsp_fir_apply(vv_dsp_fir_state* state, const vv_dsp_real* coeffs, const vv_dsp_real* input, vv_dsp_real* output, size_t num_samples);`. Input: `state` (filter state), `coeffs` (filter coefficients), `input` (input samples), `num_samples`. Output: `output` (processed samples), `vv_dsp_status`. Completion: Filter correctly applies convolution, handles history for block processing.",
+            "status": "pending",
+            "testStrategy": "Unit tests with known impulse responses and step responses. Verify output matches expected values for various input block sizes, including streaming (multiple calls). Check for correct state management and memory handling."
+          },
+          {
+            "id": 4,
+            "title": "IIR Biquad Structure and Initialization",
+            "description": "Define the `vv_dsp_biquad` structure to hold IIR filter coefficients and state variables. Implement an initialization function to set up a biquad filter instance and a reset function.",
+            "dependencies": [
+              "7.1"
+            ],
+            "details": "File: `filter/iir.h`, `filter/iir.c`. Public API: `typedef struct { vv_dsp_real a1, a2, b0, b1, b2; vv_dsp_real z1, z2; } vv_dsp_biquad;` (Direct Form II Transposed is recommended). Functions: `vv_dsp_status vv_dsp_biquad_init(vv_dsp_biquad* biquad, vv_dsp_real b0, vv_dsp_real b1, vv_dsp_real b2, vv_dsp_real a1, vv_dsp_real a2);`, `void vv_dsp_biquad_reset(vv_dsp_biquad* biquad);`. Input: `biquad` (pointer to structure), `b0, b1, b2, a1, a2` (filter coefficients). Output: `biquad` initialized, `vv_dsp_status`. Completion: Structure defined, initialization function correctly sets coefficients and resets state variables (`z1, z2` to 0).",
+            "status": "pending",
+            "testStrategy": "Unit tests to verify `vv_dsp_biquad_init` correctly assigns coefficients and zeroes out state. Test `vv_dsp_biquad_reset` functionality."
+          },
+          {
+            "id": 5,
+            "title": "IIR Biquad Sample Processing",
+            "description": "Implement the core processing function for a single biquad filter stage. This function will take an input sample and return an output sample, updating the internal state.",
+            "dependencies": [
+              "7.4"
+            ],
+            "details": "File: `filter/iir.h`, `filter/iir.c`. Public API: `vv_dsp_real vv_dsp_biquad_process(vv_dsp_biquad* biquad, vv_dsp_real input_sample);`. Input: `biquad` (pointer to structure), `input_sample` (single sample). Output: Processed `vv_dsp_real` sample. Completion: Single sample processing correctly implements Direct Form II Transposed biquad equations.",
+            "status": "pending",
+            "testStrategy": "Unit tests with simple coefficients (e.g., pass-through, delay). Test impulse and step responses for known biquad coefficients. Verify state updates correctly after each sample."
+          },
+          {
+            "id": 6,
+            "title": "IIR Biquad Block Processing",
+            "description": "Implement a function to apply a series of biquad filter stages to a block of input samples. This will typically involve chaining multiple `vv_dsp_biquad` instances.",
+            "dependencies": [
+              "7.5"
+            ],
+            "details": "File: `filter/iir.h`, `filter/iir.c`. Public API: `vv_dsp_status vv_dsp_iir_apply(vv_dsp_biquad* biquads, size_t num_stages, const vv_dsp_real* input, vv_dsp_real* output, size_t num_samples);`. Input: `biquads` (array of biquad structures), `num_stages` (number of biquad stages), `input` (input samples), `num_samples`. Output: `output` (processed samples), `vv_dsp_status`. Completion: Block processing correctly applies multiple biquad stages in series.",
+            "status": "pending",
+            "testStrategy": "Unit tests with multi-stage IIR filters. Compare output against SciPy `lfilter` for known coefficients. Test various block sizes and ensure correct state propagation between stages."
+          },
+          {
+            "id": 7,
+            "title": "Zero-Phase Filtering (filtfilt) Implementation",
+            "description": "Implement a zero-phase filtering function (`filtfilt`) that applies a filter forward and backward to eliminate phase distortion. Start with FIR filter support.",
+            "dependencies": [
+              "7.3"
+            ],
+            "details": "File: `filter/common.h`, `filter/common.c`. Public API: `vv_dsp_status vv_dsp_filtfilt_fir(const vv_dsp_real* coeffs, size_t num_taps, const vv_dsp_real* input, vv_dsp_real* output, size_t num_samples);`. Input: `coeffs`, `num_taps`, `input`, `num_samples`. Output: `output` (zero-phase filtered samples), `vv_dsp_status`. Completion: `filtfilt` correctly processes data, handles padding/reflection at boundaries to minimize transients. Consider using `vv_dsp_fir_apply` internally.",
+            "status": "pending",
+            "testStrategy": "Unit tests comparing `filtfilt` output against SciPy `filtfilt` for various FIR filters. Verify phase response is flat. Test boundary conditions and padding strategies."
+          },
+          {
+            "id": 8,
+            "title": "FFT-based Long FIR Convolution (Conditional)",
+            "description": "Implement FFT-based convolution for long FIR filters using Overlap-Save or Overlap-Add method. This subtask is conditional on Task 4 (FFT module) being available and functional.",
+            "dependencies": [
+              "7.3"
+            ],
+            "details": "File: `filter/fir.h`, `filter/fir.c`. Public API: `vv_dsp_status vv_dsp_fir_apply_fft(vv_dsp_fir_state* state, const vv_dsp_real* coeffs, const vv_dsp_real* input, vv_dsp_real* output, size_t num_samples);`. This function will depend on the `fft` module (Task 4). Implement either Overlap-Save or Overlap-Add. Completion: FFT-based convolution produces results identical to time-domain convolution for long filters, with potential performance benefits.",
+            "status": "pending",
+            "testStrategy": "Compare output against `vv_dsp_fir_apply` for various filter lengths and input sizes. Benchmark performance against time-domain convolution for long filters. This subtask should only be attempted if Task 4 is complete."
+          },
+          {
+            "id": 9,
+            "title": "Filter Module Unit Tests and Basic Benchmarking",
+            "description": "Create comprehensive unit tests for FIR and IIR filter functions, covering frequency response, impulse/step response, stability, and boundary conditions. Implement basic performance benchmarks for key processing functions.",
+            "dependencies": [
+              "7.2",
+              "7.3",
+              "7.4",
+              "7.5",
+              "7.6",
+              "7.7",
+              "7.8"
+            ],
+            "details": "File: `tests/filter_test.c` (new file). Test Cases: FIR low-pass design and application (frequency, impulse, step response). IIR biquad processing (impulse, step response, stability for high-Q). `filtfilt` correctness. Boundary conditions (e.g., `num_taps=1`, `cutoff_norm=0/1`). Benchmarking: Simple time measurements for `vv_dsp_fir_apply`, `vv_dsp_iir_apply`, and `vv_dsp_fir_apply_fft` (if implemented) with different block sizes and filter orders. Completion: All core filter functions are thoroughly tested for correctness and basic performance.",
+            "status": "pending",
+            "testStrategy": "Use helper functions to generate frequency/impulse/step responses. Compare against known DSP library outputs (e.g., SciPy). Ensure tests cover edge cases and error conditions."
+          },
+          {
+            "id": 10,
+            "title": "Documentation and Example Usage",
+            "description": "Add Doxygen-style comments to all public API functions in `filter/fir.h`, `filter/iir.h`, and `filter/common.h`. Create a simple example demonstrating FIR and IIR filter usage.",
+            "dependencies": [
+              "7.2",
+              "7.3",
+              "7.4",
+              "7.5",
+              "7.6",
+              "7.7",
+              "7.8"
+            ],
+            "details": "File: Update `filter/*.h` files with Doxygen comments. Create `examples/filter_example.c`. Documentation: Function descriptions, parameter explanations, return values, error conditions, usage notes. Example: A simple C program demonstrating how to design an FIR filter, initialize an IIR biquad, and apply them to a synthetic signal (e.g., sine wave, impulse).",
+            "status": "pending",
+            "testStrategy": "Verify documentation format and completeness. Compile and run the example to ensure it works as expected and demonstrates correct usage of the filter module APIs."
+          }
+        ]
+      },
+      {
+        "id": 8,
+        "title": "켑스트럼 및 최소위상 변환 모듈 구현",
+        "description": "실켄셰번스 켑스트럼과 최소위상 변환을 구현하여 위상 처리를 지원합니다",
+        "details": "envelope/cepstrum.c에서 vv_dsp_rceps (실켄셰번스 켑스트럼), vv_dsp_irceps (역변환) 구현. envelope/minphase.c에서 vv_dsp_minphase를 통한 최소위상 변환. 로그 스펙트럼 계산과 위상 언랩/랩 유틸리티 포함",
+        "testStrategy": "알려진 신호의 켑스트럼 계산 정확도 검증, 최소위상 변환 후 크기 스펙트럼 보존 확인",
+        "priority": "medium",
+        "dependencies": [
+          4,
+          5
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "실켄셰번스 켑스트럼 헤더 파일 정의",
+            "description": "envelope/cepstrum.h 파일을 생성하고 실켄셰번스 켑스트럼 관련 함수들의 선언을 정의합니다",
+            "dependencies": [],
+            "details": "envelope/cepstrum.h에서 vv_dsp_rceps (실켄셰번스 켑스트럼 변환), vv_dsp_irceps (역변환) 함수 선언. 복소수 배열과 실수 켑스트럼 배열을 다루는 인터페이스 정의. vv_dsp_real, vv_dsp_cpx, vv_dsp_status 타입 사용. 함수 매개변수로 입력 신호, 출력 버퍼, 신호 길이 등을 포함",
+            "status": "pending",
+            "testStrategy": "헤더 파일이 올바르게 컴파일되고 타입 정의가 일관성 있게 작성되었는지 확인"
+          },
+          {
+            "id": 2,
+            "title": "실켄셰번스 켑스트럼 변환 구현",
+            "description": "envelope/cepstrum.c에서 실켄셰번스 켑스트럼 변환 알고리즘을 구현합니다",
+            "dependencies": [
+              "8.1"
+            ],
+            "details": "vv_dsp_rceps 함수 구현: FFT를 통한 로그 스펙트럼 계산, 복소로그 연산, IFFT를 통한 켑스트럼 계산. 입력 신호의 크기 스펙트럼에서 로그를 취하고 역변환하여 실켄셰번스 켑스트럼 도출. 0값 처리 및 수치 안정성 확보를 위한 epsilon 추가",
+            "status": "pending",
+            "testStrategy": "알려진 신호에 대한 켑스트럼 계산 결과가 NumPy/SciPy의 scipy.signal.cepstrum과 일치하는지 검증"
+          },
+          {
+            "id": 3,
+            "title": "역 켑스트럼 변환 구현",
+            "description": "envelope/cepstrum.c에서 켑스트럼에서 원본 신호로의 역변환을 구현합니다",
+            "dependencies": [
+              "8.2"
+            ],
+            "details": "vv_dsp_irceps 함수 구현: 켑스트럼 데이터를 받아 FFT 적용, 지수 함수를 통한 복원, IFFT로 원본 신호 복원. 실켄셰번스 켑스트럼의 역변환 과정으로 exp(FFT(cepstrum))을 계산하여 원본 스펙트럼 복원",
+            "status": "pending",
+            "testStrategy": "rceps -> irceps 변환 과정에서 원본 신호의 크기 스펙트럼이 올바르게 복원되는지 검증"
+          },
+          {
+            "id": 4,
+            "title": "최소위상 변환 모듈 구현",
+            "description": "envelope/minphase.c와 minphase.h 파일을 생성하고 최소위상 변환을 구현합니다",
+            "dependencies": [
+              "8.2",
+              "8.3"
+            ],
+            "details": "vv_dsp_minphase 함수 구현: 입력 신호의 크기 스펙트럼을 보존하면서 최소위상 특성을 갖도록 변환. 실켄셰번스 켑스트럼을 이용한 방법으로 켑스트럼의 causal 부분만 사용하여 최소위상 신호 생성. 위상 응답 최소화와 인과성 보장",
+            "status": "pending",
+            "testStrategy": "최소위상 변환 후 크기 스펙트럼이 보존되고, 위상 응답이 최소위상 특성을 만족하는지 확인"
+          },
+          {
+            "id": 5,
+            "title": "위상 처리 유틸리티 및 통합 테스트",
+            "description": "로그 스펙트럼 계산과 위상 언랩/랩 유틸리티를 구현하고 전체 모듈을 테스트합니다",
+            "dependencies": [
+              "8.4"
+            ],
+            "details": "로그 스펙트럼 계산 헬퍼 함수들과 위상 언랩핑/랩핑 기능 구현. phase_unwrap, phase_wrap 함수로 위상 연속성 처리. 켑스트럼과 최소위상 변환 모듈의 통합 테스트 작성. 각 함수의 메모리 할당/해제 확인 및 에러 처리 검증",
+            "status": "pending",
+            "testStrategy": "전체 envelope 모듈의 기능 통합 테스트, 메모리 누수 검사, 실제 음성 신호에 대한 처리 성능 및 정확도 검증"
+          }
+        ]
+      },
+      {
+        "id": 9,
+        "title": "LPC 및 스펙트럴 엔벨로프 추정 구현",
+        "description": "Levinson-Durbin 알고리즘과 LPC 계수를 이용한 스펙트럴 엔벨로프 추정을 구현합니다",
+        "details": "envelope/lpc.h와 lpc.c에서 vv_dsp_levinson (Levinson-Durbin 알고리즘), vv_dsp_lpc (선형 예측 계수 계산), vv_dsp_lpspec (LPC 스펙트럼 추정) 함수 구현. 자기상관함수 계산과 예측 오차 최소화 알고리즘 포함",
+        "testStrategy": "음성 신호의 LPC 분석 정확도 검증, 스펙트럴 엔벨로프 추정 품질 평가",
+        "priority": "medium",
+        "dependencies": [
+          2,
+          4
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "LPC 헤더 파일 정의 및 기본 구조체 설계",
+            "description": "envelope/lpc.h에서 LPC 관련 함수들의 선언과 데이터 구조를 정의합니다",
+            "dependencies": [],
+            "details": "envelope/lpc.h 파일에서 vv_dsp_levinson, vv_dsp_lpc, vv_dsp_lpspec 함수 선언과 매개변수 정의. LPC 계수를 저장할 구조체와 자기상관 함수 인터페이스 설계. vv_dsp_real, vv_dsp_status 타입 사용하여 일관된 API 구성. 함수들은 입력 신호, 출력 계수, 차수(order) 매개변수를 받도록 설계",
+            "status": "pending",
+            "testStrategy": "헤더 파일이 올바르게 컴파일되고 타입 정의가 코어 모듈과 호환되는지 확인"
+          },
+          {
+            "id": 2,
+            "title": "자기상관 함수 계산 구현",
+            "description": "입력 신호에서 자기상관 함수를 계산하는 vv_dsp_autocorr 함수를 구현합니다",
+            "dependencies": [
+              "9.1"
+            ],
+            "details": "envelope/lpc.c에서 vv_dsp_autocorr 함수 구현: 입력 신호 x[n]에서 R[k] = Σ x[n]x[n-k] (k=0,1,...,p) 계산. 효율적인 시간 영역 계산 또는 FFT 기반 방법 선택 가능. 바이어스/언바이어스 옵션 제공, 윈도우 길이에 따른 정규화 처리. 수치적 안정성을 위한 입력 검증과 오버플로우 방지",
+            "status": "pending",
+            "testStrategy": "알려진 신호의 자기상관 함수가 NumPy의 numpy.correlate 결과와 일치하는지 검증"
+          },
+          {
+            "id": 3,
+            "title": "Levinson-Durbin 알고리즘 구현",
+            "description": "자기상관 계수에서 LPC 계수를 구하는 Levinson-Durbin 알고리즘을 구현합니다",
+            "dependencies": [
+              "9.2"
+            ],
+            "details": "vv_dsp_levinson 함수로 자기상관 계수 R[0]...R[p]에서 LPC 계수 a[1]...a[p] 계산. 순환 알고리즘으로 각 차수별 반사 계수(reflection coefficient) k[i] 계산하고 필터 계수 갱신. 예측 오차 에너지 계산과 수치 안정성 확보. 특이값 처리와 발산 방지를 위한 조건 확인",
+            "status": "pending",
+            "testStrategy": "Matlab/Octave의 levinson 함수나 scipy.signal.lfilter와 결과 비교, 수치적 안정성 테스트"
+          },
+          {
+            "id": 4,
+            "title": "LPC 계수 계산 및 예측 오차 분석",
+            "description": "전체 LPC 분석을 수행하는 vv_dsp_lpc 함수와 예측 오차 계산을 구현합니다",
+            "dependencies": [
+              "9.3"
+            ],
+            "details": "vv_dsp_lpc 함수로 입력 신호에서 자기상관 계산 -> Levinson-Durbin -> LPC 계수 출력까지 통합 처리. 예측 오차(prediction error) 에너지와 반사 계수들 출력 옵션. 다양한 LPC 차수에 대한 최적 차수 선택 지원. 프리엠퍼시스(pre-emphasis) 필터 적용 옵션과 윈도우 함수 적용",
+            "status": "pending",
+            "testStrategy": "음성 신호 샘플에 대한 LPC 분석 결과가 참조 구현(Matlab Signal Processing Toolbox 등)과 일치하는지 확인"
+          },
+          {
+            "id": 5,
+            "title": "LPC 스펙트럼 추정 및 모듈 통합",
+            "description": "LPC 계수에서 스펙트럴 엔벨로프를 추정하는 vv_dsp_lpspec 함수를 구현하고 전체 모듈을 통합합니다",
+            "dependencies": [
+              "9.4"
+            ],
+            "details": "vv_dsp_lpspec 함수로 LPC 계수에서 H(ω) = G / (1 - Σa[k]e^(-jωk)) 주파수 응답 계산. FFT를 이용한 효율적인 스펙트럼 계산과 크기/위상 추출. 다양한 주파수 해상도 지원과 선택적 스펙트럴 스무딩. CMakeLists.txt에 LPC 모듈 추가, 전체 envelope 패키지 통합, 종합 테스트와 메모리 최적화 적용",
+            "status": "pending",
+            "testStrategy": "LPC 스펙트럴 엔벨로프가 입력 신호의 스펙트럼 특성을 올바르게 근사하는지 검증, 음성 포만트 추정 정확도 평가"
+          }
+        ]
+      },
+      {
+        "id": 10,
+        "title": "C++ 래퍼 및 통합 테스트 시스템 구현",
+        "description": "C++ RAII 래퍼와 포괄적인 테스트 슈트를 구현하여 라이브러리를 완성합니다",
+        "details": "adapters/cpp_wrapper.hpp에서 모든 C 함수에 대한 RAII 기반 C++ 클래스 래퍼 구현. vv::dsp 네임스페이스 사용, span/strided view 지원. tests/ 디렉토리에서 각 모듈별 단위 테스트, 통합 테스트, 마이크로벤치마크 구현. NumPy/SciPy 참조값과 비교 검증",
+        "testStrategy": "전체 라이브러리 기능의 정확도 검증, 성능 벤치마크, 메모리 누수 검사, 48kHz 실시간 처리 성능 확인",
+        "priority": "medium",
+        "dependencies": [
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9
+        ],
+        "status": "pending",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "C++ RAII 래퍼 헤더 파일 구조 및 네임스페이스 정의",
+            "description": "adapters/cpp_wrapper.hpp에서 vv::dsp 네임스페이스와 기본 C++ 클래스 구조를 정의합니다",
+            "dependencies": [],
+            "details": "adapters/cpp_wrapper.hpp 파일 생성하고 vv::dsp 네임스페이스 정의. 모든 C 헤더 파일들을 포함하고, C++ 표준 라이브러리(span, memory, vector) 포함. RAII 기반 클래스들의 기본 구조 정의 - FFTPlanner, STFTProcessor, WindowGenerator, Resampler 등 각 모듈별 래퍼 클래스. 예외 처리를 위한 DSPException 클래스 정의, vv_dsp_status를 C++ 예외로 변환하는 헬퍼 함수 구현",
+            "status": "pending",
+            "testStrategy": "헤더 파일이 올바르게 컴파일되고 모든 C 함수들이 접근 가능한지 확인, C++ 표준 호환성 테스트"
+          },
+          {
+            "id": 2,
+            "title": "코어 모듈 C++ 래퍼 클래스 구현",
+            "description": "코어 타입 시스템과 기본 수학 연산들에 대한 C++ 래퍼를 구현합니다",
+            "dependencies": [
+              "10.1"
+            ],
+            "details": "vv::dsp::Complex 클래스로 vv_dsp_cpx 래퍼 구현, 연산자 오버로딩(+, -, *, /) 제공. vv::dsp::Math 네임스페이스에 정적 함수들로 sum, mean, variance, min/max 래퍼. std::span<const Real> 또는 std::vector<Real>을 받는 템플릿 기반 인터페이스 구현. RAII 방식의 메모리 관리와 자동 타입 변환 지원. strided view를 위한 span 확장 인터페이스 제공",
+            "status": "pending",
+            "testStrategy": "C++ STL 컨테이너와의 호환성 확인, 연산자 오버로딩 정확도 테스트, 메모리 관리 검증"
+          },
+          {
+            "id": 3,
+            "title": "스펙트럴 분석 모듈 C++ 래퍼 구현",
+            "description": "FFT, STFT 등 스펙트럴 분석 기능들에 대한 RAII 기반 C++ 클래스를 구현합니다",
+            "dependencies": [
+              "10.2"
+            ],
+            "details": "vv::dsp::FFTPlanner 클래스로 vv_dsp_fft_plan 래퍼, 생성자에서 플랜 생성, 소멸자에서 자동 해제. forward/backward 메서드로 변환 수행, std::complex<Real> 배열과 호환. vv::dsp::STFT 클래스로 실시간 STFT 처리, process() 메서드로 프레임 단위 처리, overlap-add 기반 reconstruct() 구현. 템플릿 기반으로 다양한 컨테이너 타입 지원, 이동 의미론(move semantics) 활용",
+            "status": "pending",
+            "testStrategy": "RAII 기반 자동 메모리 관리 확인, C++ 컨테이너 호환성 테스트, 실시간 처리 성능 검증"
+          },
+          {
+            "id": 4,
+            "title": "필터링 및 리샘플링 C++ 래퍼 구현",
+            "description": "필터 설계, 리샘플링 등의 모듈에 대한 C++ 인터페이스를 구현합니다",
+            "dependencies": [
+              "10.3"
+            ],
+            "details": "vv::dsp::FIRFilter, vv::dsp::IIRFilter 클래스로 필터 상태 관리와 실시간 처리 제공. Resampler 클래스로 polyphase 리샘플러 래퍼, 생성자에서 비율 설정, process() 메서드로 스트리밍 처리. WindowGenerator 클래스로 다양한 윈도우 함수 생성, 팩토리 패턴 적용. 각 클래스는 C++ 이동 의미론과 복사 방지 구현, 상태 기반 실시간 처리 인터페이스 제공",
+            "status": "pending",
+            "testStrategy": "필터 상태 관리 정확도 확인, 리샘플링 품질 테스트, 실시간 스트리밍 처리 성능 측정"
+          },
+          {
+            "id": 5,
+            "title": "포괄적 테스트 슈트 및 성능 벤치마크 구현",
+            "description": "tests/ 디렉토리에 각 모듈별 단위 테스트, 통합 테스트, 마이크로벤치마크를 구현하고 NumPy/SciPy와 비교 검증합니다",
+            "dependencies": [
+              "10.4"
+            ],
+            "details": "tests/ 디렉토리 생성하고 Google Test 또는 Catch2 기반 테스트 프레임워크 설정. 각 모듈별 테스트 파일(test_core.cpp, test_fft.cpp, test_stft.cpp 등) 작성. NumPy/SciPy 참조 데이터와 비교하는 정확도 테스트, 메모리 누수 검사를 위한 Valgrind/AddressSanitizer 통합. 48kHz 실시간 처리 성능 벤치마크와 다양한 신호 길이에서의 처리 시간 측정. CMakeLists.txt에 테스트 타겟 추가, CI/CD 파이프라인 설정",
+            "status": "pending",
+            "testStrategy": "전체 라이브러리 기능 정확도 검증, 메모리 누수 및 성능 회귀 검사, 실시간 처리 성능 확인, NumPy/SciPy와의 수치적 일치성 검증"
+          }
+        ]
+      }
+    ],
+    "metadata": {
+      "created": "2025-08-10T09:22:31.972Z",
+      "updated": "2025-08-10T09:22:31.972Z",
+      "description": "Tasks for master context"
+    }
+  }
+}
