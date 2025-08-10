@@ -23,6 +23,7 @@ set_property(CACHE VV_DSP_BACKEND_FFT PROPERTY STRINGS none fftw kissfft)
 option(VV_DSP_SINGLE_FILE "Build as a single-file amalgamation" OFF)
 option(VV_DSP_ENABLE_ASAN "Enable AddressSanitizer for sanitizing builds" OFF)
 option(VV_DSP_ENABLE_UBSAN "Enable UBSanitizer for sanitizing builds" OFF)
+option(VERIFY_WITH_PYTHON "Enable Python-based verification tests (NumPy/SciPy)" OFF)
 
 # Public compile definitions
 if(VV_DSP_USE_SIMD)
@@ -109,28 +110,67 @@ if(VV_DSP_BUILD_EXAMPLES)
   target_link_libraries(vv-dsp-filter-example PRIVATE vv-dsp)
 endif()
 
-# Python-based verification harness (optional)
-find_package(Python3 COMPONENTS Interpreter QUIET)
-if(Python3_Interpreter_FOUND)
-  # Pass fully-qualified binary paths to Python scripts
-  set(FFT_BIN $<TARGET_FILE:vv_dsp_dump_fft>)
-  set(FIR_BIN $<TARGET_FILE:vv_dsp_dump_fir>)
-  set(IIR_BIN $<TARGET_FILE:vv_dsp_dump_iir>)
-  set(STFT_BIN $<TARGET_FILE:vv_dsp_dump_stft_roundtrip>)
-  set(RESAMPLE_BIN $<TARGET_FILE:vv_dsp_dump_resample>)
+# Python-based verification harness (optional, opt-in via VERIFY_WITH_PYTHON)
+if(VV_DSP_BUILD_TESTS AND VERIFY_WITH_PYTHON)
+  find_package(Python3 COMPONENTS Interpreter QUIET)
+  if(Python3_Interpreter_FOUND)
+    # Check NumPy/SciPy availability by attempting import
+    execute_process(
+      COMMAND ${Python3_EXECUTABLE} -c "import numpy, scipy"
+      RESULT_VARIABLE _py_import_rc
+      OUTPUT_QUIET ERROR_QUIET
+    )
+    if(_py_import_rc EQUAL 0)
+      # Pass fully-qualified binary paths to Python scripts
+      set(FFT_BIN $<TARGET_FILE:vv_dsp_dump_fft>)
+      set(FIR_BIN $<TARGET_FILE:vv_dsp_dump_fir>)
+      set(IIR_BIN $<TARGET_FILE:vv_dsp_dump_iir>)
+      set(STFT_BIN $<TARGET_FILE:vv_dsp_dump_stft_roundtrip>)
+      set(RESAMPLE_BIN $<TARGET_FILE:vv_dsp_dump_resample>)
 
-  add_test(NAME py-fft
-     COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/python/test_fft.py
-       --fft-bin ${FFT_BIN})
-  add_test(NAME py-filters
-     COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/python/test_filters.py
-       --fir-bin ${FIR_BIN} --iir-bin ${IIR_BIN})
-  add_test(NAME py-stft
-     COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/python/test_stft.py
-       --stft-bin ${STFT_BIN})
-  add_test(NAME py-resampler
-     COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/python/test_resampler.py
-       --resample-bin ${RESAMPLE_BIN})
-else()
-  message(STATUS "Python3 interpreter not found; Python-based verification tests will be skipped by CTest.")
+      add_test(NAME py-fft
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/python/test_fft.py
+          --fft-bin ${FFT_BIN})
+      add_test(NAME py-filters
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/python/test_filters.py
+          --fir-bin ${FIR_BIN} --iir-bin ${IIR_BIN})
+      add_test(NAME py-stft
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/python/test_stft.py
+          --stft-bin ${STFT_BIN})
+      add_test(NAME py-resampler
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/python/test_resampler.py
+          --resample-bin ${RESAMPLE_BIN})
+
+      # Label tests for easy selection
+      set_tests_properties(py-fft PROPERTIES LABELS "py;validation")
+      set_tests_properties(py-filters PROPERTIES LABELS "py;validation")
+      set_tests_properties(py-stft PROPERTIES LABELS "py;validation")
+      set_tests_properties(py-resampler PROPERTIES LABELS "py;validation")
+
+      # Treat Python scripts' exit code 77 as SKIP in CTest
+      set_tests_properties(py-fft py-filters py-stft py-resampler
+        PROPERTIES SKIP_RETURN_CODE 77)
+
+      # Make Python tests friendlier with sanitizers when enabled
+      set(_vv_py_env "")
+      if(VV_DSP_ENABLE_ASAN)
+        # Reduce false positives from Python allocation model
+        list(APPEND _vv_py_env "ASAN_OPTIONS=detect_leaks=0:disable_coredump=1")
+      endif()
+      if(VV_DSP_ENABLE_UBSAN)
+        list(APPEND _vv_py_env "UBSAN_OPTIONS=print_stacktrace=1")
+      endif()
+      if(_vv_py_env)
+        string(JOIN ";" _vv_py_env_str ${_vv_py_env})
+        set_tests_properties(
+          py-fft py-filters py-stft py-resampler
+          PROPERTIES ENVIRONMENT "${_vv_py_env_str}"
+        )
+      endif()
+    else()
+      message(STATUS "Python3 found, but NumPy/SciPy not importable; skipping Python validation tests. Enable by installing requirements.txt or set VERIFY_WITH_PYTHON=OFF to silence.")
+    endif()
+  else()
+    message(STATUS "Python3 interpreter not found; Python-based verification tests will be skipped by CTest.")
+  endif()
 endif()

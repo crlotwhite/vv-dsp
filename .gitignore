@@ -52,3 +52,4 @@ Testing/
 .vs/
 
 __pycache__/
+.venv/
