@@ -37,14 +37,16 @@ vv_dsp_status vv_dsp_filtfilt_fir(const vv_dsp_real* coeffs,
 
     reflect_pad(input, num_samples, pad, ext);
 
-    // Forward filter
-    vv_dsp_fir_state st_fwd = {0};
-    if (vv_dsp_fir_state_init(&st_fwd, num_taps) != VV_DSP_OK) { free(ext); return VV_DSP_ERROR_INTERNAL; }
+    // Forward filter (stateless direct convolution)
     vv_dsp_real* tmp = (vv_dsp_real*)malloc(ext_n * sizeof(vv_dsp_real));
-    if (!tmp) { vv_dsp_fir_state_free(&st_fwd); free(ext); return VV_DSP_ERROR_INTERNAL; }
-    vv_dsp_status s = vv_dsp_fir_apply(&st_fwd, coeffs, ext, tmp, ext_n);
-    vv_dsp_fir_state_free(&st_fwd);
-    if (s != VV_DSP_OK) { free(tmp); free(ext); return s; }
+    if (!tmp) { free(ext); return VV_DSP_ERROR_INTERNAL; }
+    // y = h (*) x with zero-padding
+    for (size_t i = 0; i < ext_n; ++i) {
+        vv_dsp_real acc = 0;
+        size_t maxk = (i + 1 < num_taps) ? (i + 1) : num_taps;
+        for (size_t k = 0; k < maxk; ++k) acc += coeffs[k] * ext[i - k];
+        tmp[i] = acc;
+    }
 
     // Reverse
     for (size_t i = 0; i < ext_n / 2; ++i) {
@@ -53,14 +55,15 @@ vv_dsp_status vv_dsp_filtfilt_fir(const vv_dsp_real* coeffs,
         tmp[ext_n - 1 - i] = t;
     }
 
-    // Backward filter
-    vv_dsp_fir_state st_bwd = {0};
-    if (vv_dsp_fir_state_init(&st_bwd, num_taps) != VV_DSP_OK) { free(tmp); free(ext); return VV_DSP_ERROR_INTERNAL; }
+    // Backward filter (stateless direct convolution)
     vv_dsp_real* tmp2 = (vv_dsp_real*)malloc(ext_n * sizeof(vv_dsp_real));
-    if (!tmp2) { vv_dsp_fir_state_free(&st_bwd); free(tmp); free(ext); return VV_DSP_ERROR_INTERNAL; }
-    s = vv_dsp_fir_apply(&st_bwd, coeffs, tmp, tmp2, ext_n);
-    vv_dsp_fir_state_free(&st_bwd);
-    if (s != VV_DSP_OK) { free(tmp2); free(tmp); free(ext); return s; }
+    if (!tmp2) { free(tmp); free(ext); return VV_DSP_ERROR_INTERNAL; }
+    for (size_t i = 0; i < ext_n; ++i) {
+        vv_dsp_real acc = 0;
+        size_t maxk = (i + 1 < num_taps) ? (i + 1) : num_taps;
+        for (size_t k = 0; k < maxk; ++k) acc += coeffs[k] * tmp[i - k];
+        tmp2[i] = acc;
+    }
 
     // Reverse back and extract center
     for (size_t i = 0; i < ext_n / 2; ++i) {
