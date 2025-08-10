@@ -29,7 +29,9 @@ vv_dsp_real vv_dsp_cpx_phase(vv_dsp_cpx z) {
 }
 
 vv_dsp_cpx vv_dsp_cpx_from_polar(vv_dsp_real r, vv_dsp_real theta) {
-    vv_dsp_cpx z; z.re = (vv_dsp_real)cos((double)theta) * r; z.im = (vv_dsp_real)sin((double)theta) * r; return z;
+    double st = sin((double)theta);
+    double ct = cos((double)theta);
+    vv_dsp_cpx z; z.re = (vv_dsp_real)(ct * (double)r); z.im = (vv_dsp_real)(st * (double)r); return z;
 }
 
 // ---------- Basic math (real) ----------

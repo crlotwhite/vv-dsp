@@ -11,3 +11,8 @@ target_compile_definitions(vv-dsp-core
   PRIVATE
     $<$<BOOL:${VV_DSP_USE_SIMD}>:VV_DSP_USE_SIMD>
 )
+
+# Link math library on Unix-like systems (required on Linux/Ubuntu CI)
+if(UNIX)
+  target_link_libraries(vv-dsp-core PUBLIC m)
+endif()
