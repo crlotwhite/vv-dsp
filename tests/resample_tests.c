@@ -26,7 +26,7 @@ static int test_interpolate_linear_basic(void) {
 static int test_resampler_up_down_roundtrip(void) {
     const unsigned int Fs = 48000;
     const double f = 1000.0; // 1 kHz tone
-    const size_t N = 480;    // 10ms
+    enum { N = 480 };        // 10ms, enum constant for MSVC constant-expression
     vv_dsp_real x[N];
     for (size_t n = 0; n < N; ++n) {
     x[n] = (vv_dsp_real)sin(VV_DSP_TWO_PI_D * f * (double)n / (double)Fs);
