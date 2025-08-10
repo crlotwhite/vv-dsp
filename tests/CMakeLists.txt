@@ -25,3 +25,8 @@ add_test(NAME vv-dsp-window COMMAND vv-dsp-window-tests)
 add_executable(vv-dsp-resample-tests resample_tests.c)
 target_link_libraries(vv-dsp-resample-tests PRIVATE vv-dsp)
 add_test(NAME vv-dsp-resample COMMAND vv-dsp-resample-tests)
+
+# Filter tests
+add_executable(vv-dsp-filter-tests filter_tests.c)
+target_link_libraries(vv-dsp-filter-tests PRIVATE vv-dsp)
+add_test(NAME vv-dsp-filter COMMAND vv-dsp-filter-tests)

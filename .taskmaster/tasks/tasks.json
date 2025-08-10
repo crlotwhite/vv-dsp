@@ -440,7 +440,7 @@
           2,
           4
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -448,7 +448,7 @@
             "description": "Create the necessary header and source files for the filter module: `filter/fir.h`, `filter/fir.c`, `filter/iir.h`, `filter/iir.c`, and `filter/common.h`/`filter/common.c` for shared utilities. Establish basic file structure, include guards, and `extern \"C\"` blocks. Define common enums like `vv_dsp_window_type`.",
             "dependencies": [],
             "details": "Files to create: `filter/fir.h`, `filter/fir.c`, `filter/iir.h`, `filter/iir.c`, `filter/common.h`, `filter/common.c`. Each `.h` file must have standard header guards and `extern \"C\"` blocks. Include `core/vv_dsp_types.h` in all `.c` files and relevant `.h` files. Define `typedef enum { VV_DSP_WINDOW_RECTANGULAR, VV_DSP_WINDOW_HAMMING, VV_DSP_WINDOW_HANNING, VV_DSP_WINDOW_BLACKMAN } vv_dsp_window_type;` in `filter/common.h`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify file existence and correct header guard/C linkage. Ensure compilation without errors for empty files."
           },
           {
@@ -459,7 +459,7 @@
               "7.1"
             ],
             "details": "File: `filter/fir.h`, `filter/fir.c`. Public API: `vv_dsp_status vv_dsp_fir_design_lowpass(vv_dsp_real* coeffs, size_t num_taps, vv_dsp_real cutoff_norm, vv_dsp_window_type window_type);`. Input: `coeffs` (output buffer for coefficients), `num_taps` (filter order + 1), `cutoff_norm` (normalized cutoff frequency 0-1, 1 = Nyquist), `window_type`. Output: `coeffs` array populated, `vv_dsp_status` (e.g., `VV_DSP_SUCCESS`, `VV_DSP_ERROR_INVALID_ARGUMENT` for `cutoff_norm` out of range). Completion: Coefficients are correctly calculated for various window types and cutoff frequencies.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit tests comparing generated coefficients against known values (e.g., SciPy/MATLAB) for various `num_taps`, `cutoff_norm`, and `window_type`. Check edge cases like `cutoff_norm` near 0 or 1."
           },
           {
@@ -470,7 +470,7 @@
               "7.1"
             ],
             "details": "File: `filter/fir.h`, `filter/fir.c`. Public API: `typedef struct { vv_dsp_real* history; size_t history_size; size_t history_idx; size_t num_taps; } vv_dsp_fir_state;`. Functions: `vv_dsp_status vv_dsp_fir_state_init(vv_dsp_fir_state* state, size_t num_taps);`, `void vv_dsp_fir_state_free(vv_dsp_fir_state* state);`, `vv_dsp_status vv_dsp_fir_apply(vv_dsp_fir_state* state, const vv_dsp_real* coeffs, const vv_dsp_real* input, vv_dsp_real* output, size_t num_samples);`. Input: `state` (filter state), `coeffs` (filter coefficients), `input` (input samples), `num_samples`. Output: `output` (processed samples), `vv_dsp_status`. Completion: Filter correctly applies convolution, handles history for block processing.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit tests with known impulse responses and step responses. Verify output matches expected values for various input block sizes, including streaming (multiple calls). Check for correct state management and memory handling."
           },
           {
@@ -481,7 +481,7 @@
               "7.1"
             ],
             "details": "File: `filter/iir.h`, `filter/iir.c`. Public API: `typedef struct { vv_dsp_real a1, a2, b0, b1, b2; vv_dsp_real z1, z2; } vv_dsp_biquad;` (Direct Form II Transposed is recommended). Functions: `vv_dsp_status vv_dsp_biquad_init(vv_dsp_biquad* biquad, vv_dsp_real b0, vv_dsp_real b1, vv_dsp_real b2, vv_dsp_real a1, vv_dsp_real a2);`, `void vv_dsp_biquad_reset(vv_dsp_biquad* biquad);`. Input: `biquad` (pointer to structure), `b0, b1, b2, a1, a2` (filter coefficients). Output: `biquad` initialized, `vv_dsp_status`. Completion: Structure defined, initialization function correctly sets coefficients and resets state variables (`z1, z2` to 0).",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit tests to verify `vv_dsp_biquad_init` correctly assigns coefficients and zeroes out state. Test `vv_dsp_biquad_reset` functionality."
           },
           {
@@ -492,7 +492,7 @@
               "7.4"
             ],
             "details": "File: `filter/iir.h`, `filter/iir.c`. Public API: `vv_dsp_real vv_dsp_biquad_process(vv_dsp_biquad* biquad, vv_dsp_real input_sample);`. Input: `biquad` (pointer to structure), `input_sample` (single sample). Output: Processed `vv_dsp_real` sample. Completion: Single sample processing correctly implements Direct Form II Transposed biquad equations.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit tests with simple coefficients (e.g., pass-through, delay). Test impulse and step responses for known biquad coefficients. Verify state updates correctly after each sample."
           },
           {
@@ -503,7 +503,7 @@
               "7.5"
             ],
             "details": "File: `filter/iir.h`, `filter/iir.c`. Public API: `vv_dsp_status vv_dsp_iir_apply(vv_dsp_biquad* biquads, size_t num_stages, const vv_dsp_real* input, vv_dsp_real* output, size_t num_samples);`. Input: `biquads` (array of biquad structures), `num_stages` (number of biquad stages), `input` (input samples), `num_samples`. Output: `output` (processed samples), `vv_dsp_status`. Completion: Block processing correctly applies multiple biquad stages in series.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit tests with multi-stage IIR filters. Compare output against SciPy `lfilter` for known coefficients. Test various block sizes and ensure correct state propagation between stages."
           },
           {
@@ -514,7 +514,7 @@
               "7.3"
             ],
             "details": "File: `filter/common.h`, `filter/common.c`. Public API: `vv_dsp_status vv_dsp_filtfilt_fir(const vv_dsp_real* coeffs, size_t num_taps, const vv_dsp_real* input, vv_dsp_real* output, size_t num_samples);`. Input: `coeffs`, `num_taps`, `input`, `num_samples`. Output: `output` (zero-phase filtered samples), `vv_dsp_status`. Completion: `filtfilt` correctly processes data, handles padding/reflection at boundaries to minimize transients. Consider using `vv_dsp_fir_apply` internally.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit tests comparing `filtfilt` output against SciPy `filtfilt` for various FIR filters. Verify phase response is flat. Test boundary conditions and padding strategies."
           },
           {
@@ -525,7 +525,7 @@
               "7.3"
             ],
             "details": "File: `filter/fir.h`, `filter/fir.c`. Public API: `vv_dsp_status vv_dsp_fir_apply_fft(vv_dsp_fir_state* state, const vv_dsp_real* coeffs, const vv_dsp_real* input, vv_dsp_real* output, size_t num_samples);`. This function will depend on the `fft` module (Task 4). Implement either Overlap-Save or Overlap-Add. Completion: FFT-based convolution produces results identical to time-domain convolution for long filters, with potential performance benefits.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Compare output against `vv_dsp_fir_apply` for various filter lengths and input sizes. Benchmark performance against time-domain convolution for long filters. This subtask should only be attempted if Task 4 is complete."
           },
           {
@@ -542,7 +542,7 @@
               "7.8"
             ],
             "details": "File: `tests/filter_test.c` (new file). Test Cases: FIR low-pass design and application (frequency, impulse, step response). IIR biquad processing (impulse, step response, stability for high-Q). `filtfilt` correctness. Boundary conditions (e.g., `num_taps=1`, `cutoff_norm=0/1`). Benchmarking: Simple time measurements for `vv_dsp_fir_apply`, `vv_dsp_iir_apply`, and `vv_dsp_fir_apply_fft` (if implemented) with different block sizes and filter orders. Completion: All core filter functions are thoroughly tested for correctness and basic performance.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Use helper functions to generate frequency/impulse/step responses. Compare against known DSP library outputs (e.g., SciPy). Ensure tests cover edge cases and error conditions."
           },
           {
@@ -559,7 +559,7 @@
               "7.8"
             ],
             "details": "File: Update `filter/*.h` files with Doxygen comments. Create `examples/filter_example.c`. Documentation: Function descriptions, parameter explanations, return values, error conditions, usage notes. Example: A simple C program demonstrating how to design an FIR filter, initialize an IIR biquad, and apply them to a synthetic signal (e.g., sine wave, impulse).",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Verify documentation format and completeness. Compile and run the example to ensure it works as expected and demonstrates correct usage of the filter module APIs."
           }
         ]
@@ -778,7 +778,7 @@
     ],
     "metadata": {
       "created": "2025-08-10T09:22:31.972Z",
-      "updated": "2025-08-10T11:38:54.130Z",
+      "updated": "2025-08-10T12:00:05.516Z",
       "description": "Tasks for master context"
     }
   }

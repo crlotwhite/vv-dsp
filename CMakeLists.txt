@@ -14,6 +14,7 @@ endif()
 
 # Build options
 option(VV_DSP_BUILD_TESTS "Build vv-dsp tests" ON)
+option(VV_DSP_BUILD_EXAMPLES "Build vv-dsp examples" ON)
 option(VV_DSP_USE_SIMD "Enable SIMD optimizations where available" OFF)
 set(VV_DSP_BACKEND_FFT "kissfft" CACHE STRING "FFT backend to use: none|fftw|kissfft")
 set_property(CACHE VV_DSP_BACKEND_FFT PROPERTY STRINGS none fftw kissfft)
@@ -74,4 +75,10 @@ endif()
 if(VV_DSP_BUILD_TESTS)
   enable_testing()
   add_subdirectory(tests)
+endif()
+
+# Examples
+if(VV_DSP_BUILD_EXAMPLES)
+  add_executable(vv-dsp-filter-example examples/filter_example.c)
+  target_link_libraries(vv-dsp-filter-example PRIVATE vv-dsp)
 endif()
