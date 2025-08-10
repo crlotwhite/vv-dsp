@@ -726,7 +726,7 @@
             "description": "adapters/cpp_wrapper.hpp에서 vv::dsp 네임스페이스와 기본 C++ 클래스 구조를 정의합니다",
             "dependencies": [],
             "details": "adapters/cpp_wrapper.hpp 파일 생성하고 vv::dsp 네임스페이스 정의. 모든 C 헤더 파일들을 포함하고, C++ 표준 라이브러리(span, memory, vector) 포함. RAII 기반 클래스들의 기본 구조 정의 - FFTPlanner, STFTProcessor, WindowGenerator, Resampler 등 각 모듈별 래퍼 클래스. 예외 처리를 위한 DSPException 클래스 정의, vv_dsp_status를 C++ 예외로 변환하는 헬퍼 함수 구현",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "헤더 파일이 올바르게 컴파일되고 모든 C 함수들이 접근 가능한지 확인, C++ 표준 호환성 테스트"
           },
           {
@@ -737,7 +737,7 @@
               "10.1"
             ],
             "details": "vv::dsp::Complex 클래스로 vv_dsp_cpx 래퍼 구현, 연산자 오버로딩(+, -, *, /) 제공. vv::dsp::Math 네임스페이스에 정적 함수들로 sum, mean, variance, min/max 래퍼. std::span<const Real> 또는 std::vector<Real>을 받는 템플릿 기반 인터페이스 구현. RAII 방식의 메모리 관리와 자동 타입 변환 지원. strided view를 위한 span 확장 인터페이스 제공",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "C++ STL 컨테이너와의 호환성 확인, 연산자 오버로딩 정확도 테스트, 메모리 관리 검증"
           },
           {
@@ -748,7 +748,7 @@
               "10.2"
             ],
             "details": "vv::dsp::FFTPlanner 클래스로 vv_dsp_fft_plan 래퍼, 생성자에서 플랜 생성, 소멸자에서 자동 해제. forward/backward 메서드로 변환 수행, std::complex<Real> 배열과 호환. vv::dsp::STFT 클래스로 실시간 STFT 처리, process() 메서드로 프레임 단위 처리, overlap-add 기반 reconstruct() 구현. 템플릿 기반으로 다양한 컨테이너 타입 지원, 이동 의미론(move semantics) 활용",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "RAII 기반 자동 메모리 관리 확인, C++ 컨테이너 호환성 테스트, 실시간 처리 성능 검증"
           },
           {
@@ -759,7 +759,7 @@
               "10.3"
             ],
             "details": "vv::dsp::FIRFilter, vv::dsp::IIRFilter 클래스로 필터 상태 관리와 실시간 처리 제공. Resampler 클래스로 polyphase 리샘플러 래퍼, 생성자에서 비율 설정, process() 메서드로 스트리밍 처리. WindowGenerator 클래스로 다양한 윈도우 함수 생성, 팩토리 패턴 적용. 각 클래스는 C++ 이동 의미론과 복사 방지 구현, 상태 기반 실시간 처리 인터페이스 제공",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "필터 상태 관리 정확도 확인, 리샘플링 품질 테스트, 실시간 스트리밍 처리 성능 측정"
           },
           {
@@ -778,7 +778,7 @@
     ],
     "metadata": {
       "created": "2025-08-10T09:22:31.972Z",
-      "updated": "2025-08-10T15:06:42.931Z",
+      "updated": "2025-08-10T15:28:00.222Z",
       "description": "Tasks for master context"
     }
   }

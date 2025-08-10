@@ -1,10 +1,12 @@
 cmake_minimum_required(VERSION 3.15)
 
-project(vv-dsp VERSION 0.1.0 LANGUAGES C)
+project(vv-dsp VERSION 0.1.0 LANGUAGES C CXX)
 
 # C standard and compiler warnings
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if(MSVC)
   add_compile_options(/W4)
