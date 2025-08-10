@@ -575,7 +575,7 @@
           4,
           5
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -583,7 +583,7 @@
             "description": "envelope/cepstrum.h 파일을 생성하고 실켄셰번스 켑스트럼 관련 함수들의 선언을 정의합니다",
             "dependencies": [],
             "details": "envelope/cepstrum.h에서 vv_dsp_rceps (실켄셰번스 켑스트럼 변환), vv_dsp_irceps (역변환) 함수 선언. 복소수 배열과 실수 켑스트럼 배열을 다루는 인터페이스 정의. vv_dsp_real, vv_dsp_cpx, vv_dsp_status 타입 사용. 함수 매개변수로 입력 신호, 출력 버퍼, 신호 길이 등을 포함",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "헤더 파일이 올바르게 컴파일되고 타입 정의가 일관성 있게 작성되었는지 확인"
           },
           {
@@ -594,7 +594,7 @@
               "8.1"
             ],
             "details": "vv_dsp_rceps 함수 구현: FFT를 통한 로그 스펙트럼 계산, 복소로그 연산, IFFT를 통한 켑스트럼 계산. 입력 신호의 크기 스펙트럼에서 로그를 취하고 역변환하여 실켄셰번스 켑스트럼 도출. 0값 처리 및 수치 안정성 확보를 위한 epsilon 추가",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "알려진 신호에 대한 켑스트럼 계산 결과가 NumPy/SciPy의 scipy.signal.cepstrum과 일치하는지 검증"
           },
           {
@@ -605,7 +605,7 @@
               "8.2"
             ],
             "details": "vv_dsp_irceps 함수 구현: 켑스트럼 데이터를 받아 FFT 적용, 지수 함수를 통한 복원, IFFT로 원본 신호 복원. 실켄셰번스 켑스트럼의 역변환 과정으로 exp(FFT(cepstrum))을 계산하여 원본 스펙트럼 복원",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "rceps -> irceps 변환 과정에서 원본 신호의 크기 스펙트럼이 올바르게 복원되는지 검증"
           },
           {
@@ -617,7 +617,7 @@
               "8.3"
             ],
             "details": "vv_dsp_minphase 함수 구현: 입력 신호의 크기 스펙트럼을 보존하면서 최소위상 특성을 갖도록 변환. 실켄셰번스 켑스트럼을 이용한 방법으로 켑스트럼의 causal 부분만 사용하여 최소위상 신호 생성. 위상 응답 최소화와 인과성 보장",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "최소위상 변환 후 크기 스펙트럼이 보존되고, 위상 응답이 최소위상 특성을 만족하는지 확인"
           },
           {
@@ -628,7 +628,7 @@
               "8.4"
             ],
             "details": "로그 스펙트럼 계산 헬퍼 함수들과 위상 언랩핑/랩핑 기능 구현. phase_unwrap, phase_wrap 함수로 위상 연속성 처리. 켑스트럼과 최소위상 변환 모듈의 통합 테스트 작성. 각 함수의 메모리 할당/해제 확인 및 에러 처리 검증",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "전체 envelope 모듈의 기능 통합 테스트, 메모리 누수 검사, 실제 음성 신호에 대한 처리 성능 및 정확도 검증"
           }
         ]
@@ -644,7 +644,7 @@
           2,
           4
         ],
-        "status": "pending",
+        "status": "done",
         "subtasks": [
           {
             "id": 1,
@@ -652,7 +652,7 @@
             "description": "envelope/lpc.h에서 LPC 관련 함수들의 선언과 데이터 구조를 정의합니다",
             "dependencies": [],
             "details": "envelope/lpc.h 파일에서 vv_dsp_levinson, vv_dsp_lpc, vv_dsp_lpspec 함수 선언과 매개변수 정의. LPC 계수를 저장할 구조체와 자기상관 함수 인터페이스 설계. vv_dsp_real, vv_dsp_status 타입 사용하여 일관된 API 구성. 함수들은 입력 신호, 출력 계수, 차수(order) 매개변수를 받도록 설계",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "헤더 파일이 올바르게 컴파일되고 타입 정의가 코어 모듈과 호환되는지 확인"
           },
           {
@@ -663,7 +663,7 @@
               "9.1"
             ],
             "details": "envelope/lpc.c에서 vv_dsp_autocorr 함수 구현: 입력 신호 x[n]에서 R[k] = Σ x[n]x[n-k] (k=0,1,...,p) 계산. 효율적인 시간 영역 계산 또는 FFT 기반 방법 선택 가능. 바이어스/언바이어스 옵션 제공, 윈도우 길이에 따른 정규화 처리. 수치적 안정성을 위한 입력 검증과 오버플로우 방지",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "알려진 신호의 자기상관 함수가 NumPy의 numpy.correlate 결과와 일치하는지 검증"
           },
           {
@@ -674,7 +674,7 @@
               "9.2"
             ],
             "details": "vv_dsp_levinson 함수로 자기상관 계수 R[0]...R[p]에서 LPC 계수 a[1]...a[p] 계산. 순환 알고리즘으로 각 차수별 반사 계수(reflection coefficient) k[i] 계산하고 필터 계수 갱신. 예측 오차 에너지 계산과 수치 안정성 확보. 특이값 처리와 발산 방지를 위한 조건 확인",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Matlab/Octave의 levinson 함수나 scipy.signal.lfilter와 결과 비교, 수치적 안정성 테스트"
           },
           {
@@ -685,7 +685,7 @@
               "9.3"
             ],
             "details": "vv_dsp_lpc 함수로 입력 신호에서 자기상관 계산 -> Levinson-Durbin -> LPC 계수 출력까지 통합 처리. 예측 오차(prediction error) 에너지와 반사 계수들 출력 옵션. 다양한 LPC 차수에 대한 최적 차수 선택 지원. 프리엠퍼시스(pre-emphasis) 필터 적용 옵션과 윈도우 함수 적용",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "음성 신호 샘플에 대한 LPC 분석 결과가 참조 구현(Matlab Signal Processing Toolbox 등)과 일치하는지 확인"
           },
           {
@@ -696,7 +696,7 @@
               "9.4"
             ],
             "details": "vv_dsp_lpspec 함수로 LPC 계수에서 H(ω) = G / (1 - Σa[k]e^(-jωk)) 주파수 응답 계산. FFT를 이용한 효율적인 스펙트럼 계산과 크기/위상 추출. 다양한 주파수 해상도 지원과 선택적 스펙트럴 스무딩. CMakeLists.txt에 LPC 모듈 추가, 전체 envelope 패키지 통합, 종합 테스트와 메모리 최적화 적용",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "LPC 스펙트럴 엔벨로프가 입력 신호의 스펙트럼 특성을 올바르게 근사하는지 검증, 음성 포만트 추정 정확도 평가"
           }
         ]
@@ -778,7 +778,7 @@
     ],
     "metadata": {
       "created": "2025-08-10T09:22:31.972Z",
-      "updated": "2025-08-10T12:00:05.516Z",
+      "updated": "2025-08-10T15:06:42.931Z",
       "description": "Tasks for master context"
     }
   }

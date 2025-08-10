@@ -30,3 +30,11 @@ add_test(NAME vv-dsp-resample COMMAND vv-dsp-resample-tests)
 add_executable(vv-dsp-filter-tests filter_tests.c)
 target_link_libraries(vv-dsp-filter-tests PRIVATE vv-dsp)
 add_test(NAME vv-dsp-filter COMMAND vv-dsp-filter-tests)
+
+# Envelope tests
+add_executable(vv-dsp-envelope-tests envelope_tests.c)
+target_link_libraries(vv-dsp-envelope-tests PRIVATE vv-dsp)
+if(UNIX)
+  target_link_libraries(vv-dsp-envelope-tests PRIVATE m)
+endif()
+add_test(NAME vv-dsp-envelope COMMAND vv-dsp-envelope-tests)
