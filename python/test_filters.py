@@ -3,7 +3,7 @@ import argparse
 import os
 import sys
 
-from common import ensure_numpy_scipy, SKIP_CODE
+from common import ensure_numpy_scipy, SKIP_CODE, read_tolerances, is_verbose
 
 if not ensure_numpy_scipy():
     sys.exit(SKIP_CODE)
@@ -35,6 +35,8 @@ def main():
     args = parser.parse_args()
 
     rng = np.random.default_rng(1)
+    rtol, atol = read_tolerances(args.rtol, args.atol)
+    verbose = is_verbose()
     x = rng.standard_normal(args.n).astype(np.float32)
 
     # FIR compare with scipy firwin + lfilter
@@ -47,7 +49,7 @@ def main():
         os.path.join(os.path.dirname(args.fir_bin), 'vv_dsp_dump_fir_coeffs'),
         '--num-taps', str(num_taps), '--cutoff', str(cutoff), '--win', 'hann',
     ])
-    with open(coeff_path, 'w') as f:
+    with open(coeff_path, 'w', encoding='utf-8') as f:
         f.write("\n".join(coeff_lines) + "\n")
     y_lines = run_cmd([
         args.fir_bin, '--num-taps', str(num_taps), '--cutoff', str(cutoff),
@@ -57,7 +59,14 @@ def main():
 
     h = np.loadtxt(coeff_path)
     y_ref = lfilter(h, [1.0], x)
-    assert_allclose(y, y_ref, rtol=args.rtol, atol=args.atol)
+    try:
+        assert_allclose(y, y_ref, rtol=rtol, atol=atol)
+    except AssertionError as e:
+        if verbose:
+            diff = np.max(np.abs(y - y_ref))
+            print(f"FIR mismatch: max |diff|={diff}")
+            print(e)
+        raise
 
     # IIR: one-pole lowpass in DF2T form
     # y[n] = b0*x[n] + ... - a1*y[n-1] - a2*y[n-2]
@@ -75,7 +84,14 @@ def main():
     y = np.array(list(map(float, y_lines)))
 
     y_ref = lfilter([b0, b1, b2], [1.0, -a1, -a2], x)
-    assert_allclose(y, y_ref, rtol=args.rtol, atol=args.atol)
+    try:
+        assert_allclose(y, y_ref, rtol=rtol, atol=atol)
+    except AssertionError as e:
+        if verbose:
+            diff = np.max(np.abs(y - y_ref))
+            print(f"IIR mismatch: max |diff|={diff}")
+            print(e)
+        raise
 
     print('Filter tests passed')
     return 0

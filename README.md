@@ -22,6 +22,9 @@ ctest --test-dir build --output-on-failure
 - `-DVV_DSP_BACKEND_FFT=none|fftw|kissfft` (default `none`)
 - `-DVV_DSP_SINGLE_FILE=ON|OFF` (default OFF)
 - `-DVERIFY_WITH_PYTHON=ON|OFF` (default OFF) — Enable NumPy/SciPy-based cross-validation tests
+	- Controls for validation tests:
+		- `-DVV_PY_VERBOSE=ON` to increase Python test logging
+		- `-DVV_PY_RTOL=5e-5` and/or `-DVV_PY_ATOL=5e-5` to override tolerances
 
 ## Python-based validation (optional)
 
@@ -53,6 +56,7 @@ Notes:
 
 - If NumPy/SciPy is not importable, CMake will skip registering validation tests. If tests run but Python scripts exit with code 77, CTest will mark them as SKIP.
 - When building with sanitizers (`-DVV_DSP_ENABLE_ASAN=ON` or `-DVV_DSP_ENABLE_UBSAN=ON`), the Python tests set friendly defaults (e.g., `ASAN_OPTIONS=detect_leaks=0`) to avoid noise from Python's allocator. Sanitizers remain enabled for vv-dsp binaries.
+- You can tune tolerances/verbosity from CMake cache variables above; they are passed to tests via environment (VV_PY_RTOL, VV_PY_ATOL, VV_PY_VERBOSE).
 
 Failure interpretation:
 

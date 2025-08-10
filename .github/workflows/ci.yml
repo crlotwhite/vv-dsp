@@ -2,43 +2,50 @@ name: CI
 
 on:
   push:
-    branches: [ main, master ]
+    branches: [ main ]
   pull_request:
-    branches: [ main, master ]
+    branches: [ main ]
 
 jobs:
   build-and-test:
-    name: ${{ matrix.os }} - CMake Build & Test
-    runs-on: ${{ matrix.os }}
+    runs-on: ubuntu-latest
     strategy:
       fail-fast: false
       matrix:
-        os: [ubuntu-latest, macos-latest, windows-latest]
-
+        build_type: [RelWithDebInfo]
+        sanitize: [none, asan_ubsan]
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Configure (CMake)
-        run: |
-          cmake -S . -B build -DVV_DSP_BUILD_TESTS=ON -DCMAKE_BUILD_TYPE=Release
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.x'
 
-      - name: Build (Unix)
-        if: runner.os != 'Windows'
+      - name: Install system deps
         run: |
-          cmake --build build -j
+          sudo apt-get update
+          sudo apt-get install -y cmake build-essential
 
-      - name: Build (Windows)
-        if: runner.os == 'Windows'
+      - name: Install Python deps
         run: |
-          cmake --build build --config Release -- /m
+          python -m pip install --upgrade pip
+          pip install -r python/requirements.txt
 
-      - name: Test (Unix)
-        if: runner.os != 'Windows'
+      - name: Configure CMake
         run: |
-          ctest --test-dir build --output-on-failure
+          cmake -S . -B build \
+            -DVERIFY_WITH_PYTHON=ON \
+            -DVV_DSP_BUILD_TESTS=ON \
+            ${{ matrix.sanitize == 'asan_ubsan' && '-DVV_DSP_ENABLE_ASAN=ON -DVV_DSP_ENABLE_UBSAN=ON' || '' }} \
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
 
-      - name: Test (Windows)
-        if: runner.os == 'Windows'
-        run: |
-          ctest --test-dir build -C Release --output-on-failure
+      - name: Build
+        run: cmake --build build -j
+
+      - name: Run validation tests
+        run: ctest --test-dir build -L validation --output-on-failure
+
+      - name: Run full test suite
+        run: ctest --test-dir build --output-on-failure

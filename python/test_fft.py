@@ -2,7 +2,7 @@
 import argparse
 import sys
 
-from common import ensure_numpy_scipy, SKIP_CODE
+from common import ensure_numpy_scipy, SKIP_CODE, read_tolerances, is_verbose
 
 if not ensure_numpy_scipy():
     sys.exit(SKIP_CODE)
@@ -39,6 +39,9 @@ def main():
     args = parser.parse_args()
 
     rng = np.random.default_rng(0)
+    # Allow env overrides from CTest properties
+    rtol, atol = read_tolerances(args.rtol, args.atol)
+    verbose = is_verbose()
 
     # C2C forward
     x = rng.random(args.n) + 1j * rng.random(args.n)
@@ -55,7 +58,12 @@ def main():
     ])
     y = parse_complex_lines(out_lines)
     y_ref = np.fft.fft(x)
-    assert_allclose(y, y_ref, rtol=args.rtol, atol=args.atol)
+    try:
+        assert_allclose(y, y_ref, rtol=rtol, atol=atol)
+    except AssertionError as e:
+        if verbose:
+            print("C2C forward mismatch:", e)
+        raise
 
     # R2C forward
     xr = rng.random(args.n)
@@ -67,7 +75,12 @@ def main():
     ])
     y = parse_complex_lines(out_lines)
     y_ref = np.fft.rfft(xr)
-    assert_allclose(y, y_ref, rtol=args.rtol, atol=args.atol)
+    try:
+        assert_allclose(y, y_ref, rtol=rtol, atol=atol)
+    except AssertionError as e:
+        if verbose:
+            print("R2C forward mismatch:", e)
+        raise
 
     # C2R inverse (assumes vv-dsp scales inverse by 1/n)
     X = np.fft.rfft(xr)
@@ -84,7 +97,12 @@ def main():
     ])
     y = np.array(list(map(float, out_lines)))
     y_ref = np.fft.irfft(X, n=args.n)
-    assert_allclose(y, y_ref, rtol=args.rtol, atol=args.atol)
+    try:
+        assert_allclose(y, y_ref, rtol=rtol, atol=atol)
+    except AssertionError as e:
+        if verbose:
+            print("C2R inverse mismatch:", e)
+        raise
 
     print('FFT tests passed')
     return 0

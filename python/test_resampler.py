@@ -2,7 +2,7 @@
 import argparse
 import sys
 
-from common import ensure_numpy_scipy, SKIP_CODE
+from common import ensure_numpy_scipy, SKIP_CODE, read_tolerances, is_verbose
 
 if not ensure_numpy_scipy():
     sys.exit(SKIP_CODE)
@@ -32,6 +32,8 @@ def main():
     args = parser.parse_args()
 
     rng = np.random.default_rng(3)
+    rtol, atol = read_tolerances(args.rtol, args.atol)
+    verbose = is_verbose()
     x = rng.standard_normal(args.n).astype(np.float32)
 
     # Up by 2, linear
@@ -52,7 +54,14 @@ def main():
     ref = (1 - frac) * x[i0c] + frac * x[i1c]
     y = np.array(list(map(float, y_lines)))
     L = min(len(ref), len(y))
-    assert_allclose(y[:L], ref[:L], rtol=args.rtol, atol=args.atol)
+    try:
+        assert_allclose(y[:L], ref[:L], rtol=rtol, atol=atol)
+    except AssertionError as e:
+        if verbose:
+            diff = np.max(np.abs(y[:L] - ref[:L]))
+            print(f"Resampler mismatch: max |diff|={diff}")
+            print(e)
+        raise
 
     print('Resampler tests passed')
     return 0

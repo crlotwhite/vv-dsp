@@ -2,7 +2,7 @@
 import argparse
 import sys
 
-from common import ensure_numpy_scipy, SKIP_CODE
+from common import ensure_numpy_scipy, SKIP_CODE, read_tolerances, is_verbose
 
 if not ensure_numpy_scipy():
     sys.exit(SKIP_CODE)
@@ -34,6 +34,8 @@ def main():
     args = parser.parse_args()
 
     rng = np.random.default_rng(2)
+    rtol, atol = read_tolerances(args.rtol, args.atol)
+    verbose = is_verbose()
     x = rng.standard_normal(args.n).astype(np.float32)
 
     # Our CLI generates roundtrip recon normalized per-sample;
@@ -66,11 +68,14 @@ def main():
 
     # Relaxed check; fallback to RMS comparison if needed
     try:
-        assert_allclose(y, ref, rtol=args.rtol, atol=args.atol)
+        assert_allclose(y, ref, rtol=rtol, atol=atol)
     except AssertionError:
+        if verbose:
+            diff = np.max(np.abs(y - ref))
+            print(f"STFT time-domain mismatch: max |diff|={diff}")
         yrms = np.sqrt(np.mean(y**2))
         rrms = np.sqrt(np.mean(ref**2))
-        assert_allclose(yrms, rrms, rtol=5e-2, atol=5e-2)
+        assert_allclose(yrms, rrms, rtol=max(rtol, 5e-2), atol=max(atol, 5e-2))
     print('STFT tests passed')
     return 0
 
