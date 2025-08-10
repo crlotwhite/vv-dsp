@@ -49,6 +49,12 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r python/requirements.txt
 
+      - name: Install Python deps (Windows)
+        if: runner.os == 'Windows'
+        run: |
+          python -m pip install --upgrade pip
+          pip install -r python/requirements.txt
+
       - name: Configure CMake (Linux)
         if: runner.os == 'Linux'
         run: |
@@ -78,8 +84,8 @@ jobs:
         if: runner.os == 'Linux'
         run: ctest --test-dir build -L validation --output-on-failure
 
-      - name: Run validation tests (Windows - reserved)
-        if: runner.os == 'Windows' && false
+      - name: Run validation tests (Windows)
+        if: runner.os == 'Windows'
         run: ctest --test-dir build -C ${{ matrix.build_type }} -L validation --output-on-failure
 
       - name: Run full test suite (Windows)
