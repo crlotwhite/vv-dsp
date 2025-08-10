@@ -76,31 +76,32 @@ int main(void) {
     if (!ok3) { fprintf(stderr, "fftshift/ifftshift test failed\n"); return 1; }
     // STFT/ISTFT roundtrip (simple)
     {
-        const size_t n = 256;
-        vv_dsp_real x[n];
+        // Use compile-time constants to avoid VLA (MSVC compatibility)
+        enum { N_STFT = 256, FFT_SZ = 64, HOP_SZ = 32, TAIL = FFT_SZ };
+        vv_dsp_real x[N_STFT];
         const double PI = 3.14159265358979323846264338327950288;
-        for (size_t i=0;i<n;++i) x[i] = (vv_dsp_real)sin(2.0*PI*(double)i/32.0);
+        for (size_t i=0;i<N_STFT;++i) x[i] = (vv_dsp_real)sin(2.0*PI*(double)i/32.0);
 
-        vv_dsp_stft_params p; p.fft_size = 64; p.hop_size = 32; p.window = VV_DSP_STFT_WIN_HANN;
+        vv_dsp_stft_params p; p.fft_size = FFT_SZ; p.hop_size = HOP_SZ; p.window = VV_DSP_STFT_WIN_HANN;
         vv_dsp_stft* st = NULL;
         if (vv_dsp_stft_create(&p, &st) != VV_DSP_OK) { fprintf(stderr, "stft create failed\n"); return 1; }
-        vv_dsp_cpx X[64];
-        vv_dsp_real y[n+64]; memset(y, 0, sizeof(y));
-        vv_dsp_real norm[n+64]; memset(norm, 0, sizeof(norm));
-        for (size_t start=0; start + p.fft_size <= n + (p.fft_size - p.hop_size); start += p.hop_size) {
-            vv_dsp_real frame[64];
+        vv_dsp_cpx X[FFT_SZ];
+        vv_dsp_real y[N_STFT+TAIL]; memset(y, 0, sizeof(y));
+        vv_dsp_real norm[N_STFT+TAIL]; memset(norm, 0, sizeof(norm));
+        for (size_t start=0; start + p.fft_size <= N_STFT + (p.fft_size - p.hop_size); start += p.hop_size) {
+            vv_dsp_real frame[FFT_SZ];
             for (size_t i=0;i<p.fft_size;++i) {
                 size_t idx = start + i;
-                frame[i] = (idx < n) ? x[idx] : (vv_dsp_real)0;
+                frame[i] = (idx < N_STFT) ? x[idx] : (vv_dsp_real)0;
             }
             if (vv_dsp_stft_process(st, frame, X) != VV_DSP_OK) { fprintf(stderr, "stft process failed\n"); vv_dsp_stft_destroy(st); return 1; }
             if (vv_dsp_stft_reconstruct(st, X, y + start, norm + start) != VV_DSP_OK) { fprintf(stderr, "istft failed\n"); vv_dsp_stft_destroy(st); return 1; }
         }
-        for (size_t i=0;i<n+64;++i) if (norm[i] > (vv_dsp_real)1e-12) y[i] /= norm[i];
+        for (size_t i=0;i<N_STFT+TAIL;++i) if (norm[i] > (vv_dsp_real)1e-12) y[i] /= norm[i];
         // Compare central n samples (ignore start/end transient)
         vv_dsp_real mse = 0;
         size_t count = 0;
-        for (size_t i=0;i<n; ++i) {
+        for (size_t i=0;i<N_STFT; ++i) {
             vv_dsp_real d = x[i] - y[i];
             mse += d*d; count++;
         }
