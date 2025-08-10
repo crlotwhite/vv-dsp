@@ -125,7 +125,7 @@ class STFTProcessor {
 public:
     STFTProcessor() = default;
     explicit STFTProcessor(const vv_dsp_stft_params& p){ reset(p); }
-    void reset(const vv_dsp_stft_params& p){ vv_dsp_stft* raw=nullptr; check_status(vv_dsp_stft_create(&p,&raw), "vv_dsp_stft_create"); h_.reset(raw);}    
+    void reset(const vv_dsp_stft_params& p){ vv_dsp_stft* raw=nullptr; check_status(vv_dsp_stft_create(&p,&raw), "vv_dsp_stft_create"); h_.reset(raw);}
     bool valid() const noexcept { return bool(h_); }
     vv_dsp_status process(const Real* in, Complex* out){ return vv_dsp_stft_process(h_.get(), in, reinterpret_cast<vv_dsp_cpx*>(out)); }
     vv_dsp_status reconstruct(const Complex* in, Real* out_add, Real* norm_add){ return vv_dsp_stft_reconstruct(h_.get(), reinterpret_cast<const vv_dsp_cpx*>(in), out_add, norm_add); }
@@ -145,7 +145,7 @@ class Resampler {
 public:
     Resampler() = default;
     Resampler(unsigned num, unsigned den){ reset(num, den); }
-    void reset(unsigned num, unsigned den){ auto* raw = vv_dsp_resampler_create(num, den); if(!raw) throw DSPException("vv_dsp_resampler_create"); h_.reset(raw);}    
+    void reset(unsigned num, unsigned den){ auto* raw = vv_dsp_resampler_create(num, den); if(!raw) throw DSPException("vv_dsp_resampler_create"); h_.reset(raw);}
     void set_ratio(unsigned num, unsigned den){ if(vv_dsp_resampler_set_ratio(h_.get(), num, den)!=0) throw DSPException("vv_dsp_resampler_set_ratio"); }
     void set_quality(bool use_sinc, unsigned taps){ if(vv_dsp_resampler_set_quality(h_.get(), use_sinc?1:0, taps)!=0) throw DSPException("vv_dsp_resampler_set_quality"); }
     size_t process(std::span<const Real> in, std::span<Real> out){ size_t out_n=0; if(vv_dsp_resampler_process_real(h_.get(), in.data(), in.size(), out.data(), out.size(), &out_n)!=0) throw DSPException("vv_dsp_resampler_process_real"); return out_n; }
