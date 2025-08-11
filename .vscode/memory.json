@@ -1,0 +1,45 @@
+{"type":"entity","name":"vv-dsp","entityType":"project","observations":["C99 기반의 디지털 신호 처리(DSP) 라이브러리","모듈형, 포터블, 테스트 가능한 구조로 설계됨","버전 0.1.0, MIT 라이선스","GitHub 저장소: crlotwhite/vv-dsp","CMake 기반 빌드 시스템 사용","다중 플랫폼 지원 (Linux, Windows MSVC, macOS)","현재 작업 디렉터리: /home/noel/vv-dsp","빌드 디렉터리가 이미 존재하고 구성됨","최근 커밋 해시: 71566e2 (HEAD -> main)","VS Code에서 .vscode/mcp.json 파일 편집 중","다양한 빌드 태스크 설정됨 (Debug, Release, Test 등)","Savitzky-Golay 관련 테스트가 활발히 실행됨"]}
+{"type":"entity","name":"core_module","entityType":"module","observations":["기본 수학 연산 및 DSP 유틸리티 제공","복소수 연산 (add, mul, conj, abs, phase)","배열 기반 통계 함수 (sum, mean, var, min, max)","argmin/argmax 인덱스 찾기 기능","vv_dsp_real 타입 사용 (float 또는 double)"]}
+{"type":"entity","name":"spectral_module","entityType":"module","observations":["FFT/IFFT 기능 제공","STFT (Short-Time Fourier Transform) 구현","DCT (Discrete Cosine Transform) 지원","CZT (Chirp Z-Transform) 기능","Hilbert 변환 및 해석 신호 생성","fftshift/ifftshift 유틸리티","위상 래핑 기능"]}
+{"type":"entity","name":"filter_module","entityType":"module","observations":["FIR 필터 설계 및 적용","IIR 필터 구현","Savitzky-Golay 필터 (최근 추가됨)","FFT 기반 고속 컨볼루션","제로페이즈 필터링 (filtfilt)","다양한 윈도우 함수 지원 (Hamming, Hanning, Blackman)"]}
+{"type":"entity","name":"fft_backend_system","entityType":"system","observations":["플러그인 가능한 FFT 백엔드 아키텍처","지원 백엔드: none, fftw, kissfft","기본값은 kissfft","R2C, C2R, C2C 변환 지원","나이브 DFT 구현 포함 (baseline)"]}
+{"type":"entity","name":"python_validation","entityType":"testing_system","observations":["NumPy/SciPy 기반 크로스 검증","Python 3 인터프리터 필요","tolerance 조정 가능 (VV_PY_RTOL, VV_PY_ATOL)","CTest와 통합된 테스트 러너","새니타이저와 호환되는 환경 설정","requirements.txt에 numpy, scipy만 필요","test_*.py 파일들이 각 모듈별로 존재","CLI 도구들과 상호작용하여 결과 비교","환경 변수로 tolerance 및 verbose 설정 가능","exit code 77은 SKIP으로 처리됨"]}
+{"type":"entity","name":"cmake_build_system","entityType":"build_system","observations":["CMake 3.15+ 요구","C99 및 C++20 표준 사용","다양한 빌드 옵션 제공","SIMD 최적화 지원 (VV_DSP_USE_SIMD)","단일 파일 아말감 빌드 옵션","AddressSanitizer/UBSanitizer 지원","IPO/LTO 최적화 옵션","umbrella 인터페이스 타겟 vv-dsp 제공","모든 모듈 라이브러리를 자동으로 링크","조건부 모듈 컴파일 지원","MSVC 특별 정의: _USE_MATH_DEFINES, _CRT_SECURE_NO_WARNINGS","Unity 빌드 옵션 제공","인터프로시저럴 최적화 (IPO/LTO) 지원"]}
+{"type":"entity","name":"savitzky_golay_filter","entityType":"algorithm","observations":["다항식 기반 스무딩/미분 필터","Gram 다항식을 사용한 폐형식 구현","경계 처리 모드: reflect, constant, nearest, wrap","도함수 차수 및 다항식 차수 조정 가능","샘플 간격 델타 지원","최근 구현됨 (커밋 b5f24a0)"]}
+{"type":"entity","name":"mfcc_features","entityType":"feature_extraction","observations":["Mel 스케일 변환 지원","MFCC (Mel-Frequency Cepstral Coefficients) 구현","음성 및 오디오 분석용","features 모듈의 일부","최근 추가됨 (커밋 29977c7)"]}
+{"type":"entity","name":"audio_io","entityType":"io_system","observations":["WAV 파일 읽기/쓰기 기능","VV_DSP_ENABLE_AUDIO_IO 플래그로 제어","오디오 처리 워크플로우 지원","최근 추가됨 (커밋 cb8077e)"]}
+{"type":"entity","entityType":"module","name":"resample_module","observations":["리샘플링 및 레이트 변환 기능","업샘플링 및 다운샘플링 지원","Python 검증 테스트 포함"]}
+{"type":"entity","entityType":"module","name":"envelope_module","observations":["신호 엔벨로프 추출 기능","진폭 및 에너지 추적","DSP 신호 버스트 감지 용도"]}
+{"type":"entity","entityType":"module","name":"window_module","observations":["다양한 윈도우 함수 구현","Hann, Hamming, Blackman 등 지원","STFT 및 필터링에 사용","최근 추가 윈도우 함수 구현"]}
+{"type":"entity","entityType":"module","name":"adapters_module","observations":["다른 라이브러리와의 연동 인터페이스","데이터 형식 변환 및 어댑터 패턴"]}
+{"type":"entity","entityType":"development_status","name":"recent_updates","observations":["최근 CMake 설정 업데이트 및 수학 연산 개선","MSVC 호환성 작업 진행","코드 스타일 정리 및 가독성 향상","최근 10개 커밋에서 주요 기능 추가","테스트 시스템 및 빌드 구성 지속 개선"]}
+{"type":"entity","entityType":"development_tools","name":"cli_tools","observations":["tools 디렉터리에 다양한 CLI 도구 포함","dump_fft, dump_fir, dump_iir, dump_stft 등","Python 검증에서 사용되는 비교 툴","벤치마크 및 디버깅 용도"]}
+{"type":"entity","entityType":"testing_strategy","name":"comprehensive_testing","observations":["C 기반 단위 테스트","Python 기반 크로스 검증","CTest 통합 테스트 러너","valgrind 메모리 창 감지 지원","새니타이저 통합 테스트","CTest 라벨 시스템 사용: py, validation","테스트 선택적 실행 가능 (-R 패턴)","메모리 검사용 valgrind 설정 포함","새니타이저 친화적 환경 변수 설정","빌드 후 자동 테스트 실행 태스크들"]}
+{"type":"relation","from":"vv-dsp","to":"core_module","relationType":"contains"}
+{"type":"relation","from":"vv-dsp","to":"spectral_module","relationType":"contains"}
+{"type":"relation","from":"vv-dsp","to":"filter_module","relationType":"contains"}
+{"type":"relation","from":"vv-dsp","to":"cmake_build_system","relationType":"uses"}
+{"type":"relation","from":"vv-dsp","to":"python_validation","relationType":"validated_by"}
+{"type":"relation","from":"spectral_module","to":"fft_backend_system","relationType":"depends_on"}
+{"type":"relation","from":"filter_module","to":"fft_backend_system","relationType":"uses"}
+{"type":"relation","from":"filter_module","to":"savitzky_golay_filter","relationType":"implements"}
+{"type":"relation","from":"spectral_module","to":"mfcc_features","relationType":"supports"}
+{"type":"relation","from":"vv-dsp","to":"audio_io","relationType":"optionally_includes"}
+{"type":"relation","from":"cmake_build_system","to":"python_validation","relationType":"integrates"}
+{"type":"relation","from":"python_validation","to":"spectral_module","relationType":"validates"}
+{"type":"relation","from":"python_validation","to":"filter_module","relationType":"validates"}
+{"type":"relation","from":"core_module","to":"spectral_module","relationType":"provides_foundation_for"}
+{"type":"relation","from":"core_module","to":"filter_module","relationType":"provides_foundation_for"}
+{"type":"relation","from":"vv-dsp","relationType":"contains","to":"resample_module"}
+{"type":"relation","from":"vv-dsp","relationType":"contains","to":"envelope_module"}
+{"type":"relation","from":"vv-dsp","relationType":"contains","to":"window_module"}
+{"type":"relation","from":"vv-dsp","relationType":"contains","to":"adapters_module"}
+{"type":"relation","from":"window_module","relationType":"used_by","to":"spectral_module"}
+{"type":"relation","from":"window_module","relationType":"used_by","to":"filter_module"}
+{"type":"relation","from":"python_validation","relationType":"validates","to":"resample_module"}
+{"type":"relation","from":"cli_tools","relationType":"supports","to":"python_validation"}
+{"type":"relation","from":"comprehensive_testing","relationType":"encompasses","to":"python_validation"}
+{"type":"relation","from":"vv-dsp","relationType":"developed_with","to":"cli_tools"}
+{"type":"relation","from":"vv-dsp","relationType":"follows","to":"comprehensive_testing"}
+{"type":"relation","from":"cmake_build_system","relationType":"supports","to":"comprehensive_testing"}
+{"type":"relation","from":"recent_updates","relationType":"improves","to":"vv-dsp"}
