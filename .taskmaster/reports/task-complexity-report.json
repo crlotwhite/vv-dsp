@@ -1,0 +1,53 @@
+{
+	"meta": {
+		"generatedAt": "2025-08-11T06:27:48.693Z",
+		"tasksAnalyzed": 5,
+		"totalTasks": 20,
+		"analysisCount": 5,
+		"thresholdScore": 5,
+		"projectName": "Taskmaster",
+		"usedResearch": false
+	},
+	"complexityAnalysis": [
+		{
+			"taskId": 15,
+			"taskTitle": "Implement Extended Window Functions (Flattop, Kaiser, Tukey, etc.)",
+			"complexityScore": 5,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Implement the `vv_dsp_window_bartlett_f` and `vv_dsp_window_bartlett_d` functions in `src/core/window.c`, following the existing pattern for window functions. Ensure correct calculation for `N` samples and handle edge cases like `N=1` or `N=2`. Update `include/vv_dsp/window.h` with the new function declarations. Then, implement `vv_dsp_window_bohman_f` and `vv_dsp_window_bohman_d` similarly.",
+			"reasoning": "This task involves implementing several new window functions. While the overall pattern for adding new functions to `window.c` and `window.h` is established, each function requires careful implementation of its mathematical formula, handling of parameters (e.g., Kaiser's beta, Tukey's alpha), and ensuring both `float` and `double` precision variants. The number of functions (7-8) and the need for comprehensive testing against SciPy, including edge cases and numerical tolerances, contribute to moderate complexity. Planck-taper and Kaiser windows are more involved than simpler ones."
+		},
+		{
+			"taskId": 17,
+			"taskTitle": "Implement WAV Audio File I/O Utilities",
+			"complexityScore": 9,
+			"recommendedSubtasks": 8,
+			"expansionPrompt": "Create the new `audio` directory under `include/vv_dsp` and `src`, and add `vv_dsp_wav.h` and `vv_dsp_wav.c` respectively. Update `src/CMakeLists.txt` to include the new `audio` module. Define the basic function signatures for `vv_dsp_wav_read` and `vv_dsp_wav_write` in `vv_dsp_wav.h` using `vv_dsp_status` for return types.",
+			"reasoning": "This task is highly complex due to the dual implementation requirement: a `libsndfile` shim and a custom WAV parser/writer. The custom implementation, especially handling 24-bit packed PCM and the conversion between interleaved WAV data and planar `vv_dsp_real` buffers (de-interleaving on read, interleaving on write), is non-trivial and prone to subtle bugs. Robust error handling for various file I/O scenarios is critical. Furthermore, the CMake integration for conditional compilation and linking `libsndfile` adds significant build system complexity. Comprehensive roundtrip testing is also a demanding aspect."
+		},
+		{
+			"taskId": 18,
+			"taskTitle": "Implement Hilbert Transform and Analytic Signal Utilities",
+			"complexityScore": 7,
+			"recommendedSubtasks": 6,
+			"expansionPrompt": "Create `include/vv_dsp/spectral/hilbert.h` and `src/spectral/hilbert.c`. Define the function signatures for `vv_dsp_hilbert_analytic_f` and `vv_dsp_hilbert_analytic_d`. Implement the basic structure for `vv_dsp_hilbert_analytic_f`, including calls to `vv_dsp_fft_r2c_f` and `vv_dsp_fft_c2r_f`, and the allocation of intermediate complex buffers. Focus on correctly constructing the frequency-domain Hilbert transform filter.",
+			"reasoning": "The core `vv_dsp_hilbert_analytic` implementation using FFT is moderately complex, requiring precise frequency-domain filter construction and complex number arithmetic. However, the most challenging aspect is the robust implementation of phase unwrapping for `vv_dsp_instantaneous_phase`, which needs to handle `2*PI` jumps and noisy signals reliably. The task leverages the existing FFT module, which simplifies some aspects, but the numerical accuracy and cross-validation against SciPy for all components make it a significant effort."
+		},
+		{
+			"taskId": 19,
+			"taskTitle": "Implement Savitzky–Golay Filter Utilities",
+			"complexityScore": 8,
+			"recommendedSubtasks": 7,
+			"expansionPrompt": "Create `include/vv_dsp/filter/savgol.h` and `src/filter/savgol.c`. Define the `vv_dsp_savgol_mode` enum and the main `vv_dsp_savgol_f` and `vv_dsp_savgol_d` function signatures. Implement the initial input validation checks for `window_length`, `polyorder`, and `deriv`, returning appropriate `vv_dsp_status` codes for invalid inputs.",
+			"reasoning": "The primary complexity of this task lies in the kernel precomputation, which involves solving a least-squares problem, typically using the pseudo-inverse of a Vandermonde matrix. This requires robust linear algebra implementation. Additionally, careful handling of edge conditions using the 'reflect' mode and extensive input validation contribute to the complexity. Comprehensive numerical parity testing against `scipy.signal.savgol_filter` is crucial and demanding."
+		},
+		{
+			"taskId": 20,
+			"taskTitle": "Implement Mel filterbank and MFCC feature extraction",
+			"complexityScore": 9,
+			"recommendedSubtasks": 8,
+			"expansionPrompt": "Create `include/vv_dsp/features/mel.h` and `src/features/mel.c`. Define the `vv_dsp_mel_variant` enum and the function signatures for `vv_dsp_hz_to_mel_f/d` and `vv_dsp_mel_to_hz_f/d`. Implement these conversion functions, ensuring numerical accuracy and handling of edge cases (e.g., zero frequency).",
+			"reasoning": "This task involves implementing a multi-stage feature extraction pipeline. The generation of triangular Mel filterbank weights, including different variants (HTK/Slaney) and mapping to FFT bins, requires precise numerical implementation. The overall pipeline involves careful data flow and memory management between the STFT input, filterbank application, logarithm, and final DCT. Strong dependencies on existing STFT and DCT modules mean correct integration is crucial. The testing strategy is highly demanding, requiring comprehensive parity checks against `librosa` across various parameters and signal types. Explicit mention of SIMD optimization also adds to the complexity."
+		}
+	]
+}

@@ -845,7 +845,62 @@
           12
         ],
         "priority": "low",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Core Non-Parameterized Window Functions",
+            "description": "Implement the `bartlett`, `bohman`, `cosine`, and `planck-taper` window functions. Each function must have both single (`float`) and double (`double`) precision variants.",
+            "dependencies": [],
+            "details": "Implement `vv_dsp_window_bartlett_f/d`, `vv_dsp_window_bohman_f/d`, `vv_dsp_window_cosine_f/d`, and `vv_dsp_window_planck_taper_f/d` in `src/dsp/window.c`. Adhere to the existing function signature pattern `void vv_dsp_window_<name>_f(size_t N, float* output)`. Ensure proper handling of edge cases for `N=0` (return immediately) and `N=1` (output[0] = 1.0f).",
+            "status": "pending",
+            "testStrategy": "Initial manual verification of small N values (e.g., N=2, N=3) to ensure basic correctness before comprehensive testing."
+          },
+          {
+            "id": 2,
+            "title": "Implement Parameterized Window Functions",
+            "description": "Implement the `flattop`, `kaiser`, and `tukey` window functions, supporting their respective parameters. Each function must have both single (`float`) and double (`double`) precision variants.",
+            "dependencies": [],
+            "details": "Implement `vv_dsp_window_flattop_f/d`, `vv_dsp_window_kaiser_f/d`, and `vv_dsp_window_tukey_f/d` in `src/dsp/window.c`. The function signatures should include the relevant parameter, e.g., `void vv_dsp_window_kaiser_f(size_t N, double beta, float* output)`. Ensure proper handling of edge cases for `N=0` (return immediately) and `N=1` (output[0] = 1.0f). Research the specific parameter definitions for each window (e.g., Kaiser's beta, Tukey's alpha) to ensure correct implementation.",
+            "status": "pending",
+            "testStrategy": "Initial manual verification with common parameter values and small N to check for obvious errors."
+          },
+          {
+            "id": 3,
+            "title": "Update Header Declarations and Project Documentation",
+            "description": "Add declarations for all newly implemented window functions to `include/vv_dsp/dsp/window.h` and update the project's documentation with details on each new window function.",
+            "dependencies": [
+              "15.1",
+              "15.2"
+            ],
+            "details": "For each new window function (bartlett, bohman, cosine, planck-taper, flattop, kaiser, tukey), add its `_f` and `_d` declarations to `include/vv_dsp/dsp/window.h`, following the existing style and order. Additionally, update the project's documentation (e.g., a dedicated `docs/` section or markdown file) to describe each new window function, its purpose, parameters, and any specific characteristics or common use cases.",
+            "status": "pending",
+            "testStrategy": "Compile the library to ensure no header conflicts or missing declarations. Review documentation for clarity and completeness."
+          },
+          {
+            "id": 4,
+            "title": "Develop Unit Tests for Non-Parameterized Window Functions",
+            "description": "Create comprehensive unit tests for the `bartlett`, `bohman`, `cosine`, and `planck-taper` window functions.",
+            "dependencies": [
+              "15.1",
+              "15.3"
+            ],
+            "details": "Add new `TEST_CASE` blocks to `tests/dsp/window_tests.c` for each of the non-parameterized window functions. For each function, include tests for both `float` and `double` precision variants. Test various `N` values, including `N=1`, `N=2`, and typical larger sizes (e.g., 10, 64, 128). Utilize the Python-based verification harness (Task 11) to generate reference data from `scipy.signal.windows` for numerical comparison, ensuring results are within defined numerical tolerances.",
+            "status": "pending",
+            "testStrategy": "Run `ctest` to execute all new window tests. Verify that all tests pass and that numerical accuracy meets expectations against SciPy references."
+          },
+          {
+            "id": 5,
+            "title": "Develop Unit Tests for Parameterized Window Functions",
+            "description": "Create comprehensive unit tests for the `flattop`, `kaiser`, and `tukey` window functions, covering various parameter values.",
+            "dependencies": [
+              "15.2",
+              "15.3"
+            ],
+            "details": "Add new `TEST_CASE` blocks to `tests/dsp/window_tests.c` for each of the parameterized window functions. For each function, include tests for both `float` and `double` precision variants. Test various `N` values (including `N=1`, `N=2`, and typical larger sizes) and, critically, test with multiple representative parameter values (e.g., different `beta` values for Kaiser, different `alpha` values for Tukey). Utilize the Python-based verification harness (Task 11) to generate reference data from `scipy.signal.windows` for numerical comparison, ensuring results are within defined numerical tolerances.",
+            "status": "pending",
+            "testStrategy": "Run `ctest` to execute all new window tests. Pay close attention to tests with varying parameters to ensure correct behavior across the parameter range. Verify numerical accuracy against SciPy references."
+          }
+        ]
       },
       {
         "id": 16,
@@ -873,7 +928,80 @@
           2
         ],
         "priority": "low",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Module Scaffolding and Public API",
+            "description": "Create `include/vv_dsp/audio/wav.h` and `src/audio/wav.c`. Define public API: vv_dsp_wav_read, vv_dsp_wav_write, vv_dsp_wav_info; use vv_dsp_status and vv_dsp_real; planar channel buffers API.",
+            "details": "",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 17
+          },
+          {
+            "id": 2,
+            "title": "CMake Integration and Build Option",
+            "description": "Add CMake option VV_DSP_ENABLE_AUDIO_IO (OFF by default). Conditionally add src/audio to build, install headers, and wire tests/examples under this option.",
+            "details": "",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 17
+          },
+          {
+            "id": 3,
+            "title": "Custom WAV Parser (Read-side)",
+            "description": "Implement minimal custom WAV parser: parse RIFF/WAVE, fmt, data, optional chunks; support PCM16, packed PCM24, float32; validate headers; store channels, sample_rate, bit_depth, frames.",
+            "details": "",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 17
+          },
+          {
+            "id": 4,
+            "title": "Read Path: Deinterleave and Convert",
+            "description": "Implement streaming-safe read: deinterleave interleaved samples into planar vv_dsp_real buffers; convert PCM16/PCM24/float32 to vv_dsp_real with proper scaling; support partial reads and large files.",
+            "details": "",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 17
+          },
+          {
+            "id": 5,
+            "title": "Write Path: Interleave and Emit",
+            "description": "Implement writer: interleave planar buffers, emit WAV headers, support PCM16, packed PCM24, float32; dithering/truncation for integer formats; correct chunk sizes and alignment.",
+            "details": "",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 17
+          },
+          {
+            "id": 6,
+            "title": "Optional libsndfile Adapter",
+            "description": "Optional libsndfile backend: add CMake find_package and link; when available, implement alternate code path with identical public API and runtime selection.",
+            "details": "",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 17
+          },
+          {
+            "id": 7,
+            "title": "Robust Error Handling and Cleanup",
+            "description": "Map all I/O and format errors to vv_dsp_status codes; add helper for human-readable messages; ensure resource cleanup on failure paths.",
+            "details": "",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 17
+          },
+          {
+            "id": 8,
+            "title": "Tests and Example Utility",
+            "description": "Add CTest roundtrip tests across formats/channels; fuzz/sanitizer-friendly cases; add basic CLI/example utility for manual smoke tests.",
+            "details": "",
+            "status": "pending",
+            "dependencies": [],
+            "parentTaskId": 17
+          }
+        ]
       },
       {
         "id": 18,
@@ -889,7 +1017,53 @@
           12
         ],
         "priority": "medium",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Module Setup and `vv_dsp_hilbert_analytic` Skeleton",
+            "description": "Create the necessary header and source files for the Hilbert transform module. Define the `vv_dsp_hilbert_analytic` function signature and implement basic input validation. Set up the framework for FFT plan creation and destruction, and allocate temporary buffers required for the frequency domain operations.",
+            "dependencies": [],
+            "details": "1. Create `include/vv_dsp/spectral/hilbert.h` and `src/spectral/hilbert.c`.\n2. Include `vv_dsp/types.h`, `vv_dsp/spectral/fft.h`, and `vv_dsp/math/complex.h`.\n3. Define the `vv_dsp_hilbert_analytic` function signature: `int vv_dsp_hilbert_analytic(const vv_dsp_real* input, size_t N, vv_dsp_cpx* analytic_output)`.\n4. Implement initial input validation (e.g., `input`, `analytic_output` not NULL, `N > 0`).\n5. Integrate `vv_dsp_fft_plan_create` for real-to-complex FFT and complex-to-complex IFFT, and `vv_dsp_fft_plan_destroy`.\n6. Allocate dynamic memory for intermediate complex arrays (e.g., FFT output, filtered spectrum) using `vv_dsp_malloc` and `vv_dsp_free`.",
+            "status": "pending",
+            "testStrategy": "Basic unit tests to ensure function can be called without crashing and handles invalid inputs gracefully (e.g., NULL pointers, N=0)."
+          },
+          {
+            "id": 2,
+            "title": "Implement Core `vv_dsp_hilbert_analytic` (FFT Filtering)",
+            "description": "Implement the primary FFT-based method for computing the analytic signal. This involves performing a real-to-complex FFT, constructing and applying the frequency-domain Hilbert filter, and then performing a complex-to-complex IFFT.",
+            "dependencies": [],
+            "details": "1. Execute a real-to-complex FFT on the `input` signal using `vv_dsp_fft_execute`.\n2. Construct the frequency-domain Hilbert transform filter `H`:\n    - `H[0] = 1`\n    - `H[k] = 2` for `1 <= k < N/2`\n    - `H[N/2] = 1` (if `N` is even, for the Nyquist component)\n    - `H[k] = 0` for `N/2 < k < N` (negative frequencies).\n3. Perform element-wise complex multiplication of the FFT output with the constructed filter `H`.\n4. Execute a complex-to-complex IFFT on the filtered spectrum to obtain the `analytic_output`.\n5. Ensure correct scaling of the IFFT output based on the FFT library's conventions (e.g., divide by `N`).\n6. The O(N^2) direct convolution fallback is considered a future enhancement; focus solely on the FFT method for this subtask.",
+            "status": "pending",
+            "testStrategy": "Unit tests with simple sinusoids (e.g., `sin(2*pi*f*t)`) to verify that the real part of the output matches the input and the imaginary part is a 90-degree phase-shifted version. Test with various `N` values (even/odd, small/medium)."
+          },
+          {
+            "id": 3,
+            "title": "Implement `vv_dsp_instantaneous_phase` with Robust Unwrapping",
+            "description": "Implement the function to calculate the instantaneous phase from a complex analytic signal, including a robust phase unwrapping algorithm to ensure continuity.",
+            "dependencies": [],
+            "details": "1. Define the `vv_dsp_instantaneous_phase` function signature: `int vv_dsp_instantaneous_phase(const vv_dsp_cpx* analytic_input, size_t N, vv_dsp_real* phase_output)`.\n2. For each sample `i` from `0` to `N-1`, calculate the principal value of the phase using `atan2(analytic_input[i].imag, analytic_input[i].real)` and store it in `phase_output[i]`.\n3. Implement a robust phase unwrapping algorithm. A common approach is to iterate through the `phase_output` array, detect jumps greater than `PI` (or less than `-PI`), and add/subtract multiples of `2*PI` to subsequent samples to maintain continuity.",
+            "status": "pending",
+            "testStrategy": "Unit tests for `vv_dsp_instantaneous_phase`:\n- Test with a simple sinusoid to verify correct phase calculation.\n- Test with a signal whose phase crosses the `+/- PI` boundary multiple times to ensure robust unwrapping (e.g., a linearly increasing phase that wraps around)."
+          },
+          {
+            "id": 4,
+            "title": "Implement `vv_dsp_instantaneous_frequency`",
+            "description": "Implement the function to compute the instantaneous frequency from an unwrapped phase signal, derived from its discrete derivative.",
+            "dependencies": [],
+            "details": "1. Define the `vv_dsp_instantaneous_frequency` function signature: `int vv_dsp_instantaneous_frequency(const vv_dsp_real* unwrapped_phase_input, size_t N, double sample_rate, vv_dsp_real* freq_output)`.\n2. For `i = 0`, set `freq_output[0]` to 0 or handle appropriately (e.g., copy `freq_output[1]`).\n3. For `i` from `1` to `N-1`, calculate the discrete derivative: `delta_phase = unwrapped_phase_input[i] - unwrapped_phase_input[i-1]`.\n4. Scale the `delta_phase` by `sample_rate / (2 * PI)` to convert from radians/sample to Hz: `freq_output[i] = delta_phase * (sample_rate / (2.0 * M_PI))` (assuming `M_PI` is available from `math.h`).",
+            "status": "pending",
+            "testStrategy": "Unit tests for `vv_dsp_instantaneous_frequency`:\n- Test with a signal having a constant frequency (linear unwrapped phase) to verify constant frequency output.\n- Test with a chirp signal (quadratic unwrapped phase) to verify linearly increasing/decreasing frequency output."
+          },
+          {
+            "id": 5,
+            "title": "Comprehensive Unit Testing and Integration",
+            "description": "Develop and integrate comprehensive unit tests for all implemented Hilbert transform and analytic signal utility functions, covering various signal types, edge cases, and numerical accuracy.",
+            "dependencies": [],
+            "details": "1. Create `tests/hilbert_tests.c` following the existing CTest and `vv_dsp` testing patterns (e.g., `fft_tests.c`, `czt_tests.c`).\n2. Implement unit tests for `vv_dsp_hilbert_analytic`:\n    - Test with pure sinusoids (e.g., `sin(t)`, `cos(t)`) to verify real and imaginary parts.\n    - Test with amplitude-modulated (AM) signals.\n    - Test with frequency-modulated (FM) chirps.\n    - Verify correct handling of `N` (even/odd, small values like 1, 2, 3, 4).\n    - Check scaling and numerical accuracy against expected analytical results.\n3. Implement unit tests for `vv_dsp_instantaneous_phase`:\n    - Test with signals that cause phase wrapping and verify unwrapping correctness.\n    - Test with noisy signals to assess robustness.\n4. Implement unit tests for `vv_dsp_instantaneous_frequency`:\n    - Test with signals having known instantaneous frequencies (e.g., constant frequency, linear chirp).\n    - Verify the output frequency values are accurate.\n5. Add the new test file to the CTest build system (e.g., `CMakeLists.txt`).",
+            "status": "pending",
+            "testStrategy": "Utilize CTest for automated testing. Define acceptable error thresholds for numerical comparisons. Cross-validate results against known analytical solutions or established DSP libraries if available (e.g., SciPy's `hilbert` function for reference)."
+          }
+        ]
       },
       {
         "id": 19,
@@ -902,7 +1076,64 @@
           2
         ],
         "priority": "low",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Module Setup and Initial Input Validation for Savitzky-Golay",
+            "description": "Create the new module files `include/vv_dsp/filter/savgol.h` and `src/filter/savgol.c`. Define the `vv_dsp_savgol_mode` enum to specify boundary handling (e.g., `VV_DSP_SAVGOL_MODE_REFLECT`, `VV_DSP_SAVGOL_MODE_CONSTANT`, `VV_DSP_SAVGOL_MODE_NEAREST`, `VV_DSP_SAVGOL_MODE_WRAP`). Declare the primary `vv_dsp_savgol` function in the header. Implement the function skeleton in the C file, ensuring it returns `vv_dsp_status`. Implement all specified input validation checks: `window_length` must be odd and greater than `polyorder`, `polyorder` must be non-negative, `deriv` must be non-negative and less than or equal to `polyorder`, and `window_length` must be less than or equal to `N`. Return `VV_DSP_ERROR_INVALID_ARGUMENT` for any invalid inputs, consistent with `vv_dsp_status` error handling patterns found in `include/vv_dsp/common.h` and existing filter modules.",
+            "dependencies": [],
+            "details": "Add `savgol.c` to `src/filter/CMakeLists.txt` to ensure it's part of the build. Use `vv_dsp_real` for all floating-point parameters and calculations. Ensure the `vv_dsp_savgol_mode` enum is clearly defined with appropriate values for different boundary conditions.",
+            "status": "pending",
+            "testStrategy": "Write basic unit tests to verify that `vv_dsp_savgol` correctly identifies and returns `VV_DSP_ERROR_INVALID_ARGUMENT` for various invalid parameter combinations (e.g., even `window_length`, `polyorder` < 0, `deriv` > `polyorder`, `window_length` > `N`)."
+          },
+          {
+            "id": 2,
+            "title": "Implement Savitzky-Golay Kernel Precomputation",
+            "description": "Develop the core logic to compute the Savitzky-Golay convolution kernel. This involves implementing necessary basic matrix operations (e.g., matrix multiplication, transpose, and pseudo-inverse calculation, potentially via QR decomposition or direct formula for small matrices) as helper functions within `savgol.c`. The kernel computation itself will involve constructing the Vandermonde matrix based on `window_length` and `polyorder`, computing its pseudo-inverse, and then extracting the coefficients corresponding to the specified `deriv` order. All matrix operations and coefficient calculations must use `vv_dsp_real`.",
+            "dependencies": [
+              "19.1"
+            ],
+            "details": "Given the absence of a dedicated matrix library in the codebase, these matrix operations will need to be implemented from scratch within `savgol.c` or as static helper functions. Focus on numerical stability for the pseudo-inverse calculation. Consider the specific formula for Savitzky-Golay coefficients derived from the pseudo-inverse of the Vandermonde matrix. Memory for temporary matrices should be managed using `vv_dsp_malloc` and `vv_dsp_free`.",
+            "status": "pending",
+            "testStrategy": "Create isolated unit tests for the kernel precomputation logic. Verify the generated kernels for simple cases (e.g., `window_length=5, polyorder=2, deriv=0` for smoothing, and `deriv=1` for differentiation) against known reference values (e.g., from SciPy's `savgol_filter` or analytical derivations)."
+          },
+          {
+            "id": 3,
+            "title": "Core Convolution and Derivative Scaling",
+            "description": "Implement the central convolution algorithm that applies the precomputed Savitzky-Golay kernel to the input signal `y`. This subtask should focus on the 'valid' part of the convolution, assuming that any necessary padding for edge handling will be applied to the input signal before this step. After convolution, apply the `delta` scaling factor for differentiation, where `output[i] *= (1.0 / pow(delta, deriv))`. Ensure all calculations are performed using `vv_dsp_real`.",
+            "dependencies": [
+              "19.2"
+            ],
+            "details": "The convolution should be a standard discrete convolution. Pay attention to indexing and loop bounds to correctly apply the kernel. The `pow` function from `math.h` (or `cmath` for C++) should be used for `pow(delta, deriv)`, ensuring `vv_dsp_real` compatibility (e.g., `powf` or `pow`).",
+            "status": "pending",
+            "testStrategy": "Test the convolution and scaling logic with a pre-defined kernel and a simple input signal (e.g., a constant or linear ramp) to verify correct output values, assuming no edge effects for now. Verify the derivative scaling factor is applied correctly."
+          },
+          {
+            "id": 4,
+            "title": "Implement Savitzky-Golay Edge Handling",
+            "description": "Implement the boundary condition handling based on the `vv_dsp_savgol_mode` parameter. This involves creating a padded version of the input signal `y` before convolution. Implement padding logic for each specified mode (e.g., 'reflect' for symmetric extension, 'constant' for padding with a constant value, 'nearest' for padding with the nearest edge value, 'wrap' for circular padding). The convolution from Subtask 3 will then operate on this padded signal, and the relevant central portion will be copied to the `output` buffer.",
+            "dependencies": [
+              "19.3"
+            ],
+            "details": "Allocate memory for the padded signal using `vv_dsp_malloc` and ensure it is freed using `vv_dsp_free` after use. The padding length will depend on the `window_length`. Ensure the padding logic correctly mirrors SciPy's behavior for 'reflect' mode and other common padding strategies.",
+            "status": "pending",
+            "testStrategy": "Develop specific unit tests for each `vv_dsp_savgol_mode`. Use short signals and verify the padded signal content for each mode. Then, test the full `vv_dsp_savgol` function with these modes and simple signals to ensure correct output at the boundaries."
+          },
+          {
+            "id": 5,
+            "title": "Final Integration, Memory Management, and Comprehensive Unit Testing",
+            "description": "Integrate all previously developed components (input validation, kernel precomputation, edge handling, convolution, and derivative scaling) into the final `vv_dsp_savgol` function. Ensure robust memory management, using `vv_dsp_malloc` and `vv_dsp_free` for all temporary buffers (e.g., kernel coefficients, padded signal). Create a new test file `tests/savgol_tests.c` and develop comprehensive unit tests using CTest. Tests should cover basic functionality with analytically predictable signals (constant, linear, quadratic, cubic polynomials) for both smoothing (`deriv=0`) and differentiation (`deriv=1`, `deriv=2`). Verify numerical parity and accuracy against a reliable reference (e.g., SciPy's `savgol_filter` outputs). Test all `vv_dsp_savgol_mode` options thoroughly.",
+            "dependencies": [
+              "19.1",
+              "19.2",
+              "19.3",
+              "19.4"
+            ],
+            "details": "Pay close attention to error paths and ensure all allocated memory is freed on success or failure. The test suite should include edge cases for `N`, `window_length`, and `polyorder`. Consider testing with both `float` and `double` precision by conditionally compiling the tests if `VV_DSP_USE_DOUBLE` can be toggled for testing.",
+            "status": "pending",
+            "testStrategy": "Implement a comprehensive CTest suite. Include tests for various signal types (sinusoids, ramps, impulses), different `window_length`/`polyorder`/`deriv` combinations, and all `vv_dsp_savgol_mode` options. Compare outputs against pre-calculated reference values or a known good implementation (e.g., Python's SciPy). Define acceptable numerical error thresholds."
+          }
+        ]
       },
       {
         "id": 20,
@@ -920,7 +1151,64 @@
           13
         ],
         "priority": "low",
-        "subtasks": []
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Module Setup and Mel Scale Conversion Functions",
+            "description": "Create the new module files `include/vv_dsp/features/mel.h` and `src/features/mel.c`. Implement the core Mel scale conversion functions `vv_dsp_hz_to_mel(float hz)` and `vv_dsp_mel_to_hz(float mel)`. Define the `vv_dsp_mel_variant` enumeration (e.g., `VV_DSP_MEL_VARIANT_HTK`, `VV_DSP_MEL_VARIANT_SLANEY`) to specify the Mel scale formula variant.",
+            "dependencies": [],
+            "details": "Ensure `vv_dsp_hz_to_mel` and `vv_dsp_mel_to_hz` provide accurate conversions. Use `float` for all calculations. Follow existing `vv-dsp` conventions for header guards, function naming, and basic input validation (e.g., non-negative frequency).",
+            "status": "pending",
+            "testStrategy": "Unit tests for `vv_dsp_hz_to_mel` and `vv_dsp_mel_to_hz` to verify accuracy across a wide range of frequencies, including edge cases (e.g., 0 Hz), and ensure `hz_to_mel(mel_to_hz(x))` returns `x` within numerical tolerance."
+          },
+          {
+            "id": 2,
+            "title": "Triangular Mel Filterbank Generation",
+            "description": "Implement `vv_dsp_mel_filterbank_create(size_t n_fft, size_t n_mels, float sample_rate, float fmin, float fmax, vv_dsp_mel_variant variant, float** out_filterbank_weights, size_t* out_num_filters, size_t* out_filter_len)`. This function will calculate the Mel points, convert them back to Hertz, and then generate the triangular filter weights based on the specified `n_fft`, `sample_rate`, frequency range, and Mel variant. The `out_filterbank_weights` should be allocated dynamically and represent the filterbank matrix.",
+            "dependencies": [
+              "20.1"
+            ],
+            "details": "The filterbank weights should be normalized. Pay close attention to the indexing and bin mapping from FFT bins to Mel bins. Implement robust error handling for invalid parameters (e.g., `n_mels` too large, `fmin` > `fmax`, `n_fft` too small). Ensure proper memory allocation for `out_filterbank_weights` using `vv_dsp_malloc` and document its expected deallocation.",
+            "status": "pending",
+            "testStrategy": "Unit tests to verify the shape and values of the generated filterbank weights for various `n_fft`, `n_mels`, `sample_rate`, `fmin`, `fmax`, and `variant` combinations. Compare against known reference implementations (e.g., `librosa`) for small, predictable inputs."
+          },
+          {
+            "id": 3,
+            "title": "Log-Mel Spectrogram Computation",
+            "description": "Develop a function, e.g., `vv_dsp_compute_log_mel_spectrogram(const float* power_spectrogram, size_t num_frames, size_t n_fft_bins, const float* filterbank_weights, size_t n_mels, float log_epsilon, float* out_log_mel_spectrogram)`, that takes a power spectrogram (output from STFT, Task 5), applies the pre-generated Mel filterbank weights, and then takes the logarithm (natural log). A small `log_epsilon` should be added to the Mel energies before taking the logarithm to avoid `log(0)`.",
+            "dependencies": [
+              "20.2"
+            ],
+            "details": "The power spectrogram is typically `(n_fft/2 + 1)` bins per frame. The function should iterate through each frame, apply the filterbank (effectively a weighted sum or matrix multiplication), and then apply the logarithm. Consider the memory layout of the input `power_spectrogram` (e.g., contiguous frames).",
+            "status": "pending",
+            "testStrategy": "Unit tests with synthetic power spectrograms and known filterbank weights to verify correct log-Mel spectrogram output. Compare against `librosa` for a full pipeline test using the Task 11 verification harness."
+          },
+          {
+            "id": 4,
+            "title": "MFCC Coefficient Computation (DCT-II and Liftering)",
+            "description": "Implement the main MFCC computation function, `vv_dsp_mfcc(const float* log_mel_spectrogram, size_t num_frames, size_t n_mels, size_t num_mfcc_coeffs, vv_dsp_dct_type dct_type, float lifter_coeff, float* out_mfcc_coeffs)`. This function will take the log-mel spectrogram and apply the Discrete Cosine Transform (DCT-II, from Task 13) to produce the MFCCs. Include an optional 'lifter' coefficient for post-DCT processing, applying the lifter to the resulting MFCCs.",
+            "dependencies": [
+              "20.3"
+            ],
+            "details": "For each frame of the `log_mel_spectrogram`, call `vv_dsp_dct_forward` with `VV_DSP_DCT_TYPE_II`. Ensure `num_mfcc_coeffs` is less than or equal to `n_mels`. Implement the liftering formula: `mfcc[i] = mfcc[i] * (1 + (lifter_coeff / 2) * sin(M_PI * i / lifter_coeff))` for `i > 0`. Handle the case where `lifter_coeff` is 0 (no liftering).",
+            "status": "pending",
+            "testStrategy": "Unit tests for `vv_dsp_mfcc` with synthetic log-mel spectrograms to verify correct DCT application and liftering. Cross-validate against `librosa` using the Task 11 harness for end-to-end MFCC computation."
+          },
+          {
+            "id": 5,
+            "title": "MFCC Context Management, Pipeline Integration, and Optimization",
+            "description": "Design and implement a context structure (e.g., `vv_dsp_mfcc_plan_t`) to manage pre-computed resources like the Mel filterbank and potentially DCT plans. Implement `vv_dsp_mfcc_init(...)` to allocate and initialize this context, including filterbank creation, and `vv_dsp_mfcc_destroy(...)` for proper cleanup. Create a high-level `vv_dsp_mfcc_process(...)` function that takes a power spectrogram and a context, orchestrating the entire log-Mel and MFCC pipeline. Ensure all configurable parameters (`sample_rate`, `n_mels`, `fmin`, `fmax`, `n_fft`, `dct_type`, `lifter`) are properly exposed and handled. Review the entire module for SIMD optimization opportunities and ensure robust error handling across all public API functions.",
+            "dependencies": [
+              "20.1",
+              "20.2",
+              "20.3",
+              "20.4"
+            ],
+            "details": "The `vv_dsp_mfcc_plan_t` should encapsulate the `filterbank_weights` and potentially a `vv_dsp_dct_plan_t` if beneficial for performance. The `vv_dsp_mfcc_process` function should handle the full flow from power spectrogram input to MFCC output, managing intermediate buffers. Prioritize SIMD-friendly loop structures, especially in the filterbank application and DCT input/output handling. All public functions should return `vv_dsp_status` for error reporting.",
+            "status": "pending",
+            "testStrategy": "Comprehensive integration tests using the Task 11 Python harness to compare `vv-dsp` MFCC outputs against `librosa` for various audio inputs and parameter configurations. Test memory leak detection with Valgrind for `vv_dsp_mfcc_init`/`vv_dsp_mfcc_destroy` cycles. Performance benchmarks to evaluate SIMD effectiveness."
+          }
+        ]
       }
     ],
     "metadata": {
