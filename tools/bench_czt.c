@@ -1,13 +1,23 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <time.h>
 #include <math.h>
 #include "vv_dsp/vv_dsp.h"
 
+#if defined(_WIN32)
+#include <windows.h>
+static double now_sec(void){
+    LARGE_INTEGER freq, ctr;
+    QueryPerformanceFrequency(&freq);
+    QueryPerformanceCounter(&ctr);
+    return (double)ctr.QuadPart / (double)freq.QuadPart;
+}
+#else
+#include <time.h>
 static double now_sec(void){
     struct timespec ts; clock_gettime(CLOCK_MONOTONIC, &ts);
     return (double)ts.tv_sec + (double)ts.tv_nsec * 1e-9;
 }
+#endif
 
 int main(int argc, char** argv){
     size_t N = 1024, M = 1024, iters = 50; double fs = 48000.0, f0 = 1000.0, bw = 2000.0;
