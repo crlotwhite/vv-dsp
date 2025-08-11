@@ -1,6 +1,7 @@
 add_library(vv-dsp-core
   core.c
   stats.c
+  framing.c
 )
 
 target_include_directories(vv-dsp-core

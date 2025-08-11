@@ -447,6 +447,84 @@ vv_dsp_status vv_dsp_cross_correlation(const vv_dsp_real* x, size_t nx,
 									   vv_dsp_real* r, size_t r_len);
 /** @} */
 
+/** @name Signal Framing and Overlap-Add
+ * @{
+ */
+
+/**
+ * @brief Calculate the number of frames for a given signal and framing parameters
+ * @param signal_len Total number of samples in the signal
+ * @param frame_len Length of each frame (e.g., FFT size)
+ * @param hop_len Number of samples to advance between frames
+ * @param center If non-zero, use centered framing mode
+ * @return Number of frames that will be generated
+ *
+ * @details For centered framing (center != 0), the number of frames is signal_len / hop_len.
+ * For non-centered framing (center == 0), it is 1 + (signal_len - frame_len) / hop_len
+ * when signal_len >= frame_len, otherwise 0.
+ *
+ * @code{.c}
+ * size_t num_frames = vv_dsp_get_num_frames(1024, 256, 128, 1);
+ * @endcode
+ */
+size_t vv_dsp_get_num_frames(size_t signal_len, size_t frame_len, size_t hop_len, int center);
+
+/**
+ * @brief Extract a single frame from an input signal
+ * @param signal Pointer to the input signal buffer
+ * @param signal_len Total number of samples in the signal
+ * @param frame_buffer Pre-allocated output buffer of size frame_len
+ * @param frame_len The length of each frame (e.g., FFT size)
+ * @param hop_len The number of samples to advance between frames
+ * @param frame_index The index of the frame to extract
+ * @param center If non-zero, use centered framing with reflection padding
+ * @param window Optional pointer to a windowing array of size frame_len. If NULL, no windowing is applied
+ * @return VV_DSP_OK on success, error code on failure
+ *
+ * @details Extracts a single, optionally windowed and padded, frame from an input signal.
+ * For centered framing, reflection padding is used for frames near signal boundaries.
+ * If a window is provided, it is applied via element-wise multiplication.
+ *
+ * @code{.c}
+ * vv_dsp_real signal[1024];
+ * vv_dsp_real frame[256];
+ * vv_dsp_real window[256];
+ * // Fill signal and window...
+ * int status = vv_dsp_fetch_frame(signal, 1024, frame, 256, 128, 0, 1, window);
+ * @endcode
+ */
+vv_dsp_status vv_dsp_fetch_frame(const vv_dsp_real* signal, size_t signal_len,
+                                 vv_dsp_real* frame_buffer, size_t frame_len,
+                                 size_t hop_len, size_t frame_index, int center,
+                                 const vv_dsp_real* window);
+
+/**
+ * @brief Add a frame into an output buffer using overlap-add
+ * @param frame The processed frame to be added back
+ * @param output_signal The buffer for the reconstructed signal
+ * @param output_len The total length of the output signal buffer
+ * @param frame_len Length of the frame
+ * @param hop_len Number of samples to advance between frames
+ * @param frame_index The index of the frame
+ * @return VV_DSP_OK on success, error code on failure
+ *
+ * @details Adds a frame into an output buffer at the correct position, overlapping
+ * with previous frames. This assumes that a proper synthesis window has already
+ * been applied to the frame if necessary for perfect reconstruction.
+ *
+ * @code{.c}
+ * vv_dsp_real processed_frame[256];
+ * vv_dsp_real output[1024];
+ * // Process frame...
+ * int status = vv_dsp_overlap_add(processed_frame, output, 1024, 256, 128, 0);
+ * @endcode
+ */
+vv_dsp_status vv_dsp_overlap_add(const vv_dsp_real* frame, vv_dsp_real* output_signal,
+                                 size_t output_len, size_t frame_len, size_t hop_len,
+                                 size_t frame_index);
+
+/** @} */
+
 /** @} */ // End of core_group
 
 #ifdef __cplusplus

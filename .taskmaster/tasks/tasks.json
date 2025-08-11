@@ -1216,7 +1216,7 @@
         "description": "Implement core signal framing functions, including frame extraction (`vv_dsp_fetch_frame`) and reconstruction (`vv_dsp_overlap_add`), to support STFT and real-time audio processing workflows.",
         "details": "Create a new module, `core/framing.h` and `core/framing.c`, to encapsulate signal framing logic. This is a foundational component for any short-time analysis or processing, such as STFT.\n\n**Core Functions to Implement:**\n\n1.  **`int vv_dsp_fetch_frame(const vv_dsp_real* signal, size_t signal_len, vv_dsp_real* frame_buffer, size_t frame_len, size_t hop_len, size_t frame_index, bool center, const vv_dsp_real* window)`**\n    *   **Purpose:** Extracts a single, optionally windowed and padded, frame from an input signal.\n    *   **Parameters:**\n        *   `signal`: Pointer to the input signal buffer.\n        *   `signal_len`: Total number of samples in the signal.\n        *   `frame_buffer`: Pre-allocated output buffer of size `frame_len`.\n        *   `frame_len`: The length of each frame (e.g., FFT size).\n        *   `hop_len`: The number of samples to advance between frames.\n        *   `frame_index`: The index of the frame to extract.\n        *   `center`: If `true`, the signal is conceptually padded at the beginning and end so that frame `t` is centered at sample `t * hop_len`. Use reflection padding for this.\n        *   `window`: Optional pointer to a windowing array of size `frame_len`. If not NULL, apply this window to the extracted frame.\n    *   **Implementation:** Calculate the sample start position based on `frame_index`, `hop_len`, and the `center` flag. Handle boundary conditions carefully, especially for centered framing which requires padding (e.g., `np.pad(..., mode='reflect')` behavior). Copy the data into `frame_buffer` and apply the window if provided.\n\n2.  **`int vv_dsp_overlap_add(const vv_dsp_real* frame, vv_dsp_real* output_signal, size_t output_len, size_t frame_len, size_t hop_len, size_t frame_index)`**\n    *   **Purpose:** Adds a frame into an output buffer at the correct position, overlapping with previous frames.\n    *   **Parameters:**\n        *   `frame`: The processed frame to be added back.\n        *   `output_signal`: The buffer for the reconstructed signal.\n        *   `output_len`: The total length of the output signal buffer.\n        *   `frame_len`, `hop_len`, `frame_index`: Parameters matching those used for `vv_dsp_fetch_frame`.\n    *   **Implementation:** Calculate the start position in `output_signal` for the given `frame_index`. Add the samples from `frame` to the `output_signal` buffer. This function assumes that a proper synthesis window has already been applied to the frame if necessary for perfect reconstruction.\n\n3.  **`size_t vv_dsp_get_num_frames(size_t signal_len, size_t frame_len, size_t hop_len, bool center)`**\n    *   **Purpose:** A helper utility to calculate the total number of frames that will be generated for a given signal and parameters.\n    *   **Implementation:** If `center` is true, the number of frames is `signal_len / hop_len`. If `false`, it is `1 + (signal_len - frame_len) / hop_len` for `signal_len >= frame_len`.",
         "testStrategy": "Develop a comprehensive CTest suite and leverage the Python verification harness for cross-validation.\n\n**Unit Tests (CTest):**\n\n1.  **`vv_dsp_get_num_frames` Verification:**\n    *   Test with various combinations of `signal_len`, `frame_len`, and `hop_len` for both `center=true` and `center=false` modes. Compare results against manually calculated, known-correct values.\n\n2.  **`vv_dsp_fetch_frame` Verification:**\n    *   **Non-Centered:** For `center=false`, extract the first, a middle, and the last possible frame from a known signal (e.g., an impulse or a ramp) and verify the contents are exactly correct.\n    *   **Centered:** For `center=true`, verify the first frame is correctly padded from the left (using reflection) and the last frame is correctly padded from the right.\n    *   **Windowing:** Provide a known window (e.g., Hann from Task 5) and verify that the output frame is the element-wise product of the raw frame and the window.\n    *   **Edge Cases:** Test with `signal_len < frame_len` to ensure graceful handling.\n\n3.  **`vv_dsp_overlap_add` and Reconstruction Loop:**\n    *   Create a test that performs a full analysis-synthesis loop: generate a signal, frame it using `vv_dsp_fetch_frame`, and reconstruct it using `vv_dsp_overlap_add`.\n    *   Verify near-perfect reconstruction when no processing is done and an appropriate constant-overlap-add (COLA) compliant window is used (e.g., Hann window with 50% or 75% overlap).\n    *   Check that the output signal has the correct length and that energy is conserved.\n\n**Cross-Validation (Python Harness - Task 11):**\n\n*   Generate a test signal in Python.\n*   Use `librosa.util.frame` to generate reference frames.\n*   Call the C function `vv_dsp_fetch_frame` via the harness and compare its output frame-by-frame against the `librosa` reference, ensuring they are numerically identical or within a very tight tolerance.\n*   Implement a reference overlap-add in Python/NumPy and compare the C implementation's reconstructed output against it.",
-        "status": "pending",
+        "status": "done",
         "dependencies": [
           2,
           3,
@@ -1233,7 +1233,7 @@
             "description": "Initialize the new module files `core/framing.h` and `core/framing.c`. Define the function signatures for all public framing utilities in the header. Implement the `vv_dsp_get_num_frames` helper function to accurately calculate the total number of frames for both centered and non-centered modes.",
             "dependencies": [],
             "details": "The implementation of `vv_dsp_get_num_frames` must correctly handle the two distinct calculation methods based on the `center` flag. For `center=false`, the formula is `1 + (signal_len - frame_len) / hop_len` (for `signal_len >= frame_len`, otherwise 0). For `center=true`, the formula is `signal_len / hop_len`. Edge cases, such as `signal_len` being smaller than `frame_len`, must be handled gracefully.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "A preliminary unit test will be created to verify the frame count calculation against manually computed values for various combinations of signal length, frame length, and hop length for both `center` modes."
           },
           {
@@ -1244,7 +1244,7 @@
               "21.1"
             ],
             "details": "This implementation focuses on the `center=false` path. The starting sample for `frame_index` `i` is `i * hop_len`. The implementation must ensure it does not read past the end of the input `signal` buffer. If a window is provided, it should be applied via element-wise multiplication to the copied frame data.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit tests will verify correct frame extraction for various frame indices within a signal. Tests will also confirm that the windowing is applied correctly by comparing the output to a pre-calculated windowed frame."
           },
           {
@@ -1255,7 +1255,7 @@
               "21.2"
             ],
             "details": "For `center=true`, frame `t` is centered at sample `t * hop_len`. The start sample is `t * hop_len - frame_len / 2`. When this calculation results in a negative index or an index beyond `signal_len`, reflection padding must be used to fill the `frame_buffer`. The padding logic should mimic the behavior of `numpy.pad(..., mode='reflect')`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Develop specific unit tests for centered framing. These tests must target the boundary conditions: the very first frame, the last frame, and frames that partially overlap the signal edges, to ensure the reflection padding is implemented correctly."
           },
           {
@@ -1266,7 +1266,7 @@
               "21.1"
             ],
             "details": "The function must calculate the starting sample position in the `output_signal` buffer using the `frame_index` and `hop_len`. The calculation for the start position is `frame_index * hop_len`. It will then iterate through the input `frame` and add each sample to the corresponding sample in the `output_signal`. The implementation must perform bounds checking to avoid writing past the end of the `output_signal` buffer.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit tests will involve creating a known output signal, then adding a sequence of frames (e.g., frames of all ones) and verifying that the resulting buffer contains the correct accumulated values in the overlapping regions."
           },
           {
@@ -1280,7 +1280,7 @@
               "21.4"
             ],
             "details": "The CTest suite (`tests/framing_tests.c`) should cover a wide range of parameters: various signal, frame, and hop lengths; odd and even frame lengths; and edge cases like `hop_len > frame_len`. The Python script will generate test vectors (input signal, parameters) and expected outputs (frames, reconstructed signal) using `librosa.util.frame` and `librosa.util.pad_center`, which the CTest can then read and use for verification.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "The primary test strategy is cross-validation. The C implementation must produce numerically identical results to the Python reference implementation for a battery of test cases, ensuring correctness and adherence to the specified padding and framing logic."
           }
         ]
@@ -1856,7 +1856,7 @@
     ],
     "metadata": {
       "created": "2025-08-10T09:22:31.972Z",
-      "updated": "2025-08-11T15:08:47.115Z",
+      "updated": "2025-08-11T15:35:44.779Z",
       "description": "Tasks for master context"
     }
   }
