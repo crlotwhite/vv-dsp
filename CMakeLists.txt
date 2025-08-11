@@ -11,6 +11,8 @@ set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 if(MSVC)
   add_compile_options(/W4)
+  # Define math constants and disable CRT security warnings for MSVC
+  add_compile_definitions(_USE_MATH_DEFINES _CRT_SECURE_NO_WARNINGS)
 else()
   add_compile_options(-Wall -Wextra -Wpedantic)
 endif()
