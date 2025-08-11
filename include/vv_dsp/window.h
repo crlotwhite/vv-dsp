@@ -1,3 +1,13 @@
+/**
+ * @file window.h
+ * @brief Window functions for signal processing
+ * @ingroup window_group
+ *
+ * This module provides various window functions commonly used in signal processing
+ * for spectral analysis, filtering, and other DSP applications. All windows are
+ * computed with symmetric properties suitable for FFT analysis.
+ */
+
 #ifndef VV_DSP_WINDOW_H
 #define VV_DSP_WINDOW_H
 
@@ -7,23 +17,82 @@ extern "C" {
 
 #include "vv_dsp/vv_dsp_types.h"
 
-// Window functions API
-// All functions fill `out[0..N-1]` with window coefficients.
-// Returns VV_DSP_OK on success. Error codes:
-//  - VV_DSP_ERROR_NULL_POINTER if out == NULL
-//  - VV_DSP_ERROR_INVALID_SIZE if N == 0
+/**
+ * @defgroup window_group Window Functions
+ * @brief Window functions for spectral analysis and filtering
+ *
+ * Window functions are used to reduce spectral leakage in FFT analysis and
+ * to shape the impulse response of filters. This module provides commonly
+ * used windows with symmetric properties.
+ *
+ * All window functions:
+ * - Fill output array `out[0..N-1]` with window coefficients
+ * - Return VV_DSP_OK on success
+ * - Use symmetric formulation: w[n] = w[N-1-n]
+ * - Have unit peak value (maximum = 1.0)
+ *
+ * @{
+ */
 
-// Rectangular (boxcar) window: w[n] = 1.0
+/**
+ * @brief Rectangular (boxcar) window
+ * @param N Window length
+ * @param out Output array for window coefficients
+ * @return VV_DSP_OK on success, error code on failure
+ *
+ * @details Generates w[n] = 1.0 for all n. This is the simplest window
+ * with no tapering, equivalent to no windowing at all.
+ *
+ * **Properties:**
+ * - Best frequency resolution
+ * - Highest spectral leakage
+ * - Rectangular time domain shape
+ */
 vv_dsp_status vv_dsp_window_boxcar(size_t N, vv_dsp_real* out);
 
-// Hann window (symmetric): w[n] = 0.5 - 0.5*cos(2*pi*n/(N-1))
+/**
+ * @brief Hann window (raised cosine)
+ * @param N Window length
+ * @param out Output array for window coefficients
+ * @return VV_DSP_OK on success, error code on failure
+ *
+ * @details Generates w[n] = 0.5 - 0.5*cos(2π*n/(N-1))
+ *
+ * **Properties:**
+ * - Good compromise between resolution and leakage
+ * - Smooth tapering to zero at edges
+ * - Very commonly used for general-purpose analysis
+ */
 vv_dsp_status vv_dsp_window_hann(size_t N, vv_dsp_real* out);
 
-// Hamming window (symmetric): w[n] = 0.54 - 0.46*cos(2*pi*n/(N-1))
+/**
+ * @brief Hamming window
+ * @param N Window length
+ * @param out Output array for window coefficients
+ * @return VV_DSP_OK on success, error code on failure
+ *
+ * @details Generates w[n] = 0.54 - 0.46*cos(2π*n/(N-1))
+ *
+ * **Properties:**
+ * - Better sidelobe suppression than Hann
+ * - Non-zero values at edges (0.08)
+ * - Slightly worse frequency resolution than Hann
+ */
 vv_dsp_status vv_dsp_window_hamming(size_t N, vv_dsp_real* out);
 
-// Blackman window (symmetric):
-// w[n] = 0.42 - 0.5*cos(2*pi*n/(N-1)) + 0.08*cos(4*pi*n/(N-1))
+/**
+ * @brief Blackman window
+ * @param N Window length
+ * @param out Output array for window coefficients
+ * @return VV_DSP_OK on success, error code on failure
+ *
+ * @details Generates w[n] = 0.42 - 0.5*cos(2π*n/(N-1)) + 0.08*cos(4π*n/(N-1))
+ *
+ * **Properties:**
+ * - Excellent sidelobe suppression
+ * - Wider main lobe than Hann/Hamming
+ * - Good for detecting weak signals near strong ones
+ */
 vv_dsp_status vv_dsp_window_blackman(size_t N, vv_dsp_real* out);
 
 // 4-term Blackman-Harris (symmetric):
