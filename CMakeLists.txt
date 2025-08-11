@@ -101,12 +101,12 @@ if(VV_DSP_USE_FASTAPPROX)
     GIT_TAG master
   )
   FetchContent_MakeAvailable(fastapprox)
-  
+
   # Add fastapprox include directory
   set(FASTAPPROX_INCLUDE_DIR ${fastapprox_SOURCE_DIR}/fastapprox/src)
   add_library(fastapprox INTERFACE)
   target_include_directories(fastapprox INTERFACE ${FASTAPPROX_INCLUDE_DIR})
-  
+
   message(STATUS "vv-dsp: FastApprox enabled")
   add_compile_definitions(VV_DSP_USE_FASTAPPROX=1)
 endif()
@@ -216,7 +216,7 @@ endif()
 if(VV_DSP_BUILD_EXAMPLES)
   add_executable(vv-dsp-filter-example examples/filter_example.c)
   target_link_libraries(vv-dsp-filter-example PRIVATE vv-dsp)
-  
+
   add_executable(vv-dsp-fastapprox-example examples/fastapprox_example.c)
   target_link_libraries(vv-dsp-fastapprox-example PRIVATE vv-dsp)
 endif()

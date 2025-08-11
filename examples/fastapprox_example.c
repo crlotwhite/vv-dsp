@@ -4,7 +4,7 @@
 
 /**
  * @brief Example demonstrating fast approximation functions
- * 
+ *
  * This example shows how to use fastapprox and other optimization
  * libraries integrated into vv-dsp.
  */
@@ -22,7 +22,7 @@ int main(void) {
     // Test some common math functions
     double x = 2.0;
     printf("Testing with x = %.3f:\n", x);
-    
+
     // Test exponential function
     double standard_exp = exp(x);
     double fast_exp = VV_DSP_FAST_EXP(x);

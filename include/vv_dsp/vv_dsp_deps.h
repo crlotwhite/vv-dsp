@@ -1,7 +1,7 @@
 /**
  * @file vv_dsp_deps.h
  * @brief External dependency includes and utilities for vv-dsp
- * 
+ *
  * This header provides optional integration with external libraries
  * to enhance vv-dsp performance and functionality.
  */
