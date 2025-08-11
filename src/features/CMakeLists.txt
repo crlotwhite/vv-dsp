@@ -6,7 +6,21 @@ target_include_directories(vv-dsp-features PUBLIC
     ${PROJECT_SOURCE_DIR}/include
 )
 
-target_link_libraries(vv-dsp-features
-    vv-dsp-spectral
-    m  # Math library for log functions
-)
+# Link math library on non-Windows systems
+if(NOT WIN32)
+    find_library(M_MATH m)
+    if(M_MATH)
+        target_link_libraries(vv-dsp-features
+            vv-dsp-spectral
+            ${M_MATH}
+        )
+    else()
+        target_link_libraries(vv-dsp-features
+            vv-dsp-spectral
+        )
+    endif()
+else()
+    target_link_libraries(vv-dsp-features
+        vv-dsp-spectral
+    )
+endif()

@@ -90,7 +90,7 @@ vv_dsp_status vv_dsp_czt_exec_cpx(
 
     for (size_t n=0;n<N;++n){
     // exponent e = +0.5 * n^2
-    vv_dsp_real e = (vv_dsp_real)0.5 * (vv_dsp_real)(n*(double)n);
+    vv_dsp_real e = (vv_dsp_real)0.5 * (vv_dsp_real)((double)n*(double)n);
     vv_dsp_real ang = e * argW;
     vv_dsp_real mag = (vv_dsp_real)pow((double)magW, (double)e);
     vv_dsp_cpx W_n2 = cpx_from(mag * VV_DSP_COS(ang), mag * VV_DSP_SIN(ang));
@@ -104,7 +104,7 @@ vv_dsp_status vv_dsp_czt_exec_cpx(
         g[n] = cpx_mul(A_inv_pow, W_n2);
     }
     for (size_t k=0;k<M;++k){
-        vv_dsp_real e = (vv_dsp_real)0.5 * (vv_dsp_real)(k*(double)k);
+        vv_dsp_real e = (vv_dsp_real)0.5 * (vv_dsp_real)((double)k*(double)k);
         vv_dsp_real ang = -e * argW;
         vv_dsp_real mag = (vv_dsp_real)pow((double)magW, (double)(-e));
         h[k] = cpx_from(mag * VV_DSP_COS(ang), mag * VV_DSP_SIN(ang));

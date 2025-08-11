@@ -20,7 +20,7 @@ static void dct2_forward(const vv_dsp_real* x, vv_dsp_real* X, size_t N) {
     for (size_t k = 0; k < N; ++k) {
         vv_dsp_real sum = 0;
         for (size_t n = 0; n < N; ++n) {
-            vv_dsp_real ang = vv_pi() * (vv_dsp_real)(n + (vv_dsp_real)0.5) * (vv_dsp_real)k / (vv_dsp_real)N;
+            vv_dsp_real ang = vv_pi() * ((vv_dsp_real)n + (vv_dsp_real)0.5) * (vv_dsp_real)k / (vv_dsp_real)N;
             sum += x[n] * VV_DSP_COS(ang);
         }
         X[k] = sum;
@@ -32,7 +32,7 @@ static void dct3_inverse_from_ii(const vv_dsp_real* X, vv_dsp_real* x, size_t N)
     for (size_t n = 0; n < N; ++n) {
         vv_dsp_real sum = (vv_dsp_real)0.5 * X[0];
         for (size_t k = 1; k < N; ++k) {
-            vv_dsp_real ang = vv_pi() * (vv_dsp_real)k * (vv_dsp_real)(n + (vv_dsp_real)0.5) / (vv_dsp_real)N;
+            vv_dsp_real ang = vv_pi() * (vv_dsp_real)k * ((vv_dsp_real)n + (vv_dsp_real)0.5) / (vv_dsp_real)N;
             sum += X[k] * VV_DSP_COS(ang);
         }
         x[n] = scale * sum;
@@ -45,7 +45,7 @@ static void dct3_forward(const vv_dsp_real* x, vv_dsp_real* Y, size_t N) {
     for (size_t k = 0; k < N; ++k) {
         vv_dsp_real sum = x[0];
         for (size_t n = 1; n < N; ++n) {
-            vv_dsp_real ang = vv_pi() * (vv_dsp_real)k * (vv_dsp_real)(n + (vv_dsp_real)0.5) / (vv_dsp_real)N;
+            vv_dsp_real ang = vv_pi() * (vv_dsp_real)k * ((vv_dsp_real)n + (vv_dsp_real)0.5) / (vv_dsp_real)N;
             sum += (vv_dsp_real)2.0 * x[n] * VV_DSP_COS(ang);
         }
         Y[k] = sum;
@@ -57,7 +57,7 @@ static void dct4_transform(const vv_dsp_real* x, vv_dsp_real* X, size_t N, int i
     for (size_t k = 0; k < N; ++k) {
         vv_dsp_real sum = 0;
         for (size_t n = 0; n < N; ++n) {
-            vv_dsp_real ang = vv_pi() * (vv_dsp_real)(n + (vv_dsp_real)0.5) * (vv_dsp_real)(k + (vv_dsp_real)0.5) / (vv_dsp_real)N;
+            vv_dsp_real ang = vv_pi() * ((vv_dsp_real)n + (vv_dsp_real)0.5) * ((vv_dsp_real)k + (vv_dsp_real)0.5) / (vv_dsp_real)N;
             sum += x[n] * VV_DSP_COS(ang);
         }
         if (inverse) sum *= (vv_dsp_real)2.0 / (vv_dsp_real)N;

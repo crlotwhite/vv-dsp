@@ -38,7 +38,7 @@ static void linspace(vv_dsp_real start, vv_dsp_real end, size_t num, vv_dsp_real
         out[0] = start;
         return;
     }
-    
+
     vv_dsp_real step = (end - start) / (vv_dsp_real)(num - 1);
     for (size_t i = 0; i < num; i++) {
         out[i] = start + step * (vv_dsp_real)i;
@@ -84,29 +84,29 @@ VV_DSP_NODISCARD vv_dsp_status vv_dsp_mel_filterbank_create(
     if (fmax > sample_rate / 2.0f) {
         return VV_DSP_ERROR_OUT_OF_RANGE;
     }
-    
+
     // For now, only implement HTK variant (Slaney can be added later)
     if (variant != VV_DSP_MEL_VARIANT_HTK) {
         return VV_DSP_ERROR_OUT_OF_RANGE;
     }
-    
+
     size_t n_fft_bins = n_fft / 2 + 1;  // Number of positive frequency bins
-    
+
     // Check if n_mels is reasonable
     if (n_mels >= n_fft_bins) {
         return VV_DSP_ERROR_INVALID_SIZE;
     }
-    
+
     // Allocate filterbank weights matrix (flattened: n_mels * n_fft_bins)
     vv_dsp_real* filterbank = (vv_dsp_real*)calloc(n_mels * n_fft_bins, sizeof(vv_dsp_real));
     if (!filterbank) {
         return VV_DSP_ERROR_INTERNAL;
     }
-    
+
     // Convert fmin and fmax to Mel scale
     vv_dsp_real mel_min = vv_dsp_hz_to_mel(fmin);
     vv_dsp_real mel_max = vv_dsp_hz_to_mel(fmax);
-    
+
     // Create n_mels+2 equally spaced points in Mel scale (include fmin and fmax)
     size_t n_mel_points = n_mels + 2;
     vv_dsp_real* mel_points = (vv_dsp_real*)malloc(n_mel_points * sizeof(vv_dsp_real));
@@ -114,9 +114,9 @@ VV_DSP_NODISCARD vv_dsp_status vv_dsp_mel_filterbank_create(
         free(filterbank);
         return VV_DSP_ERROR_INTERNAL;
     }
-    
+
     linspace(mel_min, mel_max, n_mel_points, mel_points);
-    
+
     // Convert Mel points back to Hz
     vv_dsp_real* hz_points = (vv_dsp_real*)malloc(n_mel_points * sizeof(vv_dsp_real));
     if (!hz_points) {
@@ -124,11 +124,11 @@ VV_DSP_NODISCARD vv_dsp_status vv_dsp_mel_filterbank_create(
         free(mel_points);
         return VV_DSP_ERROR_INTERNAL;
     }
-    
+
     for (size_t i = 0; i < n_mel_points; i++) {
         hz_points[i] = vv_dsp_mel_to_hz(mel_points[i]);
     }
-    
+
     // Create frequency bins for FFT
     vv_dsp_real* fft_freqs = (vv_dsp_real*)malloc(n_fft_bins * sizeof(vv_dsp_real));
     if (!fft_freqs) {
@@ -137,35 +137,35 @@ VV_DSP_NODISCARD vv_dsp_status vv_dsp_mel_filterbank_create(
         free(hz_points);
         return VV_DSP_ERROR_INTERNAL;
     }
-    
+
     for (size_t i = 0; i < n_fft_bins; i++) {
         fft_freqs[i] = (vv_dsp_real)i * sample_rate / (vv_dsp_real)n_fft;
     }
-    
+
     // Build triangular filters
     for (size_t m = 0; m < n_mels; m++) {
         vv_dsp_real left = hz_points[m];      // Left edge of triangle
         vv_dsp_real center = hz_points[m + 1]; // Center (peak) of triangle
         vv_dsp_real right = hz_points[m + 2];  // Right edge of triangle
-        
+
         // Find FFT bin indices for triangle boundaries
         size_t left_idx = searchsorted(fft_freqs, n_fft_bins, left);
         size_t center_idx = searchsorted(fft_freqs, n_fft_bins, center);
         size_t right_idx = searchsorted(fft_freqs, n_fft_bins, right);
-        
+
         // Build triangular filter response
         for (size_t k = left_idx; k < center_idx && k < n_fft_bins; k++) {
             // Rising edge of triangle
             vv_dsp_real weight = (fft_freqs[k] - left) / (center - left);
             filterbank[m * n_fft_bins + k] = weight;
         }
-        
+
         for (size_t k = center_idx; k < right_idx && k < n_fft_bins; k++) {
             // Falling edge of triangle
             vv_dsp_real weight = (right - fft_freqs[k]) / (right - center);
             filterbank[m * n_fft_bins + k] = weight;
         }
-        
+
         // Normalize the filter so that the peak has magnitude 1
         // (This is optional but commonly done)
         vv_dsp_real sum = 0.0f;
@@ -178,17 +178,17 @@ VV_DSP_NODISCARD vv_dsp_status vv_dsp_mel_filterbank_create(
             }
         }
     }
-    
+
     // Clean up temporary arrays
     free(mel_points);
     free(hz_points);
     free(fft_freqs);
-    
+
     // Set output parameters
     *out_filterbank_weights = filterbank;
     *out_num_filters = n_mels;
     *out_filter_len = n_fft_bins;
-    
+
     return VV_DSP_OK;
 }
 
@@ -220,27 +220,27 @@ VV_DSP_NODISCARD vv_dsp_status vv_dsp_compute_log_mel_spectrogram(
     if (log_epsilon < 0.0f) {
         return VV_DSP_ERROR_OUT_OF_RANGE;
     }
-    
+
     // Process each frame
     for (size_t frame = 0; frame < num_frames; frame++) {
         const vv_dsp_real* frame_power = &power_spectrogram[frame * n_fft_bins];
         vv_dsp_real* frame_log_mel = &out_log_mel_spectrogram[frame * n_mels];
-        
+
         // Apply each Mel filter
         for (size_t m = 0; m < n_mels; m++) {
             vv_dsp_real mel_energy = 0.0f;
             const vv_dsp_real* filter_weights = &filterbank_weights[m * n_fft_bins];
-            
+
             // Weighted sum (matrix multiplication)
             for (size_t k = 0; k < n_fft_bins; k++) {
                 mel_energy += frame_power[k] * filter_weights[k];
             }
-            
+
             // Apply logarithm with epsilon to avoid log(0)
             frame_log_mel[m] = logf(mel_energy + log_epsilon);
         }
     }
-    
+
     return VV_DSP_OK;
 }
 
@@ -271,30 +271,30 @@ VV_DSP_NODISCARD vv_dsp_status vv_dsp_mfcc(
     if (lifter_coeff < 0.0f) {
         return VV_DSP_ERROR_OUT_OF_RANGE;
     }
-    
+
     // Allocate temporary buffer for DCT output
     vv_dsp_real* dct_output = (vv_dsp_real*)malloc(n_mels * sizeof(vv_dsp_real));
     if (!dct_output) {
         return VV_DSP_ERROR_INTERNAL;
     }
-    
+
     // Process each frame
     for (size_t frame = 0; frame < num_frames; frame++) {
         const vv_dsp_real* frame_log_mel = &log_mel_spectrogram[frame * n_mels];
         vv_dsp_real* frame_mfcc = &out_mfcc_coeffs[frame * num_mfcc_coeffs];
-        
+
         // Apply DCT-II
         vv_dsp_status status = vv_dsp_dct_forward(n_mels, dct_type, frame_log_mel, dct_output);
         if (status != VV_DSP_OK) {
             free(dct_output);
             return status;
         }
-        
+
         // Copy only the requested number of coefficients
         for (size_t i = 0; i < num_mfcc_coeffs; i++) {
             frame_mfcc[i] = dct_output[i];
         }
-        
+
         // Apply liftering if requested
         if (lifter_coeff > 0.0f) {
             for (size_t i = 1; i < num_mfcc_coeffs; i++) {  // Skip c[0]
@@ -303,7 +303,7 @@ VV_DSP_NODISCARD vv_dsp_status vv_dsp_mfcc(
             }
         }
     }
-    
+
     free(dct_output);
     return VV_DSP_OK;
 }
@@ -323,7 +323,7 @@ struct vv_dsp_mfcc_plan {
     vv_dsp_dct_type dct_type;
     vv_dsp_real lifter_coeff;
     vv_dsp_real log_epsilon;
-    
+
     // Pre-computed resources
     vv_dsp_real* filterbank_weights;
     vv_dsp_real* temp_log_mel;   // Temporary buffer for log-mel spectrogram
@@ -345,11 +345,11 @@ VV_DSP_NODISCARD vv_dsp_status vv_dsp_mfcc_init(
 ) {
     // This will be fully implemented in Subtask 20.5
     // For now, provide a basic implementation
-    
+
     if (!out_plan) {
         return VV_DSP_ERROR_NULL_POINTER;
     }
-    
+
     // Input validation
     if (n_fft == 0 || n_mels == 0 || num_mfcc_coeffs == 0 || sample_rate <= 0.0f) {
         return VV_DSP_ERROR_INVALID_SIZE;
@@ -357,13 +357,13 @@ VV_DSP_NODISCARD vv_dsp_status vv_dsp_mfcc_init(
     if (num_mfcc_coeffs > n_mels || fmin < 0.0f || fmax <= fmin || fmax > sample_rate / 2.0f) {
         return VV_DSP_ERROR_OUT_OF_RANGE;
     }
-    
+
     // Allocate plan structure
     vv_dsp_mfcc_plan* plan = (vv_dsp_mfcc_plan*)malloc(sizeof(vv_dsp_mfcc_plan));
     if (!plan) {
         return VV_DSP_ERROR_INTERNAL;
     }
-    
+
     // Initialize plan parameters
     plan->n_fft = n_fft;
     plan->n_mels = n_mels;
@@ -376,23 +376,23 @@ VV_DSP_NODISCARD vv_dsp_status vv_dsp_mfcc_init(
     plan->dct_type = dct_type;
     plan->lifter_coeff = lifter_coeff;
     plan->log_epsilon = log_epsilon;
-    
+
     // Create filterbank
     size_t num_filters, filter_len;
     vv_dsp_status status = vv_dsp_mel_filterbank_create(
         n_fft, n_mels, sample_rate, fmin, fmax, variant,
         &plan->filterbank_weights, &num_filters, &filter_len
     );
-    
+
     if (status != VV_DSP_OK) {
         free(plan);
         return status;
     }
-    
+
     // Allocate temporary buffers (will be used in vv_dsp_mfcc_process)
     plan->temp_log_mel = (vv_dsp_real*)malloc(n_mels * sizeof(vv_dsp_real));
     plan->temp_dct = (vv_dsp_real*)malloc(n_mels * sizeof(vv_dsp_real));
-    
+
     if (!plan->temp_log_mel || !plan->temp_dct) {
         vv_dsp_mel_filterbank_free(plan->filterbank_weights, n_mels);
         free(plan->temp_log_mel);
@@ -400,7 +400,7 @@ VV_DSP_NODISCARD vv_dsp_status vv_dsp_mfcc_init(
         free(plan);
         return VV_DSP_ERROR_INTERNAL;
     }
-    
+
     *out_plan = plan;
     return VV_DSP_OK;
 }
@@ -417,34 +417,34 @@ VV_DSP_NODISCARD vv_dsp_status vv_dsp_mfcc_process(
     if (num_frames == 0) {
         return VV_DSP_ERROR_INVALID_SIZE;
     }
-    
+
     // This will be optimized in Subtask 20.5
     // For now, use the existing functions
-    
+
     // Allocate temporary log-mel spectrogram for all frames
     vv_dsp_real* temp_log_mel_all = (vv_dsp_real*)malloc(num_frames * plan->n_mels * sizeof(vv_dsp_real));
     if (!temp_log_mel_all) {
         return VV_DSP_ERROR_INTERNAL;
     }
-    
+
     // Compute log-mel spectrogram
     vv_dsp_status status = vv_dsp_compute_log_mel_spectrogram(
         power_spectrogram, num_frames, plan->n_fft_bins,
         plan->filterbank_weights, plan->n_mels, plan->log_epsilon,
         temp_log_mel_all
     );
-    
+
     if (status != VV_DSP_OK) {
         free(temp_log_mel_all);
         return status;
     }
-    
+
     // Compute MFCC
     status = vv_dsp_mfcc(
         temp_log_mel_all, num_frames, plan->n_mels, plan->num_mfcc_coeffs,
         plan->dct_type, plan->lifter_coeff, out_mfcc_coeffs
     );
-    
+
     free(temp_log_mel_all);
     return status;
 }
@@ -453,11 +453,11 @@ vv_dsp_status vv_dsp_mfcc_destroy(vv_dsp_mfcc_plan* plan) {
     if (!plan) {
         return VV_DSP_ERROR_NULL_POINTER;
     }
-    
+
     vv_dsp_mel_filterbank_free(plan->filterbank_weights, plan->n_mels);
     free(plan->temp_log_mel);
     free(plan->temp_dct);
     free(plan);
-    
+
     return VV_DSP_OK;
 }

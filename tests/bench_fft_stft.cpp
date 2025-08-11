@@ -15,7 +15,7 @@ int main(){
     // Prepare input
     std::vector<Complex> in(N), out(N);
     const double PI = 3.14159265358979323846;
-    for(size_t i=0;i<N;++i) in[i] = Complex{(Real)std::sin(2.0*PI*i/64.0), 0};
+    for(size_t i=0;i<N;++i) in[i] = Complex{(Real)std::sin(2.0*PI*(double)i/64.0), 0};
 
     // FFT bench
     FFTPlanner plan(N, VV_DSP_FFT_C2C, VV_DSP_FFT_FORWARD);
