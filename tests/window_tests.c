@@ -65,7 +65,7 @@ static void compute_ref_nuttall(size_t N, vv_dsp_real* out) {
     }
 }
 
-static int test_validation() {
+static int test_validation(void) {
     vv_dsp_status st;
     st = vv_dsp_window_boxcar(0, NULL); // undefined precedence between errors; only check later exact ones
     (void)st;
@@ -76,7 +76,7 @@ static int test_validation() {
     return 0;
 }
 
-static int test_symmetry_and_values() {
+static int test_symmetry_and_values(void) {
     const vv_dsp_real tol = (vv_dsp_real)1e-5f;
     const size_t N = 17;
     vv_dsp_real got[17], ref[17];
@@ -129,7 +129,7 @@ static int test_symmetry_and_values() {
     return 0;
 }
 
-static int test_N_eq_1() {
+static int test_N_eq_1(void) {
     vv_dsp_real w[1];
     if (vv_dsp_window_hann(1, w) != VV_DSP_OK || !almost_equal(w[0], (vv_dsp_real)1.0, (vv_dsp_real)1e-6)) return 30;
     if (vv_dsp_window_hamming(1, w) != VV_DSP_OK || !almost_equal(w[0], (vv_dsp_real)1.0, (vv_dsp_real)1e-6)) return 31;

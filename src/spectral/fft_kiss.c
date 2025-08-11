@@ -1,4 +1,5 @@
 #include <math.h>
+#include "vv_dsp/vv_dsp_math.h"
 #include <stdlib.h>
 #include <string.h>
 #include "fft_backend.h"
@@ -8,13 +9,15 @@
 // Supports forward (no scaling) and backward (1/n scaling).
 
 static void dft_naive(const vv_dsp_cpx* in, vv_dsp_cpx* out, size_t n, int sign) {
-    const vv_dsp_real PI = (vv_dsp_real)3.14159265358979323846264338327950288;
-    const vv_dsp_real scale = (sign < 0) ? (1.0/(vv_dsp_real)n) : 1.0; // backward scales by 1/n
+    const vv_dsp_real PI = VV_DSP_PI;
+    const vv_dsp_real one = (vv_dsp_real)1.0;
+    const vv_dsp_real two = (vv_dsp_real)2.0;
+    const vv_dsp_real scale = (sign < 0) ? (one/(vv_dsp_real)n) : one; // backward scales by 1/n
     for (size_t k = 0; k < n; ++k) {
         vv_dsp_real sum_re = 0, sum_im = 0;
         for (size_t t = 0; t < n; ++t) {
-            vv_dsp_real ang = (vv_dsp_real)(-sign) * 2.0 * PI * (vv_dsp_real)(k * t) / (vv_dsp_real)n;
-            vv_dsp_real c = cos(ang), s = sin(ang);
+            vv_dsp_real ang = (vv_dsp_real)(-sign) * two * PI * (vv_dsp_real)(k * t) / (vv_dsp_real)n;
+            vv_dsp_real c = VV_DSP_COS(ang), s = VV_DSP_SIN(ang);
             sum_re += in[t].re * c - in[t].im * s;
             sum_im += in[t].re * s + in[t].im * c;
         }

@@ -119,7 +119,11 @@ VV_DSP_NODISCARD vv_dsp_status vv_dsp_stft_spectrogram(vv_dsp_stft* h,
         if (s != VV_DSP_OK) { free(spec); free(frame); return s; }
         for (size_t k=0;k<h->nfft;++k) {
             vv_dsp_real re = spec[k].re, im = spec[k].im;
+            #if defined(VV_DSP_USE_DOUBLE)
             out_mag[f*h->nfft + k] = (vv_dsp_real)sqrt(re*re + im*im);
+            #else
+            out_mag[f*h->nfft + k] = (vv_dsp_real)sqrtf(re*re + im*im);
+            #endif
         }
     }
     free(spec); free(frame);

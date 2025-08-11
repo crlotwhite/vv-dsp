@@ -69,18 +69,18 @@ static void test_filtfilt_basic(void) {
     // Mean should remain near zero for symmetric input; compute over center to reduce edge bias.
     const size_t start = N;
     const size_t end = (L > N) ? (L - N) : 0;
-    double m = 0.0; size_t cnt = 0;
+    vv_dsp_real m = (vv_dsp_real)0.0; size_t cnt = 0;
     if (end > start) {
         for (size_t i = start; i < end; ++i) { m += y[i]; cnt++; }
-        if (cnt) m /= (double)cnt;
+        if (cnt) m /= (vv_dsp_real)cnt;
     } else {
         for (size_t i = 0; i < L; ++i) { m += y[i]; }
-        m /= (double)L;
+        m /= (vv_dsp_real)L;
     }
-    assert(fabs(m) < 0.2);
+    assert(fabsf(m) < 0.2f);
 }
 
-int main(){
+int main(void){
     test_fir_design_basic();
     test_fir_apply_impulse();
     test_biquad_init_reset_process();

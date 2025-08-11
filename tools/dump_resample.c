@@ -10,6 +10,7 @@ static void usage(const char* p){
 
 int main(int argc, char** argv){
     unsigned int num=2, den=1; const char* qual="linear"; unsigned int taps=32; size_t n=256; unsigned int seed=0; const char* infile=NULL;
+    if (argc == 2 && (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) { usage(argv[0]); return 0; }
     for(int i=1;i<argc;++i){
         if(!strcmp(argv[i],"--num")&&i+1<argc) num=(unsigned)strtoul(argv[++i],NULL,10);
         else if(!strcmp(argv[i],"--den")&&i+1<argc) den=(unsigned)strtoul(argv[++i],NULL,10);

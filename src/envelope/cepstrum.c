@@ -18,8 +18,14 @@ vv_dsp_status vv_dsp_cepstrum_real(const vv_dsp_real* x, size_t n, vv_dsp_real* 
     vv_dsp_status s = vv_dsp_fft_execute(pf, xin, X);
     if (s != VV_DSP_OK) { free(xin); free(X); free(Y); vv_dsp_fft_destroy(pf); vv_dsp_fft_destroy(pb); return s; }
     for (size_t k=0;k<n;++k) {
-        vv_dsp_real mag = (vv_dsp_real)sqrt(X[k].re*X[k].re + X[k].im*X[k].im);
-        vv_dsp_real lm = (vv_dsp_real)log((double)(mag + (vv_dsp_real)1e-12));
+        vv_dsp_real mag;
+        #if defined(VV_DSP_USE_DOUBLE)
+        mag = (vv_dsp_real)sqrt(X[k].re*X[k].re + X[k].im*X[k].im);
+        vv_dsp_real lm = (vv_dsp_real)log(mag + (vv_dsp_real)1e-12);
+        #else
+        mag = (vv_dsp_real)sqrtf(X[k].re*X[k].re + X[k].im*X[k].im);
+        vv_dsp_real lm = (vv_dsp_real)logf(mag + (vv_dsp_real)1e-12f);
+        #endif
         Y[k].re = lm; Y[k].im = 0;
     }
     vv_dsp_cpx* cpx = (vv_dsp_cpx*)malloc(sizeof(vv_dsp_cpx)*n);
@@ -56,7 +62,11 @@ vv_dsp_status vv_dsp_icepstrum_minphase(const vv_dsp_real* c, size_t n, vv_dsp_r
     if (s != VV_DSP_OK) { free(C); free(H); free(h); vv_dsp_fft_destroy(pf); vv_dsp_fft_destroy(pb); return s; }
     // Exponentiate: exp of complex H -> magnitude envelope; but here H is real (imag 0)
     for (size_t k=0;k<n;++k) {
-        vv_dsp_real er = (vv_dsp_real)exp((double)H[k].re);
+        #if defined(VV_DSP_USE_DOUBLE)
+        vv_dsp_real er = (vv_dsp_real)exp(H[k].re);
+        #else
+        vv_dsp_real er = (vv_dsp_real)expf(H[k].re);
+        #endif
         H[k].re = er; H[k].im = 0;
     }
     s = vv_dsp_fft_execute(pb, H, h);

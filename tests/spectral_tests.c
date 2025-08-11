@@ -42,7 +42,12 @@ static int test_fft_r2c_c2r_roundtrip(void) {
 
     vv_dsp_real xr[N8];
     const double PI = 3.14159265358979323846264338327950288;
-    for (size_t i = 0; i < n; ++i) xr[i] = (vv_dsp_real)sin(2.0*PI*(double)i/(double)n);
+    for (size_t i = 0; i < n; ++i)
+#if defined(VV_DSP_USE_DOUBLE)
+    xr[i] = (vv_dsp_real)sin(2.0*PI*(double)i/(double)n);
+#else
+    xr[i] = (vv_dsp_real)sinf((vv_dsp_real)2.0*(vv_dsp_real)PI*(vv_dsp_real)i/(vv_dsp_real)n);
+#endif
 
     vv_dsp_cpx Xh[N8/2+1];
     vv_dsp_real xr2[N8];
@@ -70,7 +75,7 @@ int main(void) {
     vv_dsp_ifftshift_real(s, si, 5);
     int ok3 = 1;
     for (int i=0;i<5;++i) r[i]=a[i];
-    for (int i=0;i<5;++i) if (!nearly_equal(si[i], r[i], 1e-6)) { ok3 = 0; break; }
+    for (int i=0;i<5;++i) if (!nearly_equal(si[i], r[i], (vv_dsp_real)1e-6)) { ok3 = 0; break; }
     if (!ok1) { fprintf(stderr, "FFT C2C basic test failed\n"); return 1; }
     if (!ok2) { fprintf(stderr, "FFT R2C/C2R roundtrip test failed\n"); return 1; }
     if (!ok3) { fprintf(stderr, "fftshift/ifftshift test failed\n"); return 1; }
@@ -79,8 +84,13 @@ int main(void) {
         // Use compile-time constants to avoid VLA (MSVC compatibility)
         enum { N_STFT = 256, FFT_SZ = 64, HOP_SZ = 32, TAIL = FFT_SZ };
         vv_dsp_real x[N_STFT];
-        const double PI = 3.14159265358979323846264338327950288;
-        for (size_t i=0;i<N_STFT;++i) x[i] = (vv_dsp_real)sin(2.0*PI*(double)i/32.0);
+    const double PI = 3.14159265358979323846264338327950288;
+    for (size_t i=0;i<N_STFT;++i)
+#if defined(VV_DSP_USE_DOUBLE)
+        x[i] = (vv_dsp_real)sin(2.0*PI*(double)i/32.0);
+#else
+        x[i] = (vv_dsp_real)sinf((vv_dsp_real)2.0*(vv_dsp_real)PI*(vv_dsp_real)i/(vv_dsp_real)32.0f);
+#endif
 
         vv_dsp_stft_params p; p.fft_size = FFT_SZ; p.hop_size = HOP_SZ; p.window = VV_DSP_STFT_WIN_HANN;
         vv_dsp_stft* st = NULL;

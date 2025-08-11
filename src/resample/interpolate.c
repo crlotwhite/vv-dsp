@@ -12,11 +12,11 @@ vv_dsp_status vv_dsp_interpolate_linear_real(const vv_dsp_real* x,
     vv_dsp_real max_index = (vv_dsp_real)(n - 1);
     if (pos >= max_index) { *out = x[n - 1]; return VV_DSP_OK; }
 
-    size_t i = (size_t)floor((double)pos);
+    size_t i = (size_t)floorf(pos);
     vv_dsp_real t = pos - (vv_dsp_real)i;
     vv_dsp_real a = x[i];
     vv_dsp_real b = x[i + 1];
-    *out = (vv_dsp_real)((1.0 - t) * a + t * b);
+    *out = (vv_dsp_real)(((vv_dsp_real)1.0 - t) * a + t * b);
     return VV_DSP_OK;
 }
 
@@ -32,7 +32,7 @@ vv_dsp_status vv_dsp_interpolate_cubic_real(const vv_dsp_real* x,
     vv_dsp_real max_index = (vv_dsp_real)(n - 1);
     if (pos >= max_index) { *out = x[n - 1]; return VV_DSP_OK; }
 
-    size_t i = (size_t)floor((double)pos);
+    size_t i = (size_t)floorf(pos);
     vv_dsp_real t = pos - (vv_dsp_real)i;
 
     // Neighbor indices with clamping
@@ -54,9 +54,9 @@ vv_dsp_status vv_dsp_interpolate_cubic_real(const vv_dsp_real* x,
     vv_dsp_real t2 = t * t;
     vv_dsp_real t3 = t2 * t;
 
-    vv_dsp_real h00 = (vv_dsp_real)(2.0 * t3 - 3.0 * t2 + 1.0);
-    vv_dsp_real h10 = (vv_dsp_real)(t3 - 2.0 * t2 + t);
-    vv_dsp_real h01 = (vv_dsp_real)(-2.0 * t3 + 3.0 * t2);
+    vv_dsp_real h00 = (vv_dsp_real)((vv_dsp_real)2.0 * t3 - (vv_dsp_real)3.0 * t2 + (vv_dsp_real)1.0);
+    vv_dsp_real h10 = (vv_dsp_real)(t3 - (vv_dsp_real)2.0 * t2 + t);
+    vv_dsp_real h01 = (vv_dsp_real)(-(vv_dsp_real)2.0 * t3 + (vv_dsp_real)3.0 * t2);
     vv_dsp_real h11 = (vv_dsp_real)(t3 - t2);
 
     *out = (vv_dsp_real)(h00 * p1 + h10 * m1 + h01 * p2 + h11 * m2);

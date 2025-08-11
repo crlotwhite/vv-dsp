@@ -41,7 +41,6 @@ int main(int argc, char** argv){
     vv_dsp_cpx* spec = (vv_dsp_cpx*)malloc(fft*sizeof(vv_dsp_cpx));
     if(!spec) return 1;
     // Iterate frames
-    size_t frames = (n + hop - 1) / hop; // generous; internal code may limit
     for(size_t f=0; f*hop + fft <= n; ++f){
         if(vv_dsp_stft_process(h, sig + f*hop, spec)!=VV_DSP_OK) return 1;
         if(vv_dsp_stft_reconstruct(h, spec, recon + f*hop, norm + f*hop)!=VV_DSP_OK) return 1;
@@ -49,9 +48,9 @@ int main(int argc, char** argv){
     // Normalize OLA and print exactly n samples
     size_t outN = n;
     for(size_t i=0;i<outN;++i){
-        double den = (double)norm[i];
-        double y = den > 1e-12 ? (double)recon[i] / den : 0.0;
-        printf("%g\n", y);
+        vv_dsp_real den = norm[i];
+        vv_dsp_real y = den > (vv_dsp_real)1e-12 ? recon[i] / den : (vv_dsp_real)0;
+        printf("%g\n", (double)y);
     }
     free(spec); free(sig); free(recon); free(norm);
     vv_dsp_stft_destroy(h);

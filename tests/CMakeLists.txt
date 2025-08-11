@@ -39,9 +39,6 @@ add_test(NAME vv-dsp-filter COMMAND $<TARGET_FILE:vv-dsp-filter-tests>)
 # Envelope tests
 add_executable(vv-dsp-envelope-tests envelope_tests.c)
 target_link_libraries(vv-dsp-envelope-tests PRIVATE vv-dsp)
-if(UNIX)
-  target_link_libraries(vv-dsp-envelope-tests PRIVATE m)
-endif()
 add_test(NAME vv-dsp-envelope COMMAND $<TARGET_FILE:vv-dsp-envelope-tests>)
 
 # C++ sanity compile test for RAII wrapper skeleton
@@ -69,9 +66,6 @@ add_test(NAME vv-dsp-cpp-iir COMMAND $<TARGET_FILE:vv-dsp-cpp-iir>)
 # Simple micro-benchmark (not part of pass/fail by default)
 add_executable(vv-dsp-bench bench_fft_stft.cpp)
 target_link_libraries(vv-dsp-bench PRIVATE vv-dsp)
-if(UNIX)
-  target_link_libraries(vv-dsp-bench PRIVATE m)
-endif()
 # You can run manually: ctest -R bench -V or just execute vv-dsp-bench binary
 add_test(NAME vv-dsp-bench-run COMMAND $<TARGET_FILE:vv-dsp-bench>)
 set_tests_properties(vv-dsp-bench-run PROPERTIES DISABLED TRUE)

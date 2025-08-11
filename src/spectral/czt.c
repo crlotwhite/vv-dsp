@@ -9,7 +9,8 @@
 static VV_DSP_INLINE vv_dsp_cpx cpx_mul(vv_dsp_cpx a, vv_dsp_cpx b){
     vv_dsp_cpx r; r.re = a.re*b.re - a.im*b.im; r.im = a.re*b.im + a.im*b.re; return r;
 }
-static VV_DSP_INLINE vv_dsp_cpx cpx_conj(vv_dsp_cpx a){ vv_dsp_cpx r; r.re=a.re; r.im=-a.im; return r; }
+/* Removed unused helper to silence -Wunused-function and keep TU minimal */
+/* static VV_DSP_INLINE vv_dsp_cpx cpx_conj(vv_dsp_cpx a){ vv_dsp_cpx r; r.re=a.re; r.im=-a.im; return r; } */
 static VV_DSP_INLINE vv_dsp_cpx cpx_from(vv_dsp_real re, vv_dsp_real im){ vv_dsp_cpx z; z.re=re; z.im=im; return z; }
 
 static size_t next_pow2(size_t v){

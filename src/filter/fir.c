@@ -22,11 +22,11 @@ static vv_dsp_status apply_window(vv_dsp_real* w, size_t N, vv_dsp_window_type t
             break;
         case VV_DSP_WINDOW_HAMMING:
             for (size_t n = 0; n < N; ++n)
-                w[n] = (vv_dsp_real)(0.54 - 0.46 * VV_DSP_COS(VV_DSP_TWO_PI * (vv_dsp_real)n / (vv_dsp_real)(N - 1)));
+                w[n] = (vv_dsp_real)((vv_dsp_real)0.54 - (vv_dsp_real)0.46 * VV_DSP_COS(VV_DSP_TWO_PI * (vv_dsp_real)n / (vv_dsp_real)(N - 1)));
             break;
         case VV_DSP_WINDOW_HANNING:
             for (size_t n = 0; n < N; ++n)
-                w[n] = (vv_dsp_real)(0.5 - 0.5 * VV_DSP_COS(VV_DSP_TWO_PI * (vv_dsp_real)n / (vv_dsp_real)(N - 1)));
+                w[n] = (vv_dsp_real)((vv_dsp_real)0.5 - (vv_dsp_real)0.5 * VV_DSP_COS(VV_DSP_TWO_PI * (vv_dsp_real)n / (vv_dsp_real)(N - 1)));
             break;
         case VV_DSP_WINDOW_BLACKMAN: {
             const double a0 = 0.42, a1 = 0.5, a2 = 0.08;

@@ -13,7 +13,12 @@ static int test_dct2_iii_roundtrip(size_t n) {
     vv_dsp_real* X = (vv_dsp_real*)malloc(n * sizeof(vv_dsp_real));
     vv_dsp_real* xr = (vv_dsp_real*)malloc(n * sizeof(vv_dsp_real));
     if (!x || !X || !xr) return 0;
-    for (size_t i=0;i<n;++i) x[i] = (vv_dsp_real)sin(2.0 * 3.14159265358979323846 * (vv_dsp_real)i / (vv_dsp_real)(n));
+    for (size_t i=0;i<n;++i) x[i] = (vv_dsp_real)
+#if defined(VV_DSP_USE_DOUBLE)
+    sin(2.0 * 3.14159265358979323846 * (vv_dsp_real)i / (vv_dsp_real)(n));
+#else
+    sinf((vv_dsp_real)2.0 * (vv_dsp_real)3.14159265358979323846f * (vv_dsp_real)i / (vv_dsp_real)(n));
+#endif
     if (vv_dsp_dct_forward(n, VV_DSP_DCT_II, x, X) != VV_DSP_OK) return 0;
     if (vv_dsp_dct_inverse(n, VV_DSP_DCT_II, X, xr) != VV_DSP_OK) return 0;
     int ok = 1; for (size_t i=0;i<n;++i) if (!nearly_equal(x[i], xr[i], (vv_dsp_real)1e-5)) { ok = 0; break; }
@@ -25,7 +30,12 @@ static int test_dct4_involution(size_t n) {
     vv_dsp_real* X = (vv_dsp_real*)malloc(n * sizeof(vv_dsp_real));
     vv_dsp_real* xr = (vv_dsp_real*)malloc(n * sizeof(vv_dsp_real));
     if (!x || !X || !xr) return 0;
-    for (size_t i=0;i<n;++i) x[i] = (vv_dsp_real)cos(2.0 * 3.14159265358979323846 * (vv_dsp_real)(i+0.3) / (vv_dsp_real)(n));
+    for (size_t i=0;i<n;++i) x[i] = (vv_dsp_real)
+#if defined(VV_DSP_USE_DOUBLE)
+    cos(2.0 * 3.14159265358979323846 * (vv_dsp_real)(i+0.3) / (vv_dsp_real)(n));
+#else
+    cosf((vv_dsp_real)2.0 * (vv_dsp_real)3.14159265358979323846f * (vv_dsp_real)(i+(vv_dsp_real)0.3) / (vv_dsp_real)(n));
+#endif
     if (vv_dsp_dct_forward(n, VV_DSP_DCT_IV, x, X) != VV_DSP_OK) return 0;
     if (vv_dsp_dct_inverse(n, VV_DSP_DCT_IV, X, xr) != VV_DSP_OK) return 0;
     int ok = 1; for (size_t i=0;i<n;++i) if (!nearly_equal(x[i], xr[i], (vv_dsp_real)1e-5)) { ok = 0; break; }

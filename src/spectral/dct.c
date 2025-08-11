@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <math.h>
+#include "vv_dsp/vv_dsp_math.h"
 #include "vv_dsp/vv_dsp_types.h"
 #include "vv_dsp/spectral/dct.h"
 
@@ -9,9 +10,7 @@ struct vv_dsp_dct_plan {
     vv_dsp_dct_dir dir;
 };
 
-static VV_DSP_INLINE vv_dsp_real vv_pi(void) {
-    return (vv_dsp_real)3.14159265358979323846264338327950288;
-}
+static VV_DSP_INLINE vv_dsp_real vv_pi(void) { return VV_DSP_PI; }
 
 // Naive O(N^2) DCT implementations (reference-correct, SIMD-friendly loops)
 // Canonical unnormalized pair:
@@ -21,20 +20,20 @@ static void dct2_forward(const vv_dsp_real* x, vv_dsp_real* X, size_t N) {
     for (size_t k = 0; k < N; ++k) {
         vv_dsp_real sum = 0;
         for (size_t n = 0; n < N; ++n) {
-            vv_dsp_real ang = vv_pi() * (vv_dsp_real)(n + 0.5) * (vv_dsp_real)k / (vv_dsp_real)N;
-            sum += x[n] * (vv_dsp_real)cos(ang);
+            vv_dsp_real ang = vv_pi() * (vv_dsp_real)(n + (vv_dsp_real)0.5) * (vv_dsp_real)k / (vv_dsp_real)N;
+            sum += x[n] * VV_DSP_COS(ang);
         }
         X[k] = sum;
     }
 }
 
 static void dct3_inverse_from_ii(const vv_dsp_real* X, vv_dsp_real* x, size_t N) {
-    const vv_dsp_real scale = (vv_dsp_real)(2.0 / (vv_dsp_real)N);
+    const vv_dsp_real scale = (vv_dsp_real)2.0 / (vv_dsp_real)N;
     for (size_t n = 0; n < N; ++n) {
         vv_dsp_real sum = (vv_dsp_real)0.5 * X[0];
         for (size_t k = 1; k < N; ++k) {
-            vv_dsp_real ang = vv_pi() * (vv_dsp_real)k * (vv_dsp_real)(n + 0.5) / (vv_dsp_real)N;
-            sum += X[k] * (vv_dsp_real)cos(ang);
+            vv_dsp_real ang = vv_pi() * (vv_dsp_real)k * (vv_dsp_real)(n + (vv_dsp_real)0.5) / (vv_dsp_real)N;
+            sum += X[k] * VV_DSP_COS(ang);
         }
         x[n] = scale * sum;
     }
@@ -46,8 +45,8 @@ static void dct3_forward(const vv_dsp_real* x, vv_dsp_real* Y, size_t N) {
     for (size_t k = 0; k < N; ++k) {
         vv_dsp_real sum = x[0];
         for (size_t n = 1; n < N; ++n) {
-            vv_dsp_real ang = vv_pi() * (vv_dsp_real)k * (vv_dsp_real)(n + 0.5) / (vv_dsp_real)N;
-            sum += (vv_dsp_real)2.0 * x[n] * (vv_dsp_real)cos(ang);
+            vv_dsp_real ang = vv_pi() * (vv_dsp_real)k * (vv_dsp_real)(n + (vv_dsp_real)0.5) / (vv_dsp_real)N;
+            sum += (vv_dsp_real)2.0 * x[n] * VV_DSP_COS(ang);
         }
         Y[k] = sum;
     }
@@ -58,10 +57,10 @@ static void dct4_transform(const vv_dsp_real* x, vv_dsp_real* X, size_t N, int i
     for (size_t k = 0; k < N; ++k) {
         vv_dsp_real sum = 0;
         for (size_t n = 0; n < N; ++n) {
-            vv_dsp_real ang = vv_pi() * (vv_dsp_real)(n + 0.5) * (vv_dsp_real)(k + 0.5) / (vv_dsp_real)N;
-            sum += x[n] * cos(ang);
+            vv_dsp_real ang = vv_pi() * (vv_dsp_real)(n + (vv_dsp_real)0.5) * (vv_dsp_real)(k + (vv_dsp_real)0.5) / (vv_dsp_real)N;
+            sum += x[n] * VV_DSP_COS(ang);
         }
-        if (inverse) sum *= (vv_dsp_real)(2.0 / (vv_dsp_real)N);
+        if (inverse) sum *= (vv_dsp_real)2.0 / (vv_dsp_real)N;
         X[k] = sum;
     }
 }

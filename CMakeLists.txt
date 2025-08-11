@@ -9,12 +9,19 @@ set(CMAKE_C_STANDARD_REQUIRED ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
+option(VV_DSP_WERROR "Treat warnings as errors" OFF)
+option(VV_DSP_UNITY_BUILD "Enable unity/jumbo builds where supported" OFF)
+option(VV_DSP_IPO "Enable interprocedural optimization (LTO) for Release builds if supported" OFF)
+
 if(MSVC)
   add_compile_options(/W4)
   # Define math constants and disable CRT security warnings for MSVC
   add_compile_definitions(_USE_MATH_DEFINES _CRT_SECURE_NO_WARNINGS)
 else()
-  add_compile_options(-Wall -Wextra -Wpedantic)
+  add_compile_options(-Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wdouble-promotion -Wformat=2 -Wstrict-prototypes)
+  if(VV_DSP_WERROR)
+    add_compile_options(-Werror)
+  endif()
 endif()
 
 # Build options
@@ -56,6 +63,23 @@ if(NOT MSVC)
     add_compile_options(-fsanitize=undefined)
     add_link_options(-fsanitize=undefined)
   endif()
+endif()
+
+# IPO/LTO
+include(CheckIPOSupported)
+if(VV_DSP_IPO)
+  check_ipo_supported(RESULT ipo_supported OUTPUT ipo_msg)
+  if(ipo_supported)
+    message(STATUS "vv-dsp: Enabling IPO/LTO for Release configuration")
+    set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
+  else()
+    message(STATUS "vv-dsp: IPO not supported: ${ipo_msg}")
+  endif()
+endif()
+
+# Unity builds (where supported by generator)
+if(VV_DSP_UNITY_BUILD)
+  set(CMAKE_UNITY_BUILD ON)
 endif()
 
 # Include directories
