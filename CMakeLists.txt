@@ -34,6 +34,11 @@ set_property(CACHE VV_DSP_BACKEND_FFT PROPERTY STRINGS none fftw kissfft)
 option(VV_DSP_SINGLE_FILE "Build as a single-file amalgamation" OFF)
 option(VV_DSP_ENABLE_ASAN "Enable AddressSanitizer for sanitizing builds" OFF)
 option(VV_DSP_ENABLE_UBSAN "Enable UBSanitizer for sanitizing builds" OFF)
+
+# External dependency options
+option(VV_DSP_USE_FASTAPPROX "Enable fast math approximations using fastapprox" OFF)
+option(VV_DSP_USE_MATH_APPROX "Enable DSP-optimized math approximations" OFF)
+option(VV_DSP_USE_EIGEN "Enable Eigen library for linear algebra operations" OFF)
 option(VERIFY_WITH_PYTHON "Enable Python-based verification tests (NumPy/SciPy)" OFF)
 set(VV_PY_RTOL "" CACHE STRING "Python validation relative tolerance override (e.g., 5e-5)")
 set(VV_PY_ATOL "" CACHE STRING "Python validation absolute tolerance override (e.g., 5e-5)")
@@ -51,6 +56,8 @@ add_compile_definitions(
 if(VV_DSP_SINGLE_FILE)
   add_compile_definitions(VV_DSP_SINGLE_FILE=1)
 endif()
+
+# External library compile definitions are added in their respective sections above
 
 # Sanitizers (non-MSVC)
 if(NOT MSVC)
@@ -83,6 +90,54 @@ if(VV_DSP_UNITY_BUILD)
   set(CMAKE_UNITY_BUILD ON)
 endif()
 
+# External dependencies using FetchContent
+include(FetchContent)
+
+# FastApprox - Fast approximations to common mathematical functions
+if(VV_DSP_USE_FASTAPPROX)
+  FetchContent_Declare(
+    fastapprox
+    GIT_REPOSITORY https://github.com/romeric/fastapprox.git
+    GIT_TAG master
+  )
+  FetchContent_MakeAvailable(fastapprox)
+  
+  # Add fastapprox include directory
+  set(FASTAPPROX_INCLUDE_DIR ${fastapprox_SOURCE_DIR}/fastapprox/src)
+  add_library(fastapprox INTERFACE)
+  target_include_directories(fastapprox INTERFACE ${FASTAPPROX_INCLUDE_DIR})
+  
+  message(STATUS "vv-dsp: FastApprox enabled")
+  add_compile_definitions(VV_DSP_USE_FASTAPPROX=1)
+endif()
+
+# Math Approx - DSP-optimized math approximations
+if(VV_DSP_USE_MATH_APPROX)
+  FetchContent_Declare(
+    math_approx
+    GIT_REPOSITORY https://github.com/Chowdhury-DSP/math_approx.git
+    GIT_TAG main
+  )
+  FetchContent_MakeAvailable(math_approx)
+  message(STATUS "vv-dsp: Math Approx (DSP-optimized) enabled")
+  add_compile_definitions(VV_DSP_USE_MATH_APPROX=1)
+endif()
+
+# Eigen - Linear algebra library
+if(VV_DSP_USE_EIGEN)
+  FetchContent_Declare(
+    eigen
+    GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
+    GIT_TAG 3.4.0
+  )
+  set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
+  set(EIGEN_BUILD_DOC OFF CACHE BOOL "" FORCE)
+  set(EIGEN_BUILD_PKGCONFIG OFF CACHE BOOL "" FORCE)
+  FetchContent_MakeAvailable(eigen)
+  message(STATUS "vv-dsp: Eigen linear algebra library enabled")
+  add_compile_definitions(VV_DSP_USE_EIGEN=1)
+endif()
+
 # Include directories
 set(VV_DSP_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
@@ -103,6 +158,18 @@ add_subdirectory(tools)
 # Umbrella interface target that aggregates module libraries
 add_library(vv-dsp INTERFACE)
 target_include_directories(vv-dsp INTERFACE ${VV_DSP_INCLUDE_DIR})
+
+# Link external dependencies to umbrella target
+if(VV_DSP_USE_FASTAPPROX AND TARGET fastapprox)
+  target_link_libraries(vv-dsp INTERFACE fastapprox)
+endif()
+if(VV_DSP_USE_MATH_APPROX AND TARGET math_approx)
+  target_link_libraries(vv-dsp INTERFACE math_approx)
+endif()
+if(VV_DSP_USE_EIGEN AND TARGET Eigen3::Eigen)
+  target_link_libraries(vv-dsp INTERFACE Eigen3::Eigen)
+endif()
+
 # Link interface to module libs so consumers only link vv-dsp
 if(TARGET vv-dsp-core)
   target_link_libraries(vv-dsp INTERFACE vv-dsp-core)
@@ -149,6 +216,9 @@ endif()
 if(VV_DSP_BUILD_EXAMPLES)
   add_executable(vv-dsp-filter-example examples/filter_example.c)
   target_link_libraries(vv-dsp-filter-example PRIVATE vv-dsp)
+  
+  add_executable(vv-dsp-fastapprox-example examples/fastapprox_example.c)
+  target_link_libraries(vv-dsp-fastapprox-example PRIVATE vv-dsp)
 endif()
 
 # Python-based verification harness (optional, opt-in via VERIFY_WITH_PYTHON)

@@ -26,6 +26,21 @@ ctest --test-dir build --output-on-failure
 		- `-DVV_PY_VERBOSE=ON` to increase Python test logging
 		- `-DVV_PY_RTOL=5e-5` and/or `-DVV_PY_ATOL=5e-5` to override tolerances
 
+### External Dependencies (Optional)
+
+vv-dsp supports optional integration with external libraries for enhanced performance:
+
+- `-DVV_DSP_USE_FASTAPPROX=ON|OFF` (default OFF) — Enable fast math approximations using [fastapprox](https://github.com/romeric/fastapprox)
+- `-DVV_DSP_USE_MATH_APPROX=ON|OFF` (default OFF) — Enable DSP-optimized math approximations using [math_approx](https://github.com/Chowdhury-DSP/math_approx)
+- `-DVV_DSP_USE_EIGEN=ON|OFF` (default OFF) — Enable [Eigen](https://eigen.tuxfamily.org/) linear algebra library
+
+Example with fast approximations enabled:
+
+```sh
+cmake -S . -B build -DVV_DSP_USE_FASTAPPROX=ON -DVV_DSP_USE_MATH_APPROX=ON
+cmake --build build -j
+```
+
 ## Python-based validation (optional)
 
 The Python validation suite compares vv-dsp CLI outputs against NumPy/SciPy references.
