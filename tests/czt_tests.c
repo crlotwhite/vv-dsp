@@ -10,8 +10,9 @@ static int nearly_equal(vv_dsp_real a, vv_dsp_real b, vv_dsp_real tol){
 int main(void){
     // Simple sanity: CZT with parameters equivalent to DFT of length N
     // For DFT, choose M=N, A=1, W=exp(-j*2*pi/N)
-    const size_t N = 8;
-    const size_t M = N;
+    // Note: MSVC doesn't treat 'const size_t' as a constant expression for array sizes.
+    // Use enum constants to keep sizes compile-time constants across compilers.
+    enum { N = 8, M = N };
     vv_dsp_real ang = (vv_dsp_real)(-2.0 * VV_DSP_PI_D / (double)N);
     vv_dsp_real Wre = VV_DSP_COS(ang), Wim = VV_DSP_SIN(ang);
     vv_dsp_real Are = (vv_dsp_real)1, Aim = (vv_dsp_real)0;
