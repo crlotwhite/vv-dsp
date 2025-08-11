@@ -27,6 +27,7 @@ endif()
 # Build options
 option(VV_DSP_BUILD_TESTS "Build vv-dsp tests" ON)
 option(VV_DSP_BUILD_EXAMPLES "Build vv-dsp examples" ON)
+option(VV_DSP_BUILD_BENCHMARKS "Build vv-dsp performance benchmarks" OFF)
 option(VV_DSP_USE_SIMD "Enable SIMD optimizations where available" OFF)
 option(VV_DSP_ENABLE_AUDIO_IO "Enable WAV audio file I/O utilities" OFF)
 set(VV_DSP_BACKEND_FFT "kissfft" CACHE STRING "FFT backend to use: none|fftw|kissfft")
@@ -154,6 +155,11 @@ if(VV_DSP_ENABLE_AUDIO_IO)
   add_subdirectory(src/audio)
 endif()
 add_subdirectory(tools)
+
+# Benchmarks
+if(VV_DSP_BUILD_BENCHMARKS)
+  add_subdirectory(bench)
+endif()
 
 # Umbrella interface target that aggregates module libraries
 add_library(vv-dsp INTERFACE)
