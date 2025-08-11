@@ -30,3 +30,6 @@ add_executable(vv_dsp_dump_stats dump_stats.c)
 
 add_executable(vv_dsp_dump_hilbert dump_hilbert.c)
  target_link_libraries(vv_dsp_dump_hilbert PRIVATE vv-dsp)
+
+add_executable(vv_dsp_dump_mfcc dump_mfcc.c)
+ target_link_libraries(vv_dsp_dump_mfcc PRIVATE vv-dsp)

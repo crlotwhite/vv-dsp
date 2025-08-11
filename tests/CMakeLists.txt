@@ -95,3 +95,8 @@ add_test(NAME vv-dsp-czt COMMAND $<TARGET_FILE:vv-dsp-czt-tests>)
 add_executable(vv-dsp-hilbert-tests hilbert_tests.c)
 target_link_libraries(vv-dsp-hilbert-tests PRIVATE vv-dsp)
 add_test(NAME vv-dsp-hilbert COMMAND $<TARGET_FILE:vv-dsp-hilbert-tests>)
+
+# MFCC/Features tests
+add_executable(vv-dsp-mfcc-tests mfcc_tests.c)
+target_link_libraries(vv-dsp-mfcc-tests PRIVATE vv-dsp)
+add_test(NAME vv-dsp-mfcc COMMAND $<TARGET_FILE:vv-dsp-mfcc-tests>)

@@ -18,6 +18,7 @@ extern "C" {
 #include "vv_dsp/envelope.h"
 #include "vv_dsp/window.h"
 #include "vv_dsp/adapters.h"
+#include "vv_dsp/features/mel.h"
 
 #ifdef VV_DSP_AUDIO_ENABLED
 #include "vv_dsp/audio.h"
