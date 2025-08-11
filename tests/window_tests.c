@@ -85,7 +85,7 @@ static void compute_ref_bohman(size_t N, vv_dsp_real* out) {
         if (x < 0) x = -x; // abs(x)
         if (x <= (vv_dsp_real)1.0) {
             vv_dsp_real pi_x = VV_DSP_PI * x;
-            out[n] = ((vv_dsp_real)1.0 - x) * (vv_dsp_real)VV_DSP_COS(pi_x) + 
+            out[n] = ((vv_dsp_real)1.0 - x) * (vv_dsp_real)VV_DSP_COS(pi_x) +
                      (vv_dsp_real)VV_DSP_SIN(pi_x) / VV_DSP_PI;
         } else {
             out[n] = (vv_dsp_real)0.0;
@@ -196,7 +196,7 @@ static int test_symmetry_and_values(void) {
     for (size_t n = 0; n < N; ++n) {
         if (!almost_equal(got[n], got[N-1-n], tol)) return 37;
     }
-    
+
     return 0;
 }
 
@@ -208,13 +208,13 @@ static int test_N_eq_1(void) {
     if (vv_dsp_window_blackman_harris(1, w) != VV_DSP_OK || !almost_equal(w[0], (vv_dsp_real)1.0, (vv_dsp_real)1e-6)) return 33;
     if (vv_dsp_window_nuttall(1, w) != VV_DSP_OK || !almost_equal(w[0], (vv_dsp_real)1.0, (vv_dsp_real)1e-6)) return 34;
     if (vv_dsp_window_boxcar(1, w) != VV_DSP_OK || !almost_equal(w[0], (vv_dsp_real)1.0, (vv_dsp_real)1e-6)) return 35;
-    
+
     // Test new non-parameterized window functions for N=1
     if (vv_dsp_window_bartlett(1, w) != VV_DSP_OK || !almost_equal(w[0], (vv_dsp_real)1.0, (vv_dsp_real)1e-6)) return 36;
     if (vv_dsp_window_bohman(1, w) != VV_DSP_OK || !almost_equal(w[0], (vv_dsp_real)1.0, (vv_dsp_real)1e-6)) return 37;
     if (vv_dsp_window_cosine(1, w) != VV_DSP_OK || !almost_equal(w[0], (vv_dsp_real)1.0, (vv_dsp_real)1e-6)) return 38;
     if (vv_dsp_window_planck_taper(1, w) != VV_DSP_OK || !almost_equal(w[0], (vv_dsp_real)1.0, (vv_dsp_real)1e-6)) return 39;
-    
+
     return 0;
 }
 
