@@ -922,7 +922,7 @@
         "description": "Implement utilities for reading and writing WAV audio files, supporting common formats (16-bit PCM, 24-bit packed, 32-bit float), with an optional libsndfile integration, controlled by a VV_DSP_ENABLE_AUDIO_IO build option.",
         "details": "Create a new module, e.g., `audio/vv_dsp_wav.h` and `audio/vv_dsp_wav.c`, to encapsulate WAV file I/O functionality.\n\nDefine the following core functions:\n- `vv_dsp_wav_read(const char* filepath, vv_dsp_real** out_buffer, size_t* out_num_samples, int* out_num_channels, double* out_sample_rate, int* out_bit_depth)`: Reads a WAV file into a planar `vv_dsp_real` buffer, returning metadata.\n- `vv_dsp_wav_write(const char* filepath, const vv_dsp_real* in_buffer, size_t num_samples, int num_channels, double sample_rate, int bit_depth)`: Writes a planar `vv_dsp_real` buffer to a WAV file with specified metadata.\n\n**Format Support:**\n- Implement robust support for reading and writing 16-bit PCM, 24-bit packed PCM, and 32-bit float WAV formats.\n- Handle conversion between the interleaved sample data typically found in WAV files and the planar `vv_dsp_real` buffer format used internally by `vv-dsp`. This involves de-interleaving on read and interleaving on write.\n\n**Optional `libsndfile` Shim:**\n- Introduce a CMake build option `VV_DSP_ENABLE_AUDIO_IO` (defaulting to `OFF`).\n- If `VV_DSP_ENABLE_AUDIO_IO` is `ON`, attempt to find and link against `libsndfile`.\n- If `libsndfile` is successfully found, use it as the backend for `vv_dsp_wav_read` and `vv_dsp_wav_write`.\n- If `libsndfile` is not found or `VV_DSP_ENABLE_AUDIO_IO` is `OFF`, implement a minimal, custom WAV parser/writer for the specified formats. This custom implementation should be robust enough for the target formats but does not need to be a full-featured WAV library.\n\n**Error Handling:**\n- Utilize `vv_dsp_status` for reporting success, failure, and specific error conditions (e.g., file not found, unsupported format, memory allocation failure, invalid parameters).\n\n**CMake Integration:**\n- Update `CMakeLists.txt` to include the new `audio` module.\n- Properly manage the `VV_DSP_ENABLE_AUDIO_IO` option and the conditional `libsndfile` dependency and linking.",
         "testStrategy": "Develop a comprehensive `CTest` suite for WAV I/O functionality.\n\n**Unit Tests:**\n- Test `vv_dsp_wav_read` with various valid WAV files (16-bit, 24-bit, 32-bit float, mono, stereo) from a dedicated `voicebank/fixtures` directory. Verify correct parsing of sample rate, channel count, bit depth, and total samples.\n- Test `vv_dsp_wav_write` by writing simple generated signals (e.g., sine wave, impulse, white noise) to temporary WAV files in all supported formats and channel configurations.\n\n**Roundtrip Tests:**\n- For each supported format (16-bit PCM, 24-bit packed, 32-bit float) and channel configuration (mono, stereo):\n    1.  Generate a short, known test signal (e.g., 1-second sine wave at 440 Hz, or a short burst of white noise).\n    2.  Write the original signal to a temporary WAV file using `vv_dsp_wav_write`.\n    3.  Read the temporary WAV file back into memory using `vv_dsp_wav_read`.\n    4.  Compare the original buffer with the read buffer:\n        - Verify that all metadata (sample rate, channels, bit depth) matches.\n        - Compare the content of the buffers. For integer formats, a bit-exact comparison or hash comparison (e.g., MD5 or simple checksum) of the raw sample data should be performed. For float formats, a sample-by-sample comparison with a small numerical tolerance is required.\n- Perform roundtrip tests using existing `voicebank/` fixtures if they are suitable and available.\n\n**Edge Cases and Error Handling:**\n- Test with non-existent files, files with invalid or corrupted headers (if custom parser is used), and very short or empty audio clips to ensure robust error handling.\n\n**Conditional Testing:**\n- Ensure all tests run correctly and pass when `VV_DSP_ENABLE_AUDIO_IO` is `ON` (both with and without `libsndfile` present) and when it is `OFF` (relying solely on the custom implementation). This may require separate CI configurations or conditional test execution.",
-        "status": "pending",
+        "status": "done",
         "dependencies": [
           1,
           2
@@ -934,7 +934,7 @@
             "title": "Module Scaffolding and Public API",
             "description": "Create `include/vv_dsp/audio/wav.h` and `src/audio/wav.c`. Define public API: vv_dsp_wav_read, vv_dsp_wav_write, vv_dsp_wav_info; use vv_dsp_status and vv_dsp_real; planar channel buffers API.",
             "details": "",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
             "parentTaskId": 17
           },
@@ -943,7 +943,7 @@
             "title": "CMake Integration and Build Option",
             "description": "Add CMake option VV_DSP_ENABLE_AUDIO_IO (OFF by default). Conditionally add src/audio to build, install headers, and wire tests/examples under this option.",
             "details": "",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
             "parentTaskId": 17
           },
@@ -952,7 +952,7 @@
             "title": "Custom WAV Parser (Read-side)",
             "description": "Implement minimal custom WAV parser: parse RIFF/WAVE, fmt, data, optional chunks; support PCM16, packed PCM24, float32; validate headers; store channels, sample_rate, bit_depth, frames.",
             "details": "",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
             "parentTaskId": 17
           },
@@ -961,7 +961,7 @@
             "title": "Read Path: Deinterleave and Convert",
             "description": "Implement streaming-safe read: deinterleave interleaved samples into planar vv_dsp_real buffers; convert PCM16/PCM24/float32 to vv_dsp_real with proper scaling; support partial reads and large files.",
             "details": "",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
             "parentTaskId": 17
           },
@@ -970,7 +970,7 @@
             "title": "Write Path: Interleave and Emit",
             "description": "Implement writer: interleave planar buffers, emit WAV headers, support PCM16, packed PCM24, float32; dithering/truncation for integer formats; correct chunk sizes and alignment.",
             "details": "",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
             "parentTaskId": 17
           },
@@ -979,7 +979,7 @@
             "title": "Optional libsndfile Adapter",
             "description": "Optional libsndfile backend: add CMake find_package and link; when available, implement alternate code path with identical public API and runtime selection.",
             "details": "",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
             "parentTaskId": 17
           },
@@ -988,7 +988,7 @@
             "title": "Robust Error Handling and Cleanup",
             "description": "Map all I/O and format errors to vv_dsp_status codes; add helper for human-readable messages; ensure resource cleanup on failure paths.",
             "details": "",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
             "parentTaskId": 17
           },
@@ -997,7 +997,7 @@
             "title": "Tests and Example Utility",
             "description": "Add CTest roundtrip tests across formats/channels; fuzz/sanitizer-friendly cases; add basic CLI/example utility for manual smoke tests.",
             "details": "",
-            "status": "pending",
+            "status": "done",
             "dependencies": [],
             "parentTaskId": 17
           }
@@ -1213,7 +1213,7 @@
     ],
     "metadata": {
       "created": "2025-08-10T09:22:31.972Z",
-      "updated": "2025-08-11T10:29:48.059Z",
+      "updated": "2025-08-11T11:13:57.665Z",
       "description": "Tasks for master context"
     }
   }

@@ -50,6 +50,13 @@ add_executable(vv-dsp-envelope-tests envelope_tests.c)
 target_link_libraries(vv-dsp-envelope-tests PRIVATE vv-dsp)
 add_test(NAME vv-dsp-envelope COMMAND $<TARGET_FILE:vv-dsp-envelope-tests>)
 
+# Audio tests (only if audio module is enabled)
+if(TARGET vv-dsp-audio)
+  add_executable(vv-dsp-audio-tests audio_tests.c)
+  target_link_libraries(vv-dsp-audio-tests PRIVATE vv-dsp)
+  add_test(NAME vv-dsp-audio COMMAND $<TARGET_FILE:vv-dsp-audio-tests>)
+endif()
+
 # C++ sanity compile test for RAII wrapper skeleton
 add_executable(vv-dsp-cpp-sanity tests_cpp_sanity.cpp)
 target_link_libraries(vv-dsp-cpp-sanity PRIVATE vv-dsp)

@@ -19,6 +19,10 @@ extern "C" {
 #include "vv_dsp/window.h"
 #include "vv_dsp/adapters.h"
 
+#ifdef VV_DSP_AUDIO_ENABLED
+#include "vv_dsp/audio.h"
+#endif
+
 // Version macros
 #define VV_DSP_VERSION_MAJOR 0
 #define VV_DSP_VERSION_MINOR 1
