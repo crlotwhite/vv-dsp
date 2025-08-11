@@ -14,6 +14,7 @@ extern "C" {
 #include "vv_dsp/filter/common.h"
 #include "vv_dsp/filter/fir.h"
 #include "vv_dsp/filter/iir.h"
+#include "vv_dsp/filter/savgol.h"
 
 // Legacy placeholder kept for sanity tests
 int vv_dsp_filter_dummy(void);

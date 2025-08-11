@@ -1,0 +1,59 @@
+{
+	"version": "2.0.0",
+	"tasks": [
+		{
+			"label": "Configure & Build (Debug) + CTest",
+			"type": "shell",
+			"command": "cmake -S . -B build && cmake --build build -j && (cd build && ctest --output-on-failure)",
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Build & CTest after Savitzky–Golay",
+			"type": "shell",
+			"command": "cmake --build build -j && (cd build && ctest -R savgol --output-on-failure)",
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Rebuild & run Savitzky–Golay tests",
+			"type": "shell",
+			"command": "cmake --build build -j && (cd build && ctest -R savgol --output-on-failure)",
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Build and run Savitzky–Golay tests again",
+			"type": "shell",
+			"command": "cmake --build build -j && (cd build && ctest -R savgol --output-on-failure)",
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Rebuild and run only savgol tests",
+			"type": "shell",
+			"command": "cmake --build build -j && (cd build && ctest -R savgol --output-on-failure)",
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build"
+		},
+		{
+			"label": "Full rebuild and run all tests",
+			"type": "shell",
+			"command": "cmake --build build -j && (cd build && ctest --output-on-failure)",
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build"
+		}
+	]
+}

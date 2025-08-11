@@ -36,6 +36,15 @@ add_executable(vv-dsp-filter-tests filter_tests.c)
 target_link_libraries(vv-dsp-filter-tests PRIVATE vv-dsp)
 add_test(NAME vv-dsp-filter COMMAND $<TARGET_FILE:vv-dsp-filter-tests>)
 
+# Savitzky–Golay tests
+add_executable(vv-dsp-savgol-tests savgol_tests.c)
+target_link_libraries(vv-dsp-savgol-tests PRIVATE vv-dsp)
+add_test(NAME vv-dsp-savgol COMMAND $<TARGET_FILE:vv-dsp-savgol-tests>)
+
+add_executable(vv-dsp-savgol-basic-tests savgol_basic_func_tests.c)
+target_link_libraries(vv-dsp-savgol-basic-tests PRIVATE vv-dsp)
+add_test(NAME vv-dsp-savgol-basic COMMAND $<TARGET_FILE:vv-dsp-savgol-basic-tests>)
+
 # Envelope tests
 add_executable(vv-dsp-envelope-tests envelope_tests.c)
 target_link_libraries(vv-dsp-envelope-tests PRIVATE vv-dsp)

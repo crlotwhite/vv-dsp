@@ -3,6 +3,7 @@ add_library(vv-dsp-filter
 	fir.c
 	iir.c
 	common.c
+	savgol.c
 )
 
 target_include_directories(vv-dsp-filter PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../include)

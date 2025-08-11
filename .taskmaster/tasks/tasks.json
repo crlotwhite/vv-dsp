@@ -1071,7 +1071,7 @@
         "description": "Implement Savitzky–Golay smoothing and differentiation filter utilities, including kernel precomputation and robust parameter validation.",
         "details": "Create a new module, `filter/savgol.h` and `filter/savgol.c`, to encapsulate the Savitzky–Golay filter functionality. The primary API will be `vv_dsp_savgol(const vv_dsp_real* y, size_t N, int window_length, int polyorder, int deriv, vv_dsp_real delta, vv_dsp_savgol_mode mode, vv_dsp_real* output)`. \n\nImplementation steps:\n1.  **Input Validation**: Validate parameters: `window_length` must be odd and greater than `polyorder`. `polyorder` must be non-negative. `deriv` must be non-negative and less than or equal to `polyorder`. `window_length` must be less than or equal to `N`. Handle invalid inputs gracefully (e.g., return an error status).\n2.  **Kernel Precomputation**: Implement the logic to compute the Savitzky–Golay convolution kernels based on `window_length`, `polyorder`, and `deriv`. This typically involves solving a least-squares problem (e.g., using the pseudo-inverse of a Vandermonde matrix).\n3.  **Convolution**: Apply the precomputed kernel as a convolution to the input signal `y`.\n4.  **Edge Handling**: Implement boundary condition handling using the specified `mode` (e.g., `vv_dsp_savgol_mode_reflect` for symmetric extension, similar to SciPy's 'reflect' mode). This involves appropriately padding the input signal before convolution.\n5.  **Derivative Scaling**: Apply the `delta` scaling factor for differentiation (e.g., `output[i] *= (1.0 / pow(delta, deriv))`).\n6.  Ensure support for both `float` and `double` precision via `vv_dsp_real`.",
         "testStrategy": "Develop comprehensive unit tests for `vv_dsp_savgol` using CTest, focusing on numerical parity and accuracy.\n\n**Unit Tests:**\n-   **Basic Functionality**: Test with simple, analytically predictable signals (e.g., constant, linear, quadratic, cubic polynomials) to verify correct smoothing and differentiation for `deriv=0, 1, 2`.\n-   **Numerical Parity with SciPy**: Utilize a Python-based verification harness (if available, otherwise manual comparison) to compare `vv_dsp_savgol` output against `scipy.signal.savgol_filter` for:\n    -   Randomly generated signals of various lengths (small, medium, large).\n    -   Signals with known polynomial components.\n    -   A range of `window_length`, `polyorder`, `deriv` (0, 1, 2), and `delta` values.\n    -   Verify behavior for `mode=vv_dsp_savgol_mode_reflect`.\n-   **Derivative Accuracy**: For known polynomial signals, verify that `deriv=1` and `deriv=2` produce the correct analytical derivatives within a defined tolerance.\n-   **Edge Cases**: \n    -   `window_length` equal to `N` (signal length).\n    -   `window_length` just greater than `polyorder`.\n    -   `polyorder = 0` (equivalent to a moving average).\n    -   `deriv = 0` (smoothing only).\n    -   `deriv` equal to `polyorder` (highest possible derivative).\n    -   Input signal length `N` smaller than `window_length` (should return error).\n    -   Empty input signal (N=0).\n    -   Various `delta` values.",
-        "status": "pending",
+        "status": "done",
         "dependencies": [
           2
         ],
@@ -1083,7 +1083,7 @@
             "description": "Create the new module files `include/vv_dsp/filter/savgol.h` and `src/filter/savgol.c`. Define the `vv_dsp_savgol_mode` enum to specify boundary handling (e.g., `VV_DSP_SAVGOL_MODE_REFLECT`, `VV_DSP_SAVGOL_MODE_CONSTANT`, `VV_DSP_SAVGOL_MODE_NEAREST`, `VV_DSP_SAVGOL_MODE_WRAP`). Declare the primary `vv_dsp_savgol` function in the header. Implement the function skeleton in the C file, ensuring it returns `vv_dsp_status`. Implement all specified input validation checks: `window_length` must be odd and greater than `polyorder`, `polyorder` must be non-negative, `deriv` must be non-negative and less than or equal to `polyorder`, and `window_length` must be less than or equal to `N`. Return `VV_DSP_ERROR_INVALID_ARGUMENT` for any invalid inputs, consistent with `vv_dsp_status` error handling patterns found in `include/vv_dsp/common.h` and existing filter modules.",
             "dependencies": [],
             "details": "Add `savgol.c` to `src/filter/CMakeLists.txt` to ensure it's part of the build. Use `vv_dsp_real` for all floating-point parameters and calculations. Ensure the `vv_dsp_savgol_mode` enum is clearly defined with appropriate values for different boundary conditions.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Write basic unit tests to verify that `vv_dsp_savgol` correctly identifies and returns `VV_DSP_ERROR_INVALID_ARGUMENT` for various invalid parameter combinations (e.g., even `window_length`, `polyorder` < 0, `deriv` > `polyorder`, `window_length` > `N`)."
           },
           {
@@ -1094,7 +1094,7 @@
               "19.1"
             ],
             "details": "Given the absence of a dedicated matrix library in the codebase, these matrix operations will need to be implemented from scratch within `savgol.c` or as static helper functions. Focus on numerical stability for the pseudo-inverse calculation. Consider the specific formula for Savitzky-Golay coefficients derived from the pseudo-inverse of the Vandermonde matrix. Memory for temporary matrices should be managed using `vv_dsp_malloc` and `vv_dsp_free`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Create isolated unit tests for the kernel precomputation logic. Verify the generated kernels for simple cases (e.g., `window_length=5, polyorder=2, deriv=0` for smoothing, and `deriv=1` for differentiation) against known reference values (e.g., from SciPy's `savgol_filter` or analytical derivations)."
           },
           {
@@ -1105,7 +1105,7 @@
               "19.2"
             ],
             "details": "The convolution should be a standard discrete convolution. Pay attention to indexing and loop bounds to correctly apply the kernel. The `pow` function from `math.h` (or `cmath` for C++) should be used for `pow(delta, deriv)`, ensuring `vv_dsp_real` compatibility (e.g., `powf` or `pow`).",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Test the convolution and scaling logic with a pre-defined kernel and a simple input signal (e.g., a constant or linear ramp) to verify correct output values, assuming no edge effects for now. Verify the derivative scaling factor is applied correctly."
           },
           {
@@ -1116,7 +1116,7 @@
               "19.3"
             ],
             "details": "Allocate memory for the padded signal using `vv_dsp_malloc` and ensure it is freed using `vv_dsp_free` after use. The padding length will depend on the `window_length`. Ensure the padding logic correctly mirrors SciPy's behavior for 'reflect' mode and other common padding strategies.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Develop specific unit tests for each `vv_dsp_savgol_mode`. Use short signals and verify the padded signal content for each mode. Then, test the full `vv_dsp_savgol` function with these modes and simple signals to ensure correct output at the boundaries."
           },
           {
@@ -1130,7 +1130,7 @@
               "19.4"
             ],
             "details": "Pay close attention to error paths and ensure all allocated memory is freed on success or failure. The test suite should include edge cases for `N`, `window_length`, and `polyorder`. Consider testing with both `float` and `double` precision by conditionally compiling the tests if `VV_DSP_USE_DOUBLE` can be toggled for testing.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Implement a comprehensive CTest suite. Include tests for various signal types (sinusoids, ramps, impulses), different `window_length`/`polyorder`/`deriv` combinations, and all `vv_dsp_savgol_mode` options. Compare outputs against pre-calculated reference values or a known good implementation (e.g., Python's SciPy). Define acceptable numerical error thresholds."
           }
         ]
@@ -1213,7 +1213,7 @@
     ],
     "metadata": {
       "created": "2025-08-10T09:22:31.972Z",
-      "updated": "2025-08-11T07:21:48.032Z",
+      "updated": "2025-08-11T10:29:48.059Z",
       "description": "Tasks for master context"
     }
   }
