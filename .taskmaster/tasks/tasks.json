@@ -1009,7 +1009,7 @@
         "description": "Implement core Hilbert Transform and Analytic Signal utilities, along with helper functions for instantaneous amplitude, phase, and frequency.",
         "details": "Implement the following functions:\n- `vv_dsp_hilbert_analytic(const vv_dsp_real* input, size_t N, vv_dsp_cpx* analytic_output)`: Computes the analytic signal of a real-valued input. The primary implementation should use the FFT method:\n    1. Perform FFT on the real input signal.\n    2. Construct a frequency-domain Hilbert transform filter: `H[0]=1`, `H[k]=2` for positive frequencies (`1 <= k < N/2`), `H[N/2]=1` (if N is even, Nyquist component), and `H[k]=0` for negative frequencies (`N/2 < k < N`).\n    3. Multiply the FFT output by this filter.\n    4. Perform IFFT to obtain the complex analytic signal. Ensure correct handling of even/odd N and scaling conventions.\n    5. Consider a fallback O(N^2) direct convolution for very small N if FFT overhead is prohibitive, but prioritize the FFT method.\n- `vv_dsp_instantaneous_phase(const vv_dsp_cpx* analytic_input, size_t N, vv_dsp_real* phase_output)`: Calculates the instantaneous phase from the complex analytic signal. This involves `atan2(imag, real)` followed by robust phase unwrapping to ensure continuity.\n- `vv_dsp_instantaneous_frequency(const vv_dsp_real* unwrapped_phase_input, size_t N, double sample_rate, vv_dsp_real* freq_output)`: Computes the instantaneous frequency from the unwrapped phase. This is typically derived from the discrete derivative of the unwrapped phase, scaled by `sample_rate / (2 * PI)`.",
         "testStrategy": "Develop comprehensive unit tests and cross-validation tests.\n\n**Unit Tests:**\n- **Signal Types**: Test with pure sinusoids, amplitude-modulated (AM) signals, and frequency-modulated (FM) chirps. Verify that `vv_dsp_hilbert_analytic` produces the expected complex signal (original real part, Hilbert transformed imaginary part).\n- **Instantaneous Helpers**: For AM/FM signals, verify that `vv_dsp_instantaneous_phase` accurately unwraps the phase and `vv_dsp_instantaneous_frequency` correctly tracks the instantaneous frequency against known analytical solutions.\n- **Edge Cases**: Test with signals containing DC offset, constant signals, signals with varying lengths (even/odd N), and very short signals.\n- **Numerical Accuracy**: Define and verify against acceptable numerical tolerances (e.g., `1e-6` for float, `1e-12` for double).\n\n**Cross-Validation (using Task 11 harness):**\n- Utilize the Python-based verification harness to compare the output of `vv_dsp_hilbert_analytic` against `scipy.signal.hilbert` for a diverse set of signals (e.g., sinusoids, noise, real-world audio snippets).\n- Ensure consistency in scaling and phase conventions between the C implementation and SciPy reference.\n- Integrate these tests into the CTest suite via the Task 12 CI plumbing.",
-        "status": "pending",
+        "status": "done",
         "dependencies": [
           2,
           4,
@@ -1024,7 +1024,7 @@
             "description": "Create the necessary header and source files for the Hilbert transform module. Define the `vv_dsp_hilbert_analytic` function signature and implement basic input validation. Set up the framework for FFT plan creation and destruction, and allocate temporary buffers required for the frequency domain operations.",
             "dependencies": [],
             "details": "1. Create `include/vv_dsp/spectral/hilbert.h` and `src/spectral/hilbert.c`.\n2. Include `vv_dsp/types.h`, `vv_dsp/spectral/fft.h`, and `vv_dsp/math/complex.h`.\n3. Define the `vv_dsp_hilbert_analytic` function signature: `int vv_dsp_hilbert_analytic(const vv_dsp_real* input, size_t N, vv_dsp_cpx* analytic_output)`.\n4. Implement initial input validation (e.g., `input`, `analytic_output` not NULL, `N > 0`).\n5. Integrate `vv_dsp_fft_plan_create` for real-to-complex FFT and complex-to-complex IFFT, and `vv_dsp_fft_plan_destroy`.\n6. Allocate dynamic memory for intermediate complex arrays (e.g., FFT output, filtered spectrum) using `vv_dsp_malloc` and `vv_dsp_free`.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Basic unit tests to ensure function can be called without crashing and handles invalid inputs gracefully (e.g., NULL pointers, N=0)."
           },
           {
@@ -1033,7 +1033,7 @@
             "description": "Implement the primary FFT-based method for computing the analytic signal. This involves performing a real-to-complex FFT, constructing and applying the frequency-domain Hilbert filter, and then performing a complex-to-complex IFFT.",
             "dependencies": [],
             "details": "1. Execute a real-to-complex FFT on the `input` signal using `vv_dsp_fft_execute`.\n2. Construct the frequency-domain Hilbert transform filter `H`:\n    - `H[0] = 1`\n    - `H[k] = 2` for `1 <= k < N/2`\n    - `H[N/2] = 1` (if `N` is even, for the Nyquist component)\n    - `H[k] = 0` for `N/2 < k < N` (negative frequencies).\n3. Perform element-wise complex multiplication of the FFT output with the constructed filter `H`.\n4. Execute a complex-to-complex IFFT on the filtered spectrum to obtain the `analytic_output`.\n5. Ensure correct scaling of the IFFT output based on the FFT library's conventions (e.g., divide by `N`).\n6. The O(N^2) direct convolution fallback is considered a future enhancement; focus solely on the FFT method for this subtask.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit tests with simple sinusoids (e.g., `sin(2*pi*f*t)`) to verify that the real part of the output matches the input and the imaginary part is a 90-degree phase-shifted version. Test with various `N` values (even/odd, small/medium)."
           },
           {
@@ -1042,7 +1042,7 @@
             "description": "Implement the function to calculate the instantaneous phase from a complex analytic signal, including a robust phase unwrapping algorithm to ensure continuity.",
             "dependencies": [],
             "details": "1. Define the `vv_dsp_instantaneous_phase` function signature: `int vv_dsp_instantaneous_phase(const vv_dsp_cpx* analytic_input, size_t N, vv_dsp_real* phase_output)`.\n2. For each sample `i` from `0` to `N-1`, calculate the principal value of the phase using `atan2(analytic_input[i].imag, analytic_input[i].real)` and store it in `phase_output[i]`.\n3. Implement a robust phase unwrapping algorithm. A common approach is to iterate through the `phase_output` array, detect jumps greater than `PI` (or less than `-PI`), and add/subtract multiples of `2*PI` to subsequent samples to maintain continuity.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit tests for `vv_dsp_instantaneous_phase`:\n- Test with a simple sinusoid to verify correct phase calculation.\n- Test with a signal whose phase crosses the `+/- PI` boundary multiple times to ensure robust unwrapping (e.g., a linearly increasing phase that wraps around)."
           },
           {
@@ -1051,7 +1051,7 @@
             "description": "Implement the function to compute the instantaneous frequency from an unwrapped phase signal, derived from its discrete derivative.",
             "dependencies": [],
             "details": "1. Define the `vv_dsp_instantaneous_frequency` function signature: `int vv_dsp_instantaneous_frequency(const vv_dsp_real* unwrapped_phase_input, size_t N, double sample_rate, vv_dsp_real* freq_output)`.\n2. For `i = 0`, set `freq_output[0]` to 0 or handle appropriately (e.g., copy `freq_output[1]`).\n3. For `i` from `1` to `N-1`, calculate the discrete derivative: `delta_phase = unwrapped_phase_input[i] - unwrapped_phase_input[i-1]`.\n4. Scale the `delta_phase` by `sample_rate / (2 * PI)` to convert from radians/sample to Hz: `freq_output[i] = delta_phase * (sample_rate / (2.0 * M_PI))` (assuming `M_PI` is available from `math.h`).",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit tests for `vv_dsp_instantaneous_frequency`:\n- Test with a signal having a constant frequency (linear unwrapped phase) to verify constant frequency output.\n- Test with a chirp signal (quadratic unwrapped phase) to verify linearly increasing/decreasing frequency output."
           },
           {
@@ -1060,7 +1060,7 @@
             "description": "Develop and integrate comprehensive unit tests for all implemented Hilbert transform and analytic signal utility functions, covering various signal types, edge cases, and numerical accuracy.",
             "dependencies": [],
             "details": "1. Create `tests/hilbert_tests.c` following the existing CTest and `vv_dsp` testing patterns (e.g., `fft_tests.c`, `czt_tests.c`).\n2. Implement unit tests for `vv_dsp_hilbert_analytic`:\n    - Test with pure sinusoids (e.g., `sin(t)`, `cos(t)`) to verify real and imaginary parts.\n    - Test with amplitude-modulated (AM) signals.\n    - Test with frequency-modulated (FM) chirps.\n    - Verify correct handling of `N` (even/odd, small values like 1, 2, 3, 4).\n    - Check scaling and numerical accuracy against expected analytical results.\n3. Implement unit tests for `vv_dsp_instantaneous_phase`:\n    - Test with signals that cause phase wrapping and verify unwrapping correctness.\n    - Test with noisy signals to assess robustness.\n4. Implement unit tests for `vv_dsp_instantaneous_frequency`:\n    - Test with signals having known instantaneous frequencies (e.g., constant frequency, linear chirp).\n    - Verify the output frequency values are accurate.\n5. Add the new test file to the CTest build system (e.g., `CMakeLists.txt`).",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Utilize CTest for automated testing. Define acceptable error thresholds for numerical comparisons. Cross-validate results against known analytical solutions or established DSP libraries if available (e.g., SciPy's `hilbert` function for reference)."
           }
         ]
@@ -1213,7 +1213,7 @@
     ],
     "metadata": {
       "created": "2025-08-10T09:22:31.972Z",
-      "updated": "2025-08-11T06:14:13.620Z",
+      "updated": "2025-08-11T07:21:48.032Z",
       "description": "Tasks for master context"
     }
   }

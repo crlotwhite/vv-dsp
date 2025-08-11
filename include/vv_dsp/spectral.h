@@ -24,6 +24,9 @@ int vv_dsp_spectral_dummy(void);
 // CZT public API
 #include "vv_dsp/spectral/czt.h"
 
+// Hilbert/analytic signal API
+#include "vv_dsp/spectral/hilbert.h"
+
 #ifdef __cplusplus
 }
 #endif
