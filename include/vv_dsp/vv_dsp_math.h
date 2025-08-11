@@ -30,9 +30,13 @@ extern "C" {
 #if defined(VV_DSP_USE_DOUBLE)
 #  define VV_DSP_SIN(x) sin(x)
 #  define VV_DSP_COS(x) cos(x)
+#  define VV_DSP_EXP(x) exp(x)
+#  define VV_DSP_SQRT(x) sqrt(x)
 #else
 #  define VV_DSP_SIN(x) sinf(x)
 #  define VV_DSP_COS(x) cosf(x)
+#  define VV_DSP_EXP(x) expf(x)
+#  define VV_DSP_SQRT(x) sqrtf(x)
 #endif
 
 #ifdef __cplusplus

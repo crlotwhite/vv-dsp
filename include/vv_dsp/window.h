@@ -36,6 +36,36 @@ vv_dsp_status vv_dsp_window_blackman_harris(size_t N, vv_dsp_real* out);
 // w[n] = a0 - a1*cos(2*pi*n/(N-1)) + a2*cos(4*pi*n/(N-1)) - a3*cos(6*pi*n/(N-1))
 vv_dsp_status vv_dsp_window_nuttall(size_t N, vv_dsp_real* out);
 
+// Bartlett (Triangular) window (symmetric):
+// w[n] = 1 - |n - (N-1)/2| / ((N-1)/2)
+vv_dsp_status vv_dsp_window_bartlett(size_t N, vv_dsp_real* out);
+
+// Bohman window (symmetric):
+// w[n] = (1-|x|)*cos(π*|x|) + sin(π*|x|)/π, where x = 2*n/(N-1) - 1
+vv_dsp_status vv_dsp_window_bohman(size_t N, vv_dsp_real* out);
+
+// Cosine window (symmetric):
+// w[n] = sin(π*n/(N-1))
+vv_dsp_status vv_dsp_window_cosine(size_t N, vv_dsp_real* out);
+
+// Planck-taper window (symmetric):
+// Exponential tapered window with default epsilon=0.1
+vv_dsp_status vv_dsp_window_planck_taper(size_t N, vv_dsp_real* out);
+
+// Flattop window (symmetric):
+// 5-term cosine window optimized for amplitude accuracy
+vv_dsp_status vv_dsp_window_flattop(size_t N, vv_dsp_real* out);
+
+// Kaiser window (symmetric):
+// w[n] = I_0(β*√(1-((n-(N-1)/2)/((N-1)/2))²)) / I_0(β)
+// where I_0 is the modified Bessel function of the first kind, order 0
+vv_dsp_status vv_dsp_window_kaiser(size_t N, vv_dsp_real beta, vv_dsp_real* out);
+
+// Tukey window (symmetric):
+// Tapered cosine window, alpha ∈ [0,1] controls taper fraction
+// alpha=0: rectangular, alpha=1: Hann window
+vv_dsp_status vv_dsp_window_tukey(size_t N, vv_dsp_real alpha, vv_dsp_real* out);
+
 #ifdef __cplusplus
 }
 #endif

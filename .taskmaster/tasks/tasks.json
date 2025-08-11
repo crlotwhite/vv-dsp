@@ -838,7 +838,7 @@
         "description": "Extend the library's window function coverage by implementing additional variants like flattop, kaiser, tukey, bartlett, bohman, cosine, and planck-taper, ensuring parameterized APIs and comprehensive testing against SciPy.",
         "details": "Implement the specified window functions (flattop, kaiser, tukey, bartlett, bohman, cosine, planck-taper) within `window.c`. Each function should support parameterized APIs where applicable (e.g., `vv_dsp_window_kaiser(size_t N, double beta, float* output)` for float and double variants). Ensure both single (`float`) and double (`double`) precision variants are implemented for all new window functions, adhering to existing library policy. Update `window.h` with new function declarations and document the new window functions, their parameters, and characteristics in the project's documentation. Consider edge cases for small `N` values (e.g., `N=1`, `N=2`).",
         "testStrategy": "Develop comprehensive unit tests for each new window function. Utilize the Python-based verification harness (Task 11) to compare the generated window coefficients against `scipy.signal` equivalents (e.g., `scipy.signal.windows.kaiser`, `scipy.signal.windows.flattop`) within defined numerical tolerances. Specifically document any known differences in end-point handling or normalization between `vv-dsp` and SciPy implementations. For small `N` values, verify against pre-computed \"golden values\". Implement statistical checks for key window properties such as Equivalent Noise Bandwidth (ENBW) and scalloping loss, comparing them against known theoretical or reference values. Ensure tests cover various parameter values (e.g., different `beta` for Kaiser, `alpha` for Tukey). Verify symmetry and normalization properties of the generated windows.",
-        "status": "pending",
+        "status": "done",
         "dependencies": [
           3,
           11,
@@ -852,7 +852,7 @@
             "description": "Implement the `bartlett`, `bohman`, `cosine`, and `planck-taper` window functions. Each function must have both single (`float`) and double (`double`) precision variants.",
             "dependencies": [],
             "details": "Implement `vv_dsp_window_bartlett_f/d`, `vv_dsp_window_bohman_f/d`, `vv_dsp_window_cosine_f/d`, and `vv_dsp_window_planck_taper_f/d` in `src/dsp/window.c`. Adhere to the existing function signature pattern `void vv_dsp_window_<name>_f(size_t N, float* output)`. Ensure proper handling of edge cases for `N=0` (return immediately) and `N=1` (output[0] = 1.0f).",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Initial manual verification of small N values (e.g., N=2, N=3) to ensure basic correctness before comprehensive testing."
           },
           {
@@ -861,7 +861,7 @@
             "description": "Implement the `flattop`, `kaiser`, and `tukey` window functions, supporting their respective parameters. Each function must have both single (`float`) and double (`double`) precision variants.",
             "dependencies": [],
             "details": "Implement `vv_dsp_window_flattop_f/d`, `vv_dsp_window_kaiser_f/d`, and `vv_dsp_window_tukey_f/d` in `src/dsp/window.c`. The function signatures should include the relevant parameter, e.g., `void vv_dsp_window_kaiser_f(size_t N, double beta, float* output)`. Ensure proper handling of edge cases for `N=0` (return immediately) and `N=1` (output[0] = 1.0f). Research the specific parameter definitions for each window (e.g., Kaiser's beta, Tukey's alpha) to ensure correct implementation.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Initial manual verification with common parameter values and small N to check for obvious errors."
           },
           {
@@ -873,7 +873,7 @@
               "15.2"
             ],
             "details": "For each new window function (bartlett, bohman, cosine, planck-taper, flattop, kaiser, tukey), add its `_f` and `_d` declarations to `include/vv_dsp/dsp/window.h`, following the existing style and order. Additionally, update the project's documentation (e.g., a dedicated `docs/` section or markdown file) to describe each new window function, its purpose, parameters, and any specific characteristics or common use cases.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Compile the library to ensure no header conflicts or missing declarations. Review documentation for clarity and completeness."
           },
           {
@@ -885,7 +885,7 @@
               "15.3"
             ],
             "details": "Add new `TEST_CASE` blocks to `tests/dsp/window_tests.c` for each of the non-parameterized window functions. For each function, include tests for both `float` and `double` precision variants. Test various `N` values, including `N=1`, `N=2`, and typical larger sizes (e.g., 10, 64, 128). Utilize the Python-based verification harness (Task 11) to generate reference data from `scipy.signal.windows` for numerical comparison, ensuring results are within defined numerical tolerances.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Run `ctest` to execute all new window tests. Verify that all tests pass and that numerical accuracy meets expectations against SciPy references."
           },
           {
@@ -897,7 +897,7 @@
               "15.3"
             ],
             "details": "Add new `TEST_CASE` blocks to `tests/dsp/window_tests.c` for each of the parameterized window functions. For each function, include tests for both `float` and `double` precision variants. Test various `N` values (including `N=1`, `N=2`, and typical larger sizes) and, critically, test with multiple representative parameter values (e.g., different `beta` values for Kaiser, different `alpha` values for Tukey). Utilize the Python-based verification harness (Task 11) to generate reference data from `scipy.signal.windows` for numerical comparison, ensuring results are within defined numerical tolerances.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Run `ctest` to execute all new window tests. Pay close attention to tests with varying parameters to ensure correct behavior across the parameter range. Verify numerical accuracy against SciPy references."
           }
         ]
@@ -1213,7 +1213,7 @@
     ],
     "metadata": {
       "created": "2025-08-10T09:22:31.972Z",
-      "updated": "2025-08-11T11:13:57.665Z",
+      "updated": "2025-08-11T11:28:52.340Z",
       "description": "Tasks for master context"
     }
   }
