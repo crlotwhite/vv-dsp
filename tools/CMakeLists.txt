@@ -18,3 +18,9 @@ add_executable(vv_dsp_dump_fir_coeffs dump_fir_coeffs.c)
 
 add_executable(vv_dsp_dump_dct dump_dct.c)
  target_link_libraries(vv_dsp_dump_dct PRIVATE vv-dsp)
+
+add_executable(vv_dsp_dump_czt dump_czt.c)
+ target_link_libraries(vv_dsp_dump_czt PRIVATE vv-dsp)
+
+add_executable(vv_dsp_bench_czt bench_czt.c)
+ target_link_libraries(vv_dsp_bench_czt PRIVATE vv-dsp)

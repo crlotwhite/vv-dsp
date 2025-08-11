@@ -21,6 +21,9 @@ int vv_dsp_spectral_dummy(void);
 // DCT public API
 #include "vv_dsp/spectral/dct.h"
 
+// CZT public API
+#include "vv_dsp/spectral/czt.h"
+
 #ifdef __cplusplus
 }
 #endif

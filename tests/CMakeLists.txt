@@ -74,3 +74,8 @@ endif()
 # You can run manually: ctest -R bench -V or just execute vv-dsp-bench binary
 add_test(NAME vv-dsp-bench-run COMMAND vv-dsp-bench)
 set_tests_properties(vv-dsp-bench-run PROPERTIES DISABLED TRUE)
+
+# CZT tests
+add_executable(vv-dsp-czt-tests czt_tests.c)
+target_link_libraries(vv-dsp-czt-tests PRIVATE vv-dsp)
+add_test(NAME vv-dsp-czt COMMAND vv-dsp-czt-tests)
