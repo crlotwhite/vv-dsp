@@ -15,6 +15,9 @@
 {"type":"entity","entityType":"development_status","name":"recent_updates","observations":["최근 CMake 설정 업데이트 및 수학 연산 개선","MSVC 호환성 작업 진행","코드 스타일 정리 및 가독성 향상","최근 10개 커밋에서 주요 기능 추가","테스트 시스템 및 빌드 구성 지속 개선"]}
 {"type":"entity","entityType":"development_tools","name":"cli_tools","observations":["tools 디렉터리에 다양한 CLI 도구 포함","dump_fft, dump_fir, dump_iir, dump_stft 등","Python 검증에서 사용되는 비교 툴","벤치마크 및 디버깅 용도"]}
 {"type":"entity","entityType":"testing_strategy","name":"comprehensive_testing","observations":["C 기반 단위 테스트","Python 기반 크로스 검증","CTest 통합 테스트 러너","valgrind 메모리 창 감지 지원","새니타이저 통합 테스트","CTest 라벨 시스템 사용: py, validation","테스트 선택적 실행 가능 (-R 패턴)","메모리 검사용 valgrind 설정 포함","새니타이저 친화적 환경 변수 설정","빌드 후 자동 테스트 실행 태스크들"]}
+{"type":"entity","name":"vv_dsp_analysis_2025","entityType":"code_analysis","observations":["전체 20개 태스크 중 20개 완료 (100%)","86개 서브태스크 중 84개 완료 (97.67%)","2개 서브태스크가 지연됨 (FFTS/FFTW 백엔드)","PRD 대비 구현 상태 평가 완료","핵심 DSP 기능들 모두 구현됨","미구현 영역 식별됨"]}
+{"type":"entity","name":"missing_implementations","entityType":"todo_list","observations":["신호 프레이밍 API (fetch_frame, overlap-add 헬퍼)","Overlap-save 긴 컨볼루션 최적화","NaN/Inf 전파 규칙 명시 및 구현","Denormal flush-to-zero 실제 구현","vcpkg 포트 작성","FFTS 백엔드 구현 (서브태스크 4.6)","FFTW 백엔드 구현 (서브태스크 4.7)","IIR 필터 C++ 래퍼 구현","성능 최적화 검토 필요","실시간 처리 벤치마크 부족"]}
+{"type":"entity","name":"optimization_opportunities","entityType":"performance_analysis","observations":["SIMD 최적화 상태 검토 필요","메모리 정렬 최적화 기회","실시간 48kHz 처리 검증 필요","긴 FIR 필터 FFT 기반 최적화","STFT 프레임 처리 최적화","fastapprox, math_approx 활용도 검토"]}
 {"type":"relation","from":"vv-dsp","to":"core_module","relationType":"contains"}
 {"type":"relation","from":"vv-dsp","to":"spectral_module","relationType":"contains"}
 {"type":"relation","from":"vv-dsp","to":"filter_module","relationType":"contains"}
