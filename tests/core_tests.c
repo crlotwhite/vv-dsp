@@ -64,6 +64,40 @@ int main(void) {
     ok &= (vv_dsp_var(x, 1, &tmp) != VV_DSP_OK);
     ok &= (vv_dsp_diff(x, 1, &tmp) != VV_DSP_OK);
 
+    // --- Statistics utilities ---
+    {
+        vv_dsp_real xrms[4] = { (vv_dsp_real)1, (vv_dsp_real)-1, (vv_dsp_real)1, (vv_dsp_real)-1 };
+        vv_dsp_real rmsv = 0;
+        ok &= (vv_dsp_rms(xrms, 4, &rmsv) == VV_DSP_OK) && approx_equal(rmsv, (vv_dsp_real)1);
+
+        vv_dsp_real mn = 0, mx = 0;
+        ok &= (vv_dsp_peak(x, 5, &mn, &mx) == VV_DSP_OK) && approx_equal(mn, (vv_dsp_real)1) && approx_equal(mx, (vv_dsp_real)5);
+
+        vv_dsp_real cf = 0;
+        ok &= (vv_dsp_crest_factor(xrms, 4, &cf) == VV_DSP_OK) && approx_equal(cf, (vv_dsp_real)1);
+
+        size_t zc = 999;
+        ok &= (vv_dsp_zero_crossing_rate(xrms, 4, &zc) == VV_DSP_OK) && (zc == 3);
+
+        vv_dsp_real skew = 0, kurt = 0;
+        // For symmetric sequence around mean, skew ~ 0
+        vv_dsp_real symm[5] = { (vv_dsp_real)-2, (vv_dsp_real)-1, (vv_dsp_real)0, (vv_dsp_real)1, (vv_dsp_real)2 };
+        ok &= (vv_dsp_skewness(symm, 5, &skew) == VV_DSP_OK) && approx_equal(skew, (vv_dsp_real)0);
+        // Excess kurtosis of this discrete set isn't zero necessarily, just ensure it computes
+        ok &= (vv_dsp_kurtosis(symm, 5, &kurt) == VV_DSP_OK);
+
+        // Autocorrelation simple check on xrms pattern: r[0] = mean(x^2) = 1, r[1] ~ -1, r[2] = 1, biased
+        vv_dsp_real rauto[3] = {0};
+        ok &= (vv_dsp_autocorrelation(xrms, 4, rauto, 3, 1) == VV_DSP_OK);
+        ok &= approx_equal(rauto[0], (vv_dsp_real)1);
+
+        // Cross-correlation with itself should match autocorr biased when using our normalized average definition
+        vv_dsp_real rcross[3] = {0};
+        ok &= (vv_dsp_cross_correlation(xrms, 4, xrms, 4, rcross, 3) == VV_DSP_OK);
+        // Not strictly equal to biased auto since cross divides by overlap count; just ensure sane values
+        ok &= approx_equal(rcross[0], (vv_dsp_real)1);
+    }
+
     if (!ok) {
         fprintf(stderr, "core_tests failed\n");
         return 1;

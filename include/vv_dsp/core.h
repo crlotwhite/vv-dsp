@@ -37,6 +37,19 @@ vv_dsp_status vv_dsp_diff(const vv_dsp_real* x, size_t n, vv_dsp_real* y); // y 
 vv_dsp_real vv_dsp_clamp(vv_dsp_real v, vv_dsp_real lo, vv_dsp_real hi);
 void vv_dsp_flush_denormals(void);
 
+// -------- Statistics & measurement utilities --------
+// All functions operate on vv_dsp_real (float by default, double if VV_DSP_USE_DOUBLE defined)
+vv_dsp_status vv_dsp_rms(const vv_dsp_real* x, size_t n, vv_dsp_real* out);
+vv_dsp_status vv_dsp_peak(const vv_dsp_real* x, size_t n, vv_dsp_real* min_val, vv_dsp_real* max_val);
+vv_dsp_status vv_dsp_crest_factor(const vv_dsp_real* x, size_t n, vv_dsp_real* out);
+vv_dsp_status vv_dsp_zero_crossing_rate(const vv_dsp_real* x, size_t n, size_t* count_out);
+vv_dsp_status vv_dsp_skewness(const vv_dsp_real* x, size_t n, vv_dsp_real* out);
+vv_dsp_status vv_dsp_kurtosis(const vv_dsp_real* x, size_t n, vv_dsp_real* out);
+vv_dsp_status vv_dsp_autocorrelation(const vv_dsp_real* x, size_t n, vv_dsp_real* r, size_t r_len, int biased);
+vv_dsp_status vv_dsp_cross_correlation(const vv_dsp_real* x, size_t nx,
+									   const vv_dsp_real* y, size_t ny,
+									   vv_dsp_real* r, size_t r_len);
+
 #ifdef __cplusplus
 }
 #endif

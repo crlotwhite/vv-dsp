@@ -24,3 +24,6 @@ add_executable(vv_dsp_dump_czt dump_czt.c)
 
 add_executable(vv_dsp_bench_czt bench_czt.c)
  target_link_libraries(vv_dsp_bench_czt PRIVATE vv-dsp)
+
+add_executable(vv_dsp_dump_stats dump_stats.c)
+ target_link_libraries(vv_dsp_dump_stats PRIVATE vv-dsp)

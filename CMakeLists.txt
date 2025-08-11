@@ -151,6 +151,8 @@ if(VV_DSP_BUILD_TESTS AND VERIFY_WITH_PYTHON)
       add_test(NAME py-dct
         COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/python/test_dct.py
           --dct-bin ${DCT_BIN})
+      add_test(NAME py-stats
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/python/test_stats.py)
 
       # Label tests for easy selection
   set_tests_properties(py-fft PROPERTIES LABELS "py;validation")
@@ -158,10 +160,11 @@ if(VV_DSP_BUILD_TESTS AND VERIFY_WITH_PYTHON)
   set_tests_properties(py-stft PROPERTIES LABELS "py;validation")
   set_tests_properties(py-resampler PROPERTIES LABELS "py;validation")
   set_tests_properties(py-dct PROPERTIES LABELS "py;validation")
+  set_tests_properties(py-stats PROPERTIES LABELS "py;validation")
   set_tests_properties(py-czt PROPERTIES LABELS "py;validation")
 
       # Treat Python scripts' exit code 77 as SKIP in CTest
-  set_tests_properties(py-fft py-filters py-stft py-resampler py-dct py-czt
+  set_tests_properties(py-fft py-filters py-stft py-resampler py-dct py-czt py-stats
         PROPERTIES SKIP_RETURN_CODE 77)
 
       # Make Python tests friendlier with sanitizers when enabled
@@ -186,7 +189,7 @@ if(VV_DSP_BUILD_TESTS AND VERIFY_WITH_PYTHON)
       if(_vv_py_env)
         string(JOIN ";" _vv_py_env_str ${_vv_py_env})
         set_tests_properties(
-          py-fft py-filters py-stft py-resampler py-dct py-czt
+          py-fft py-filters py-stft py-resampler py-dct py-czt py-stats
           PROPERTIES ENVIRONMENT "${_vv_py_env_str}"
         )
       endif()
