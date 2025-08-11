@@ -1,6 +1,9 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
+#ifndef M_PI
+#define M_PI 3.14159265358979323846
+#endif
 #include "vv_dsp/spectral.h"
 
 static void gen_sine(vv_dsp_real* x, size_t N, double fs, double f, double phase) {
