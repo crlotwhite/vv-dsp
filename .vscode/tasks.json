@@ -54,6 +54,15 @@
 				"$gcc"
 			],
 			"group": "build"
+		},
+		{
+			"label": "Test MSVC compatibility fixes",
+			"type": "shell",
+			"command": "cmake --build build -j && (cd build && ctest -R \"savgol|filter|cpp-math|cpp-iir\" --output-on-failure)",
+			"problemMatcher": [
+				"$gcc"
+			],
+			"group": "build"
 		}
 	]
 }

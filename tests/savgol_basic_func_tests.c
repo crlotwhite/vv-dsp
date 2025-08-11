@@ -8,7 +8,7 @@ static int almost_equal(vv_dsp_real a, vv_dsp_real b, vv_dsp_real tol) {
 
 int main(void) {
     int fails = 0;
-    const int N = 9;
+    #define N 9
     vv_dsp_real x[N];
     for (int i=0;i<N;++i) x[i] = (vv_dsp_real)i; // linear ramp
     vv_dsp_real y[N];

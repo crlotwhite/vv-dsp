@@ -9,6 +9,9 @@ int main(){
     std::vector<Real> x(16, 1), y(16, 0);
     for(size_t i=0;i<x.size();++i) y[i] = biq.process(x[i]);
     // Expect output ~1
-    for(auto v: y) assert(v==1);
+    for(auto v: y) {
+        assert(v==1);
+        (void)v; // Suppress unused variable warning
+    }
     return 0;
 }

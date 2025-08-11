@@ -13,6 +13,10 @@ int main(){
     auto mn = Math::min(std::span<const Real>(x.data(), x.size()));
     auto mx = Math::max(std::span<const Real>(x.data(), x.size()));
     assert(mn==1 && mx==4);
+    
+    // Use the variables to avoid warnings
+    (void)m; (void)v; (void)mn; (void)mx;
+    
     // Strided view: take every other element starting at index 0 => {1,3}
     Math::StridedSpan<const Real> xs(x.data(), 2, 2);
     assert(Math::mean(xs) > Real(1.9f) && Math::mean(xs) < Real(2.1f));

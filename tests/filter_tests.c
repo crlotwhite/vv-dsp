@@ -53,7 +53,9 @@ static void test_iir_apply_two_stage(void) {
     vv_dsp_biquad bqs[2];
     assert(vv_dsp_biquad_init(&bqs[0], 1, 0, 0, 0, 0) == VV_DSP_OK);
     assert(vv_dsp_biquad_init(&bqs[1], 1, 0, 0, 0, 0) == VV_DSP_OK);
-    enum { L = 8 }; vv_dsp_real x[L]; vv_dsp_real y[L];
+    enum { L = 8 }; 
+    vv_dsp_real x[L]; 
+    vv_dsp_real y[L];
     for (size_t i=0;i<L;++i) x[i]=(vv_dsp_real)i*0.1f;
     assert(vv_dsp_iir_apply(bqs, 2, x, y, L) == VV_DSP_OK);
     for (size_t i=0;i<L;++i) assert(fabs((double)(y[i]-x[i]))<1e-6);
