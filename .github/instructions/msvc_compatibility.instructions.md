@@ -140,7 +140,7 @@ if(MSVC)
     # Disable specific warnings that are too strict
     add_compile_options(/wd4101)  # Unreferenced local variable
     add_compile_options(/wd4189)  # Local variable initialized but not referenced
-    
+
     # Enable C99 mode
     set(CMAKE_C_STANDARD 99)
     set(CMAKE_C_STANDARD_REQUIRED ON)
