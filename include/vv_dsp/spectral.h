@@ -18,6 +18,9 @@ int vv_dsp_spectral_dummy(void);
 // STFT/ISTFT public API
 #include "vv_dsp/spectral/stft.h"
 
+// DCT public API
+#include "vv_dsp/spectral/dct.h"
+
 #ifdef __cplusplus
 }
 #endif

@@ -130,6 +130,7 @@ if(VV_DSP_BUILD_TESTS AND VERIFY_WITH_PYTHON)
       set(IIR_BIN $<TARGET_FILE:vv_dsp_dump_iir>)
       set(STFT_BIN $<TARGET_FILE:vv_dsp_dump_stft_roundtrip>)
       set(RESAMPLE_BIN $<TARGET_FILE:vv_dsp_dump_resample>)
+  set(DCT_BIN $<TARGET_FILE:vv_dsp_dump_dct>)
 
       add_test(NAME py-fft
         COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/python/test_fft.py
@@ -143,15 +144,19 @@ if(VV_DSP_BUILD_TESTS AND VERIFY_WITH_PYTHON)
       add_test(NAME py-resampler
         COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/python/test_resampler.py
           --resample-bin ${RESAMPLE_BIN})
+      add_test(NAME py-dct
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/python/test_dct.py
+          --dct-bin ${DCT_BIN})
 
       # Label tests for easy selection
-      set_tests_properties(py-fft PROPERTIES LABELS "py;validation")
-      set_tests_properties(py-filters PROPERTIES LABELS "py;validation")
-      set_tests_properties(py-stft PROPERTIES LABELS "py;validation")
-      set_tests_properties(py-resampler PROPERTIES LABELS "py;validation")
+  set_tests_properties(py-fft PROPERTIES LABELS "py;validation")
+  set_tests_properties(py-filters PROPERTIES LABELS "py;validation")
+  set_tests_properties(py-stft PROPERTIES LABELS "py;validation")
+  set_tests_properties(py-resampler PROPERTIES LABELS "py;validation")
+  set_tests_properties(py-dct PROPERTIES LABELS "py;validation")
 
       # Treat Python scripts' exit code 77 as SKIP in CTest
-      set_tests_properties(py-fft py-filters py-stft py-resampler
+  set_tests_properties(py-fft py-filters py-stft py-resampler py-dct
         PROPERTIES SKIP_RETURN_CODE 77)
 
       # Make Python tests friendlier with sanitizers when enabled
@@ -176,7 +181,7 @@ if(VV_DSP_BUILD_TESTS AND VERIFY_WITH_PYTHON)
       if(_vv_py_env)
         string(JOIN ";" _vv_py_env_str ${_vv_py_env})
         set_tests_properties(
-          py-fft py-filters py-stft py-resampler
+          py-fft py-filters py-stft py-resampler py-dct
           PROPERTIES ENVIRONMENT "${_vv_py_env_str}"
         )
       endif()

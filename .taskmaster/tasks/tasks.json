@@ -810,7 +810,7 @@
         "description": "Implement Discrete Cosine Transform (DCT-II/III) and optional DCT-IV for float/double arrays, with SIMD-friendly loops and plan caching similar to FFT.",
         "details": "Implement `vv_dsp_dct_forward` and `vv_dsp_dct_inverse` functions supporting DCT-II and DCT-III. Optionally, add support for DCT-IV. Functions should handle both `float` and `double` arrays. Design for SIMD-friendly loops to maximize performance and implement a plan caching mechanism similar to the existing FFT module. The implementation should not be restricted to power-of-two sizes. Investigate and, if feasible, reuse the existing FFT backend for DCT computation (e.g., via FFT-based DCT algorithms) to leverage existing optimizations and reduce code duplication. Document the complexity and numerical properties of the implemented DCT algorithms.",
         "testStrategy": "Develop comprehensive unit tests for roundtrip accuracy (forward then inverse transform should restore the original signal) and against known analytical vectors. Define and verify error thresholds comparable to those used for FFT paths. Cross-check outputs against a reliable reference: utilize the Python-based verification harness (Task 11) to compare against SciPy's DCT implementations, and for small sizes, implement a naive O(N^2) reference DCT for cross-validation. Conduct micro-benchmarks for various input sizes, specifically from 64 to 8192, and report time per operation. Integrate all tests (unit tests, reference validation, benchmarks) into the CTest framework.",
-        "status": "pending",
+        "status": "done",
         "dependencies": [
           11,
           12
@@ -925,7 +925,7 @@
     ],
     "metadata": {
       "created": "2025-08-10T09:22:31.972Z",
-      "updated": "2025-08-10T17:40:11.772Z",
+      "updated": "2025-08-11T03:27:35.598Z",
       "description": "Tasks for master context"
     }
   }

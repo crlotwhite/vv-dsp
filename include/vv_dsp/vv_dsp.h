@@ -11,6 +11,7 @@ extern "C" {
 #include "vv_dsp/vv_dsp_math.h"
 #include "vv_dsp/core.h"
 #include "vv_dsp/spectral.h"
+#include "vv_dsp/spectral/dct.h"
 #include "vv_dsp/spectral/fft.h"
 #include "vv_dsp/filter.h"
 #include "vv_dsp/resample.h"

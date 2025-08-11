@@ -15,3 +15,6 @@ add_executable(vv_dsp_dump_resample dump_resample.c)
 
 add_executable(vv_dsp_dump_fir_coeffs dump_fir_coeffs.c)
  target_link_libraries(vv_dsp_dump_fir_coeffs PRIVATE vv-dsp)
+
+add_executable(vv_dsp_dump_dct dump_dct.c)
+ target_link_libraries(vv_dsp_dump_dct PRIVATE vv-dsp)
