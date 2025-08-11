@@ -51,5 +51,6 @@ Testing/
 # IDE configs
 .vs/
 
+# python stuff
 __pycache__/
 .venv/
