@@ -1,3 +1,4 @@
+ 
 cmake_minimum_required(VERSION 3.15)
 
 project(vv-dsp VERSION 0.1.0 LANGUAGES C CXX)
@@ -132,6 +133,7 @@ if(VV_DSP_BUILD_TESTS AND VERIFY_WITH_PYTHON)
   set(RESAMPLE_BIN $<TARGET_FILE:vv_dsp_dump_resample>)
   set(CZT_BIN $<TARGET_FILE:vv_dsp_dump_czt>)
   set(DCT_BIN $<TARGET_FILE:vv_dsp_dump_dct>)
+  set(STATS_BIN $<TARGET_FILE:vv_dsp_dump_stats>)
 
       add_test(NAME py-fft
         COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/python/test_fft.py
@@ -152,7 +154,8 @@ if(VV_DSP_BUILD_TESTS AND VERIFY_WITH_PYTHON)
         COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/python/test_dct.py
           --dct-bin ${DCT_BIN})
       add_test(NAME py-stats
-        COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/python/test_stats.py)
+        COMMAND ${Python3_EXECUTABLE} ${CMAKE_SOURCE_DIR}/python/test_stats.py
+          --stats-bin ${STATS_BIN})
 
       # Label tests for easy selection
   set_tests_properties(py-fft PROPERTIES LABELS "py;validation")
