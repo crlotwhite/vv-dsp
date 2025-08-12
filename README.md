@@ -53,8 +53,30 @@ cmake --build build -j
 
 ### Run Tests
 
+VV-DSP provides comprehensive testing through CTest with multiple test categories:
+
 ```bash
+# Run all tests
 ctest --test-dir build --output-on-failure
+
+# Run only Google Test unit tests  
+ctest --test-dir build -L gtest --output-on-failure
+
+# Run performance benchmarks (non-failing)
+ctest --test-dir build -L benchmark --output-on-failure
+
+# Run traditional C tests only
+ctest --test-dir build -E "gtest|benchmark" --output-on-failure
+```
+
+**Modern Testing with Google Test (when enabled):**
+
+Enable modern testing features with `VV_DSP_USE_GTEST=ON`:
+
+```bash
+cmake -S . -B build -DVV_DSP_USE_GTEST=ON
+cmake --build build -j
+ctest --test-dir build -L gtest --output-on-failure  # 185+ parameterized tests
 ```
 
 ### Generate Documentation
@@ -133,6 +155,40 @@ ctest --test-dir build --output-on-failure
 - **`VV_PY_VERBOSE`** (default: OFF) — Enable verbose Python test output
 - **`VV_PY_RTOL`** — Override relative tolerance (e.g., "5e-5")
 - **`VV_PY_ATOL`** — Override absolute tolerance (e.g., "5e-5")
+
+### CI Integration
+
+Example GitHub Actions workflow for comprehensive testing:
+
+```yaml
+name: VV-DSP CI
+on: [push, pull_request]
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        config:
+          - name: "Standard Tests"
+            cmake_flags: "-DVV_DSP_BUILD_TESTS=ON"
+            test_filter: "-E gtest"
+          - name: "Google Test Suite"  
+            cmake_flags: "-DVV_DSP_USE_GTEST=ON"
+            test_filter: "-L gtest"
+          - name: "Performance Benchmarks"
+            cmake_flags: "-DVV_DSP_USE_GTEST=ON"
+            test_filter: "-L benchmark"
+
+    steps:
+    - uses: actions/checkout@v4
+    - name: Configure CMake
+      run: cmake -S . -B build ${{ matrix.config.cmake_flags }}
+    - name: Build
+      run: cmake --build build -j
+    - name: Test
+      run: ctest --test-dir build ${{ matrix.config.test_filter }} --output-on-failure
+```
 
 ### Performance Optimizations
 

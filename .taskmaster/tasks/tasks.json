@@ -1859,7 +1859,7 @@
         "description": "Integrate Google Test and Google Benchmark into the vv-dsp project, enabling comprehensive unit testing and performance analysis for C functions via C++ wrappers, and configuring for modern CI.",
         "details": "This task involves a comprehensive integration of Google Test for unit testing and Google Benchmark for performance analysis into the vv-dsp C99 library, leveraging C++ wrappers for advanced features and ensuring compatibility with existing build and test infrastructure.\n\n**1. CMake Configuration:**\n*   Modify the top-level `CMakeLists.txt` to find and configure Google Test and Google Benchmark. Utilize `FetchContent` or `find_package` to manage their dependencies.\n*   Introduce a new CMake option `VV_DSP_USE_GTEST` (default `OFF`). If `ON`, enable the build of Google Test and Google Benchmark targets and add `tests/gtest` and `tests/benchmark` as subdirectories.\n*   Ensure the `vv-dsp` library is correctly linked to the test and benchmark executables.\n*   Configure CTest to discover and run Google Test executables, potentially categorizing them with a label (e.g., `gtest`) to allow selective execution.\n\n**2. Google Test Integration (`tests/gtest/`):**\n*   Create C++ test files (e.g., `test_core.cpp`, `test_fft.cpp`, `test_filter.cpp`) mirroring the library's module structure.\n*   For each C function to be tested, include the relevant C header and ensure calls are made through `extern \"C\"` linkage if not already handled by the C headers.\n*   Utilize Google Test's features such as `TEST`, `TEST_F`, `ASSERT_`, `EXPECT_` macros for assertions.\n*   Implement parameterized tests using `testing::ValuesIn` or `testing::Range` to automatically test functions with varying array sizes, data types (float/double), and SIMD configurations (e.g., by passing flags or setting environment variables within the test execution).\n*   Cover edge cases, error conditions, and typical usage scenarios for critical DSP functions.\n\n**3. Google Benchmark Integration (`tests/benchmark/`):**\n*   Create C++ benchmark files (e.g., `bench_fft.cpp`, `bench_filter.cpp`) to measure the performance of key DSP algorithms.\n*   Wrap C functions for benchmarking similar to the Google Test approach.\n*   Use `BENCHMARK`, `BENCHMARK_TEMPLATE`, `BENCHMARK_RANGE`, and `BENCHMARK_F` to define benchmarks.\n*   Measure performance across different input sizes, SIMD settings, and algorithm variations.\n*   Utilize `State::range` for varying input sizes and `State::SetComplexityN` for complexity analysis. Ensure benchmarks provide detailed metrics including mean, median, standard deviation, and percentiles.\n\n**4. Coexistence and CI Configuration:**\n*   Ensure the new Google Test/Benchmark targets do not interfere with the existing CTest-based C tests (`tests/c/`). The build system should allow building and running C tests independently or alongside the new C++ tests.\n*   Provide documentation or conceptual guidance on integrating these tests into a CI pipeline (e.g., GitHub Actions, GitLab CI) to run on pull requests and nightly builds, emphasizing regular benchmark execution for performance regression detection.",
         "testStrategy": "The test strategy will focus on verifying the correct integration, functionality, and performance measurement capabilities of the new Google Test and Google Benchmark setups.\n\n**1. CMake Build and Configuration Verification:**\n*   Build the project locally with `-D VV_DSP_USE_GTEST=OFF` and confirm that only the existing C tests are configured and built, and no Google Test/Benchmark targets are present.\n*   Build the project with `-D VV_DSP_USE_GTEST=ON` and verify that Google Test and Google Benchmark libraries are correctly found/fetched, and their respective targets are configured and built successfully.\n*   Run `ctest` and confirm that it discovers and runs both the existing C tests and the newly integrated Google Test suites when `VV_DSP_USE_GTEST` is `ON`.\n\n**2. Google Test Functional Verification:**\n*   Execute all Google Test suites (`ctest -L gtest` or by running the generated executables directly).\n*   Verify that all tests pass, covering various input sizes, data types (float/double), and SIMD configurations as defined by parameterized tests.\n*   Specifically, confirm the correctness of the C function wrappers and their interaction with Google Test assertions, ensuring numerical accuracy and expected behavior.\n*   For parameterized tests, verify that all specified parameter combinations are executed and yield correct results.\n\n**3. Google Benchmark Performance Verification:**\n*   Execute all Google Benchmark executables (`ctest -L benchmark` or by running the binaries directly).\n*   Analyze the output to ensure that performance metrics (mean, standard deviation, percentiles) are generated as expected.\n*   Verify that benchmarks run for the intended range of input sizes and configurations.\n*   (Manual/CI step): Compare initial benchmark results against a baseline to ensure the setup is correctly measuring performance and can detect potential regressions or improvements.\n\n**4. Coexistence and Stability Verification:**\n*   Run all tests (C, Google Test, Google Benchmark) simultaneously to ensure there are no conflicts, build issues, or runtime errors when all testing frameworks are active.\n*   Verify that the existing C tests continue to function correctly and produce expected results after the integration of the new frameworks.",
-        "status": "in-progress",
+        "status": "done",
         "dependencies": [
           1,
           2,
@@ -1901,7 +1901,7 @@
               "30.2"
             ],
             "details": "Create `tests/gtest/test_fft.cpp` and `tests/gtest/test_stft.cpp`. Use `TEST_P` and `INSTANTIATE_TEST_SUITE_P` with `testing::Combine` and `testing::Values` to test different FFT lengths (e.g., powers of 2, non-powers of 2). For STFT, verify the perfect reconstruction property (ISTFT(STFT(x)) ≈ x) for various window and hop size configurations.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Execute the test suite and confirm that all parameterized tests for FFT and STFT pass. Check for correctness against reference implementations like NumPy/SciPy for various configurations. Ensure edge cases like small or odd-sized inputs are covered."
           },
           {
@@ -1912,7 +1912,7 @@
               "30.1"
             ],
             "details": "Create `tests/benchmark/CMakeLists.txt` to define the benchmark executable, linking against `vv-dsp` and `benchmark::benchmark_main`. Create `bench_fft.cpp` and `bench_window.cpp`. Use `BENCHMARK_RANGE` to measure FFT performance for various transform sizes (e.g., from 64 to 8192). Use `State::SetComplexityN` to verify algorithmic complexity (e.g., O(N log N) for FFT).",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Run the benchmark executable in a release build configuration (`-DCMAKE_BUILD_TYPE=Release`). Analyze the console output to confirm that performance scales as expected. Establish a baseline performance measurement for future regression testing."
           },
           {
@@ -1924,7 +1924,7 @@
               "30.4"
             ],
             "details": "In the root `CMakeLists.txt`, ensure CTest is enabled via `include(CTest)`. Use `gtest_discover_tests` to add all Google Test cases to CTest's test list. Add the benchmark executable as a CTest test with the `gtest` label, ensuring it runs but does not fail the build. Update documentation with instructions for running `ctest` and `ctest -L gtest`, and provide an example GitHub Actions workflow snippet.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Run `ctest -C Release` from the build directory. Verify that it discovers and runs all tests from `tests/gtest/`. Verify that `ctest -L gtest` runs only the unit tests. Confirm that the existing C tests (if any) still run as expected and that the build does not fail due to benchmark execution."
           }
         ]
@@ -1932,7 +1932,7 @@
     ],
     "metadata": {
       "created": "2025-08-10T09:22:31.972Z",
-      "updated": "2025-08-12T14:13:58.833Z",
+      "updated": "2025-08-12T15:37:02.409Z",
       "description": "Tasks for master context"
     }
   }
