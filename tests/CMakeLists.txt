@@ -89,6 +89,11 @@ add_executable(vv-dsp-cpp-iir test_cpp_iir.cpp)
 target_link_libraries(vv-dsp-cpp-iir PRIVATE vv-dsp)
 add_test(NAME vv-dsp-cpp-iir COMMAND $<TARGET_FILE:vv-dsp-cpp-iir>)
 
+# IIRFilter C++ wrapper comprehensive tests
+add_executable(vv-dsp-iirfilter-tests test_IIRFilter.cpp)
+target_link_libraries(vv-dsp-iirfilter-tests PRIVATE vv-dsp)
+add_test(NAME vv-dsp-iirfilter COMMAND $<TARGET_FILE:vv-dsp-iirfilter-tests>)
+
 # Simple micro-benchmark (not part of pass/fail by default)
 add_executable(vv-dsp-bench bench_fft_stft.cpp)
 target_link_libraries(vv-dsp-bench PRIVATE vv-dsp)

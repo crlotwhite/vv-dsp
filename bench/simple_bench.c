@@ -1,12 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#include <unistd.h>  // For alarm() function
 #include "bench_framework.h"
 
 // Forward declaration
 extern void run_stft_benchmarks(vv_bench_suite* suite);
 
-int main() {
+int main(void) {
     printf("Starting simple benchmark test...\n");
 
     // Initialize suite

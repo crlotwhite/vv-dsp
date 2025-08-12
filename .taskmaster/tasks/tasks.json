@@ -1717,7 +1717,7 @@
         "description": "Implement a modern, exception-safe C++ wrapper (`vv::dsp::IIRFilter`) for the IIR filtering functionality, providing a `std::span`-based interface, RAII resource management, and support for real-time streaming processing.",
         "details": "This task involves creating a high-level, modern C++ interface for the underlying IIR biquad filter implementation, following best practices for safety, performance, and usability.\n\n**1. Class Design (`vv::dsp::IIRFilter`)**\n*   **Header:** Create a new header file `include/vv-dsp/filter/IIRFilter.hpp`.\n*   **Namespace:** The class will reside within the `vv::dsp` namespace.\n*   **RAII Compliance:** The constructor will acquire all necessary resources (e.g., memory for biquad coefficients and state). The destructor will be responsible for releasing these resources, ensuring no memory leaks. The class should be non-copyable (`delete` copy constructor and copy assignment) but movable (`default` or implement move constructor and move assignment) to allow for efficient ownership transfer.\n*   **State Management:** The class must internally manage the state (delay lines `z1`, `z2`) for each biquad section, preserving it between calls to the processing function.\n\n**2. Modern C++ Interface**\n*   **Constructors/Factories:**\n    *   Provide a constructor that accepts a `std::vector` or `std::span` of biquad coefficient structures.\n    *   Consider static factory functions for common filter types, e.g., `static IIRFilter createLowpass(double sampleRate, double frequency, double q);`.\n    *   Constructors should throw `std::invalid_argument` for invalid parameters (e.g., empty coefficient list) and `std::bad_alloc` on memory allocation failure.\n*   **Processing Method:**\n    *   Implement the main processing function with the signature: `void process(std::span<const float> input, std::span<float> output);`.\n    *   This method must be `noexcept` to be safely used in real-time contexts. Precondition checks (e.g., `input.size() == output.size()`) should be handled with assertions (`assert`).\n    *   It must correctly handle both in-place (`input.data() == output.data()`) and out-of-place processing.\n*   **Control Methods:**\n    *   Implement a `void reset()` method to clear the internal filter state (zero out the delay lines).\n\n**3. Biquad Chain Management**\n*   The `process` method will efficiently iterate through the internal chain of biquad sections for each sample, applying them in series.\n*   The implementation should leverage the denormal flushing mechanism from Task 25 for performance-critical real-time safety.\n\n**4. Exception Safety**\n*   Adhere to the strong exception safety guarantee for constructors. If a constructor throws, the program state should be as if the object was never created.\n*   The `process` and `reset` methods, being core to real-time loops, must be `noexcept`.",
         "testStrategy": "Unit tests will be written using the project's C++ testing framework (e.g., GTest) and placed in `tests/cpp/filter/test_IIRFilter.cpp`.\n\n**1. Constructor and Resource Management Tests:**\n*   **Valid Construction:** Verify that an `IIRFilter` object can be created successfully with a valid set of biquad coefficients.\n*   **Invalid Construction:** Verify that the constructor throws `std::invalid_argument` when provided with an empty list of coefficients.\n*   **Move Semantics:** Test that move construction and move assignment correctly transfer ownership of the filter state, leaving the moved-from object in a valid, empty state.\n*   **Copy Prohibition:** Confirm that attempts to copy-construct or copy-assign an `IIRFilter` object result in a compile-time error.\n\n**2. Functional Correctness Tests:**\n*   **Impulse Response:** Feed a single impulse (`[1.0, 0.0, ...]`) into the filter and assert that the output matches the pre-calculated theoretical impulse response of the biquad chain.\n*   **Frequency Response:** For a known filter (e.g., a 1kHz low-pass at 48kHz sample rate), process sine waves at various frequencies (e.g., 100Hz, 1kHz, 5kHz) and verify that the output signal's amplitude is attenuated according to the filter's design.\n*   **In-Place Processing:** Run tests specifically where the input and output spans point to the same memory location to ensure correctness.\n\n**3. State Management Tests:**\n*   **Streaming Processing:** Process a long audio signal by breaking it into multiple small, consecutive chunks. Assert that the final output is bit-for-bit identical to the output produced when processing the entire signal in a single call. This validates the preservation of the filter's internal state.\n*   **Reset Functionality:** Process a block of data, record the output, call `reset()`, process the same block of data again, and assert that the output is identical to the first run.",
-        "status": "pending",
+        "status": "done",
         "dependencies": [
           23,
           25
@@ -1729,8 +1729,8 @@
             "title": "Define IIRFilter Class Skeleton and RAII Semantics",
             "description": "Create the `IIRFilter.hpp` header file and define the `vv::dsp::IIRFilter` class structure. Implement the core RAII pattern by managing all resource ownership within the class, and enforce move-only semantics by deleting copy operations and implementing move operations.",
             "dependencies": [],
-            "details": "In `include/vv-dsp/filter/IIRFilter.hpp`, define the `vv::dsp::IIRFilter` class. Declare private member variables for storing biquad coefficients and the corresponding state variables (e.g., using `std::vector`). Implement the destructor to handle resource cleanup. Implement the move constructor and move assignment operator, and explicitly delete the copy constructor and copy assignment operator to enforce move-only ownership.",
-            "status": "pending",
+            "details": "In `include/vv-dsp/filter/IIRFilter.hpp`, define the `vv::dsp::IIRFilter` class. Declare private member variables for storing biquad coefficients and the corresponding state variables (e.g., using `std::vector`). Implement the destructor to handle resource cleanup. Implement the move constructor and move assignment operator, and explicitly delete the copy constructor and copy assignment operator to enforce move-only ownership.\n<info added on 2025-08-12T09:17:28.104Z>\nThe `biquads_` member variable is declared as `std::vector<vv_dsp_biquad>`. The class API, including the constructor, `process`, `reset`, and factory functions, has already been declared.\n</info added on 2025-08-12T09:17:28.104Z>",
+            "status": "done",
             "testStrategy": "Initial verification will be through successful compilation. Formal unit tests will confirm that the class is non-copyable and movable in the final testing subtask."
           },
           {
@@ -1740,8 +1740,8 @@
             "dependencies": [
               "28.1"
             ],
-            "details": "The constructor `IIRFilter(std::span<const BiquadCoeffs> coeffs)` will copy the provided coefficients into an internal `std::vector`. It will also allocate a corresponding `std::vector` for the biquad state variables (`z1`, `z2`) and initialize them to zero. It must throw `std::invalid_argument` if the input coefficient span is empty. If any memory allocation fails (throwing `std::bad_alloc`), no resources should be leaked.",
-            "status": "pending",
+            "details": "The constructor `IIRFilter(std::span<const BiquadCoeffs> coeffs)` will copy the provided coefficients into an internal `std::vector`. It will also allocate a corresponding `std::vector` for the biquad state variables (`z1`, `z2`) and initialize them to zero. It must throw `std::invalid_argument` if the input coefficient span is empty. If any memory allocation fails (throwing `std::bad_alloc`), no resources should be leaked.\n<info added on 2025-08-12T09:19:22.442Z>\nThe implementation will involve creating the source file at `/src/filter/IIRFilter.cpp` and updating `CMakeLists.txt` to include it. The `BiquadCoeffs` type mentioned in the constructor signature refers to `vv_dsp_biquad`. A private helper function, `validateCoefficients()`, must be implemented to ensure the stability and finiteness of the provided coefficients, throwing an appropriate exception if validation fails. Furthermore, implement static factory methods (`createLowpass`, `createHighpass`, `createBandpass`) that calculate coefficients using the Bilinear transform. Ensure MSVC compatibility, particularly regarding type casting (e.g., `static_cast`).\n</info added on 2025-08-12T09:19:22.442Z>",
+            "status": "done",
             "testStrategy": "Unit tests will verify that the constructor throws `std::invalid_argument` for empty coefficient lists and that, upon valid construction, the internal coefficient and state vectors are correctly sized and initialized."
           },
           {
@@ -1753,7 +1753,7 @@
               "28.2"
             ],
             "details": "The `process` method will contain the main DSP loop. For each sample in the input span, it will iterate through the internal chain of biquad sections, applying each filter and updating its state. The implementation must use `assert` for precondition checks (e.g., `input.size() == output.size()`) and be marked `noexcept`. It should also integrate the denormal flushing mechanism from Task 25 to prevent performance degradation in real-time threads.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit tests will process known signals (impulse, step, sine waves) and verify the output against a reference implementation. Tests will cover both in-place (`input.data() == output.data()`) and out-of-place scenarios."
           },
           {
@@ -1764,7 +1764,7 @@
               "28.2"
             ],
             "details": "Implement `void reset() noexcept;` to zero out all internal state variables. Implement static factory functions like `static IIRFilter createLowpass(double sampleRate, double frequency, double q);`. These factories will calculate the necessary biquad coefficients based on the provided parameters and return a fully constructed `IIRFilter` object.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Unit tests will verify that calling `reset()` clears the filter's memory, which can be confirmed by processing a signal, resetting, and processing it again to get the same result as the first time. Factory functions will be tested by creating filters and verifying their frequency response characteristics."
           },
           {
@@ -1777,8 +1777,8 @@
               "28.3",
               "28.4"
             ],
-            "details": "The test suite will include: 1. Constructor tests (valid/invalid arguments, exception safety). 2. Move semantics tests (move construction and assignment). 3. Processing tests (impulse/step response, sine wave filtering, in-place/out-of-place). 4. State management tests (verify state is preserved between `process` calls). 5. Control method tests (verify `reset()` functionality). 6. Factory function tests (verify filters have correct characteristics).",
-            "status": "pending",
+            "details": "The test suite will include: 1. Constructor tests (valid/invalid arguments, exception safety). 2. Move semantics tests (move construction and assignment). 3. Processing tests (impulse/step response, sine wave filtering, in-place/out-of-place). 4. State management tests (verify state is preserved between `process` calls). 5. Control method tests (verify `reset()` functionality). 6. Factory function tests (verify filters have correct characteristics).\n<info added on 2025-08-12T09:23:56.979Z>\nAdditionally, the test suite includes refinements to constructor tests to cover empty coefficient array error handling; refinements to processing tests to include pass-through and gain scenarios; refinements to control method tests to specifically verify state initialization with a delay filter; refinements to factory function tests to validate `createLowpass`, `createHighpass`, and `createBandpass`; new test groups for multi-stage processing (e.g., a 2-stage gain filter chain); and new test groups for edge cases (e.g., empty input, single sample). Empty vector handling in the `IIRFilter` class was also improved for real-time safety based on test findings.\n</info added on 2025-08-12T09:23:56.979Z>",
+            "status": "done",
             "testStrategy": "This subtask is the implementation of the test strategy for the entire `IIRFilter` component. It will use GTest assertions to check for numerical accuracy, correct object states, and expected exceptions."
           }
         ]
@@ -1856,7 +1856,7 @@
     ],
     "metadata": {
       "created": "2025-08-10T09:22:31.972Z",
-      "updated": "2025-08-12T07:11:18.445Z",
+      "updated": "2025-08-12T09:24:08.991Z",
       "description": "Tasks for master context"
     }
   }
