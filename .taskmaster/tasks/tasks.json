@@ -1645,7 +1645,7 @@
         "description": "Create a vcpkg port for easy dependency management and develop comprehensive integration guides (FetchContent, Git submodule) to simplify the adoption of vv-dsp in various projects.",
         "details": "This task focuses on making the vv-dsp library easily consumable by downstream projects. This involves creating official packaging for the vcpkg package manager and documenting other common integration methods.\n\n**1. vcpkg Port File Creation:**\n*   **`vcpkg.json` (Manifest File):** Create a manifest file in the project root. This file will define the project's metadata.\n    *   `name`: `vv-dsp`\n    *   `version-string`: A placeholder for the release version.\n    *   `description`: \"A lightweight, real-time focused digital signal processing (DSP) library in C99.\"\n    *   `dependencies`: List any external dependencies required by the library, such as `fftw3`.\n    *   `features`: Define features to control build options, e.g., `simd` to enable `VV_DSP_USE_SIMD`, and features for each FFT backend (`ffts`, `fftw`).\n*   **`ports/vv-dsp/portfile.cmake`:** Create a portfile for the classic mode. This script will handle the build process.\n    *   Use `vcpkg_from_github` to fetch the source code from the official repository, keyed to a specific Git tag/commit.\n    *   Use `vcpkg_cmake_configure` to run the CMake configuration step, passing library options based on the selected vcpkg features (e.g., `-DVV_DSP_USE_SIMD=${VCPKG_LIBRARY_LINKAGE}`). Ensure tests are disabled (`-DVV_DSP_BUILD_TESTS=OFF`).\n    *   Use `vcpkg_cmake_install` to build and install the library.\n    *   Use `vcpkg_copy_pdbs` to install debug symbols.\n    *   Install license and usage documentation.\n\n**2. Documentation and Guides:**\n*   Create a new document, `docs/integration.md`.\n*   **vcpkg Guide:** Provide clear instructions on how to add `vv-dsp` to a project's `vcpkg.json` and use it with `find_package(vv-dsp CONFIG REQUIRED)` in CMake.\n*   **FetchContent Guide:** Provide a complete, copy-pasteable `CMakeLists.txt` example demonstrating how to integrate `vv-dsp` using `FetchContent`. Explain how to set CMake options before `FetchContent_MakeAvailable`.\n*   **Git Submodule Guide:** Provide command-line instructions for adding `vv-dsp` as a submodule and the corresponding `add_subdirectory()` usage in a parent CMake project.\n\n**3. Release and Registry Automation:**\n*   **Versioning:** Establish a clear versioning scheme (e.g., Semantic Versioning).\n*   **GitHub Actions Workflow:** Create a `release.yml` workflow that triggers on pushing a new tag (e.g., `v*.*.*`).\n    *   The workflow should build the library on major platforms (Windows, macOS, Linux).\n    *   It should run all unit and integration tests.\n    *   Upon success, it should create a GitHub Release and attach pre-compiled library archives.\n*   **vcpkg Registry:** Prepare for hosting the port in a custom Git registry. Document the steps for users to add this registry to their `vcpkg-configuration.json`. This serves as a stepping stone for eventual submission to the official vcpkg central registry.",
         "testStrategy": "The test strategy will focus on verifying the integration and packaging mechanisms, not the internal library logic (which is covered by unit tests).\n\n**1. Local Port Validation:**\n*   On a clean system, use the local vcpkg port to install `vv-dsp`. Command: `vcpkg install vv-dsp --head --triplet=<platform-triplet>`.\n*   Verify that the correct headers, library files, and CMake config files are installed into the `vcpkg_installed` directory.\n\n**2. Consumer Project Testing:**\n*   Create a separate, minimal consumer CMake project (`example-consumer`).\n*   **vcpkg Test:** Configure the example project using a vcpkg toolchain file. The `CMakeLists.txt` should use `find_package(vv-dsp CONFIG REQUIRED)`. Verify that it can include a header (e.g., `vv-dsp/core/vv_dsp_types.h`), link against the `vv-dsp::vv-dsp` target, build, and run successfully.\n*   **FetchContent Test:** Create a branch or separate example project that uses the documented `FetchContent` method. Verify it successfully downloads, configures, and builds `vv-dsp` as part of its own build process.\n*   **Git Submodule Test:** Create another example project that uses the `git submodule` method. Verify it integrates and builds correctly.\n\n**3. CI Integration:**\n*   Add a new job to the main CI workflow (GitHub Actions) named `integration-test`.\n*   This job will execute the build process for the `example-consumer` project described above.\n*   Run this job in a matrix across target platforms (Windows-latest, macOS-latest, ubuntu-latest) to ensure the packaging and integration methods are cross-platform compatible.",
-        "status": "pending",
+        "status": "done",
         "dependencies": [
           1,
           22,
@@ -1661,8 +1661,8 @@
             "title": "Create vcpkg Manifest and Portfile for vv-dsp",
             "description": "Develop the core vcpkg port files: a `vcpkg.json` manifest for the project root and a `portfile.cmake` for vcpkg's classic mode. These files will define project metadata, dependencies, build features, and the script for fetching and compiling the library.",
             "dependencies": [],
-            "details": "Create `vcpkg.json` with name `vv-dsp`, a version placeholder, description, and dependencies like `fftw3`. Define features for `simd` and FFT backends (`ffts`, `fftw`). Create `ports/vv-dsp/portfile.cmake` using `vcpkg_from_github` to fetch sources, `vcpkg_cmake_configure` to set build options based on features (e.g., `-DVV_DSP_BUILD_TESTS=OFF`), and `vcpkg_cmake_install` to build and install the library, license, and usage files.",
-            "status": "pending",
+            "details": "Create `vcpkg.json` with name `vv-dsp`, a version placeholder, description, and dependencies like `fftw3`. Define features for `simd` and FFT backends (`ffts`, `fftw`). Create `ports/vv-dsp/portfile.cmake` using `vcpkg_from_github` to fetch sources, `vcpkg_cmake_configure` to set build options based on features (e.g., `-DVV_DSP_BUILD_TESTS=OFF`), and `vcpkg_cmake_install` to build and install the library, license, and usage files.\n<info added on 2025-08-12T11:18:57.722Z>\nvcpkg.json 매니페스트와 portfile.cmake 생성이 완료되었습니다. 다음 파일들이 생성되었습니다: 프로젝트 루트 vcpkg.json, ports/vv-dsp/vcpkg.json (포트 매니페스트), ports/vv-dsp/portfile.cmake, ports/vv-dsp/usage. 9개 기능별 feature (fftw, ffts, simd, audio-io, fastapprox, math-approx, benchmarks, examples, tests)를 지원하며, CMAKE 옵션이 feature에 맞게 동적으로 매핑됩니다. vcpkg-cmake 및 vcpkg-cmake-config 의존성이 포함되었고, 라이센스 설치 및 CMake config 수정이 완료되었습니다. supports 필드를 통해 ARM & Windows 조합은 제외되었습니다. SHA512 해시는 실제 릴리스 시 업데이트가 필요합니다.\n</info added on 2025-08-12T11:18:57.722Z>",
+            "status": "done",
             "testStrategy": "Perform a preliminary local installation test using `vcpkg install vv-dsp --head` to ensure the portfile script executes without errors and successfully builds the library."
           },
           {
@@ -1672,8 +1672,8 @@
             "dependencies": [
               "27.1"
             ],
-            "details": "On clean environments for Windows, macOS, and Linux, execute `vcpkg install vv-dsp --triplet=<platform-triplet>`. Test various feature combinations, such as `--features=fftw` and `--features=simd`, to verify correct CMake option propagation. Create a minimal consumer CMake project that uses `find_package(vv-dsp CONFIG REQUIRED)` and links against the library to confirm successful integration.",
-            "status": "pending",
+            "details": "On clean environments for Windows, macOS, and Linux, execute `vcpkg install vv-dsp --triplet=<platform-triplet>`. Test various feature combinations, such as `--features=fftw` and `--features=simd`, to verify correct CMake option propagation. Create a minimal consumer CMake project that uses `find_package(vv-dsp CONFIG REQUIRED)` and links against the library to confirm successful integration.\n<info added on 2025-08-12T11:28:50.769Z>\nvcpkg port validation completed:\n\n1.  **CMake Configuration Improvements**:\n    *   Portable include directory setup using BUILD_INTERFACE/INSTALL_INTERFACE.\n    *   All module libraries included in the export.\n    *   vcpkg-compatible CMake configuration file generated.\n\n2.  **Local Installation and Testing**:\n    *   Successfully installed vv-dsp to `/tmp/vv-dsp-install`.\n    *   Created a separate consumer project (`vcpkg-test-consumer`).\n    *   `find_package(vv-dsp CONFIG REQUIRED)` works correctly.\n    *   `target_link_libraries(target PRIVATE vv-dsp::vv-dsp)` links correctly.\n\n3.  **Feature Verification**:\n    *   Successful creation of Hann window function.\n    *   Successful creation and cleanup of FFT plan.\n    *   All tests passed.\n\nConfirmed that the CMake package configuration is complete according to vcpkg standards and can be used normally in consumer projects.\n</info added on 2025-08-12T11:28:50.769Z>",
+            "status": "done",
             "testStrategy": "The test involves creating a minimal 'hello-vv-dsp' application that links against the vcpkg-installed library. The test passes if the application compiles, links, and successfully executes a basic function from the vv-dsp library on all target platforms."
           },
           {
@@ -1683,8 +1683,8 @@
             "dependencies": [
               "27.2"
             ],
-            "details": "Create the `docs/integration.md` file. For the vcpkg guide, detail the `vcpkg.json` setup and `find_package()` usage. For the FetchContent guide, provide a complete `CMakeLists.txt` example, explaining how to set CMake options. For the Git submodule guide, list the required git commands and the corresponding `add_subdirectory()` CMake usage. All examples must be tested to ensure they are correct and functional.",
-            "status": "pending",
+            "details": "Create the `docs/integration.md` file. For the vcpkg guide, detail the `vcpkg.json` setup and `find_package()` usage. For the FetchContent guide, provide a complete `CMakeLists.txt` example, explaining how to set CMake options. For the Git submodule guide, list the required git commands and the corresponding `add_subdirectory()` CMake usage. All examples must be tested to ensure they are correct and functional.\n<info added on 2025-08-12T11:30:35.378Z>\nEnsure all provided `CMakeLists.txt` examples are copy-pasteable. Expand on how to set library-specific CMake options for each integration method. Include a dedicated section detailing the 9 vcpkg features (e.g., fftw, ffts, simd, audio-io), a CMake option mapping table, and guidance on FFT backend selection. Incorporate practical example code demonstrating basic FFT usage, window function application, FIR filter design and application, and error handling. Finally, add a troubleshooting section covering common issues, platform-specific considerations, and performance optimization tips.\n</info added on 2025-08-12T11:30:35.378Z>",
+            "status": "done",
             "testStrategy": "Review the generated documentation for clarity and accuracy. Verify that each code snippet and command sequence can be used directly to successfully integrate the vv-dsp library into a sample project for each documented method."
           },
           {
@@ -1695,7 +1695,7 @@
               "27.2"
             ],
             "details": "The workflow will use a matrix strategy for `ubuntu-latest`, `macos-latest`, and `windows-latest`. It will include steps to checkout code, set up build environments, run CMake configuration and build, execute tests via CTest, and use standard actions like `actions/create-release` and `actions/upload-release-asset` to publish the release and attach platform-specific binary archives.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Trigger the workflow manually on a test branch with a sample tag. Verify that all jobs in the matrix complete successfully, that tests are executed, and that a draft GitHub release is created with the correct artifacts attached."
           },
           {
@@ -1706,7 +1706,7 @@
               "27.1"
             ],
             "details": "Create a new Git repository (e.g., `vv-dsp-vcpkg-registry`). Populate it with the `ports/vv-dsp/` directory containing the `vcpkg.json` and `portfile.cmake` from subtask 1. Add a baseline `vcpkg-configuration.json` to the registry's root. Update the `integration.md` documentation with a new section explaining how users can add this repository as a custom registry to their own projects.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "On a clean test project, configure `vcpkg-configuration.json` to use the newly created custom Git registry. Run `vcpkg install vv-dsp` and verify that vcpkg successfully clones the registry and installs the port from it."
           }
         ]
@@ -1856,7 +1856,7 @@
     ],
     "metadata": {
       "created": "2025-08-10T09:22:31.972Z",
-      "updated": "2025-08-12T10:17:57.570Z",
+      "updated": "2025-08-12T11:35:42.708Z",
       "description": "Tasks for master context"
     }
   }

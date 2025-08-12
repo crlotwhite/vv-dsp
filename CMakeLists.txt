@@ -301,7 +301,10 @@ endif()
 
 # Umbrella interface target that aggregates module libraries
 add_library(vv-dsp INTERFACE)
-target_include_directories(vv-dsp INTERFACE ${VV_DSP_INCLUDE_DIR})
+target_include_directories(vv-dsp INTERFACE
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/include>
+  $<INSTALL_INTERFACE:include>
+)
 
 # Link external dependencies to umbrella target
 if(VV_DSP_USE_FASTAPPROX AND TARGET fastapprox)
@@ -451,3 +454,82 @@ if(VV_DSP_BUILD_TESTS AND VERIFY_WITH_PYTHON)
     message(STATUS "Python3 interpreter not found; Python-based verification tests will be skipped by CTest.")
   endif()
 endif()
+
+# Package configuration for installation
+include(CMakePackageConfigHelpers)
+
+# Set CMake install paths
+include(GNUInstallDirs)
+
+# Collect all targets for export
+set(VV_DSP_TARGETS vv-dsp)
+
+# Add module targets if they exist
+if(TARGET vv-dsp-core)
+  list(APPEND VV_DSP_TARGETS vv-dsp-core)
+endif()
+if(TARGET vv-dsp-spectral)
+  list(APPEND VV_DSP_TARGETS vv-dsp-spectral)
+endif()
+if(TARGET vv-dsp-filter)
+  list(APPEND VV_DSP_TARGETS vv-dsp-filter)
+endif()
+if(TARGET vv-dsp-resample)
+  list(APPEND VV_DSP_TARGETS vv-dsp-resample)
+endif()
+if(TARGET vv-dsp-envelope)
+  list(APPEND VV_DSP_TARGETS vv-dsp-envelope)
+endif()
+if(TARGET vv-dsp-window)
+  list(APPEND VV_DSP_TARGETS vv-dsp-window)
+endif()
+if(TARGET vv-dsp-adapters)
+  list(APPEND VV_DSP_TARGETS vv-dsp-adapters)
+endif()
+if(TARGET vv-dsp-features)
+  list(APPEND VV_DSP_TARGETS vv-dsp-features)
+endif()
+if(TARGET vv-dsp-audio)
+  list(APPEND VV_DSP_TARGETS vv-dsp-audio)
+endif()
+
+# Install all targets
+install(TARGETS ${VV_DSP_TARGETS}
+  EXPORT vv-dsp-targets
+  LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  ARCHIVE DESTINATION ${CMAKE_INSTALL_LIBDIR}
+  RUNTIME DESTINATION ${CMAKE_INSTALL_BINDIR}
+  INCLUDES DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+)
+
+# Install header files
+install(DIRECTORY include/
+  DESTINATION ${CMAKE_INSTALL_INCLUDEDIR}
+  FILES_MATCHING PATTERN "*.h"
+)
+
+# Install CMake targets file
+install(EXPORT vv-dsp-targets
+  FILE vv-dsp-targets.cmake
+  NAMESPACE vv-dsp::
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/vv-dsp
+)
+
+# Generate and install config files
+configure_package_config_file(
+  cmake/vv-dsp-config.cmake.in
+  "${CMAKE_CURRENT_BINARY_DIR}/vv-dsp-config.cmake"
+  INSTALL_DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/vv-dsp
+)
+
+write_basic_package_version_file(
+  "${CMAKE_CURRENT_BINARY_DIR}/vv-dsp-config-version.cmake"
+  VERSION ${PROJECT_VERSION}
+  COMPATIBILITY SameMajorVersion
+)
+
+install(FILES
+  "${CMAKE_CURRENT_BINARY_DIR}/vv-dsp-config.cmake"
+  "${CMAKE_CURRENT_BINARY_DIR}/vv-dsp-config-version.cmake"
+  DESTINATION ${CMAKE_INSTALL_LIBDIR}/cmake/vv-dsp
+)

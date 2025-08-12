@@ -1,0 +1,18 @@
+@PACKAGE_INIT@
+
+# vv-dsp package config
+
+include(CMakeFindDependencyMacro)
+
+# Handle optional dependencies based on features
+get_filename_component(_vv_dsp_root "${CMAKE_CURRENT_LIST_DIR}" ABSOLUTE)
+
+# Include the targets file
+include("${CMAKE_CURRENT_LIST_DIR}/vv-dsp-targets.cmake")
+
+# Define alias target for backwards compatibility
+if(NOT TARGET vv-dsp::vv-dsp)
+    add_library(vv-dsp::vv-dsp ALIAS vv-dsp)
+endif()
+
+check_required_components(vv-dsp)

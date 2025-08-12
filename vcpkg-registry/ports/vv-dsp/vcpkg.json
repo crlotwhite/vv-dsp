@@ -1,0 +1,56 @@
+{
+  "name": "vv-dsp",
+  "version-string": "0.1.0",
+  "description": "A lightweight, real-time focused digital signal processing (DSP) library in C99",
+  "homepage": "https://github.com/crlotwhite/vv-dsp",
+  "license": "MIT",
+  "supports": "!(arm & windows)",
+  "dependencies": [
+    {
+      "name": "vcpkg-cmake",
+      "host": true
+    },
+    {
+      "name": "vcpkg-cmake-config",
+      "host": true
+    }
+  ],
+  "features": {
+    "fftw": {
+      "description": "Enable FFTW3 backend for FFT operations",
+      "dependencies": ["fftw3"]
+    },
+    "ffts": {
+      "description": "Enable FFTS backend for FFT operations",
+      "dependencies": ["ffts"]
+    },
+    "simd": {
+      "description": "Enable SIMD optimizations (SSE4.1, AVX2, NEON)",
+      "dependencies": []
+    },
+    "audio-io": {
+      "description": "Enable WAV audio file I/O utilities",
+      "dependencies": []
+    },
+    "fastapprox": {
+      "description": "Enable fast math approximations using fastapprox",
+      "dependencies": []
+    },
+    "math-approx": {
+      "description": "Enable DSP-optimized math approximations",
+      "dependencies": []
+    },
+    "benchmarks": {
+      "description": "Build performance benchmarks",
+      "dependencies": []
+    },
+    "examples": {
+      "description": "Build example applications",
+      "dependencies": []
+    },
+    "tests": {
+      "description": "Build test suite",
+      "dependencies": []
+    }
+  }
+}

@@ -1,0 +1,25 @@
+vv-dsp provides CMake targets:
+
+    find_package(vv-dsp CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE vv-dsp::vv-dsp)
+
+The library is header-only with modular C99 implementation and provides comprehensive DSP functionality including:
+- FFT/IFFT operations with multiple backends (KissFFT, FFTW, FFTS)
+- FIR and IIR filtering
+- Window functions (Hann, Hamming, Blackman, etc.)
+- Resampling and decimation
+- Spectral analysis (STFT, CZT, DCT)
+- MFCC feature extraction
+- Statistical functions
+
+Available features:
+- simd: Enable SIMD optimizations (SSE4.1, AVX2, NEON)
+- fftw: Enable FFTW3 backend for high-performance FFT
+- ffts: Enable FFTS backend for mobile-optimized FFT
+- audio-io: Enable WAV file I/O utilities
+- fastapprox: Enable fast math approximations
+- math-approx: Enable DSP-optimized math approximations
+
+Example usage with features:
+    find_package(vv-dsp CONFIG REQUIRED)
+    target_link_libraries(main PRIVATE vv-dsp::vv-dsp)

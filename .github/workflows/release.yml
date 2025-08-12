@@ -1,0 +1,312 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+env:
+  # Common build options for all platforms
+  CMAKE_BUILD_TYPE: Release
+  VV_DSP_BUILD_TESTS: ON
+  VV_DSP_BUILD_EXAMPLES: ON
+  VV_DSP_BUILD_BENCHMARKS: OFF
+  VV_DSP_USE_SIMD: ON
+  VERIFY_WITH_PYTHON: OFF
+
+jobs:
+  test:
+    name: Test on ${{ matrix.os }}
+    runs-on: ${{ matrix.os }}
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        include:
+          - os: ubuntu-latest
+            cmake_generator: "Unix Makefiles"
+            triplet: "x64-linux"
+            archive_name: "vv-dsp-linux-x64"
+          - os: windows-latest
+            cmake_generator: "Visual Studio 17 2022"
+            triplet: "x64-windows"
+            archive_name: "vv-dsp-windows-x64"
+          - os: macos-latest
+            cmake_generator: "Unix Makefiles"
+            triplet: "x64-osx"
+            archive_name: "vv-dsp-macos-x64"
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup CMake
+      uses: lukka/get-cmake@latest
+
+    - name: Setup Python (for optional verification)
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.9'
+
+    - name: Install Python dependencies (Linux/macOS)
+      if: matrix.os != 'windows-latest'
+      run: |
+        python -m pip install --upgrade pip
+        pip install numpy scipy
+
+    - name: Install Python dependencies (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        python -m pip install --upgrade pip
+        pip install numpy scipy
+
+    - name: Install system dependencies (Ubuntu)
+      if: matrix.os == 'ubuntu-latest'
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y build-essential
+
+    - name: Install system dependencies (macOS)
+      if: matrix.os == 'macos-latest'
+      run: |
+        # macOS comes with required tools
+
+    - name: Configure CMake (Unix)
+      if: matrix.os != 'windows-latest'
+      run: |
+        cmake -S . -B build \
+          -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }} \
+          -DVV_DSP_BUILD_TESTS=${{ env.VV_DSP_BUILD_TESTS }} \
+          -DVV_DSP_BUILD_EXAMPLES=${{ env.VV_DSP_BUILD_EXAMPLES }} \
+          -DVV_DSP_BUILD_BENCHMARKS=${{ env.VV_DSP_BUILD_BENCHMARKS }} \
+          -DVV_DSP_USE_SIMD=${{ env.VV_DSP_USE_SIMD }} \
+          -DVERIFY_WITH_PYTHON=${{ env.VERIFY_WITH_PYTHON }} \
+          -G "${{ matrix.cmake_generator }}"
+
+    - name: Configure CMake (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        cmake -S . -B build `
+          -DCMAKE_BUILD_TYPE=${{ env.CMAKE_BUILD_TYPE }} `
+          -DVV_DSP_BUILD_TESTS=${{ env.VV_DSP_BUILD_TESTS }} `
+          -DVV_DSP_BUILD_EXAMPLES=${{ env.VV_DSP_BUILD_EXAMPLES }} `
+          -DVV_DSP_BUILD_BENCHMARKS=${{ env.VV_DSP_BUILD_BENCHMARKS }} `
+          -DVV_DSP_USE_SIMD=${{ env.VV_DSP_USE_SIMD }} `
+          -DVERIFY_WITH_PYTHON=${{ env.VERIFY_WITH_PYTHON }} `
+          -G "${{ matrix.cmake_generator }}" `
+          -A x64
+
+    - name: Build
+      run: cmake --build build --config ${{ env.CMAKE_BUILD_TYPE }} -j
+
+    - name: Run tests
+      working-directory: build
+      run: ctest --output-on-failure --build-config ${{ env.CMAKE_BUILD_TYPE }}
+
+    - name: Install to staging directory
+      run: cmake --install build --prefix staging --config ${{ env.CMAKE_BUILD_TYPE }}
+
+    - name: Create archive (Unix)
+      if: matrix.os != 'windows-latest'
+      run: |
+        cd staging
+        tar -czf ../${{ matrix.archive_name }}.tar.gz *
+
+    - name: Create archive (Windows)
+      if: matrix.os == 'windows-latest'
+      run: |
+        cd staging
+        7z a ../${{ matrix.archive_name }}.zip *
+
+    - name: Upload artifacts (Unix)
+      if: matrix.os != 'windows-latest'
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.archive_name }}
+        path: ${{ matrix.archive_name }}.tar.gz
+
+    - name: Upload artifacts (Windows)
+      if: matrix.os == 'windows-latest'
+      uses: actions/upload-artifact@v3
+      with:
+        name: ${{ matrix.archive_name }}
+        path: ${{ matrix.archive_name }}.zip
+
+  release:
+    name: Create Release
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Download all artifacts
+      uses: actions/download-artifact@v3
+
+    - name: Extract version from tag
+      id: version
+      run: |
+        VERSION=${GITHUB_REF#refs/tags/v}
+        echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+        echo "Extracted version: $VERSION"
+
+    - name: Create release notes
+      run: |
+        cat > release_notes.md << EOF
+        # vv-dsp Release ${{ steps.version.outputs.VERSION }}
+
+        ## What's New
+
+        This release includes:
+        - Core DSP functionality (FFT, filtering, windowing)
+        - Multiple FFT backends (KissFFT, FFTW, FFTS)
+        - SIMD optimizations for improved performance
+        - Comprehensive test suite and examples
+        - Cross-platform support (Windows, macOS, Linux)
+
+        ## Installation Methods
+
+        ### vcpkg
+        \`\`\`bash
+        vcpkg install vv-dsp
+        \`\`\`
+
+        ### CMake FetchContent
+        \`\`\`cmake
+        include(FetchContent)
+        FetchContent_Declare(
+          vv-dsp
+          GIT_REPOSITORY https://github.com/crlotwhite/vv-dsp.git
+          GIT_TAG        v${{ steps.version.outputs.VERSION }}
+        )
+        FetchContent_MakeAvailable(vv-dsp)
+        target_link_libraries(your_target PRIVATE vv-dsp)
+        \`\`\`
+
+        ### Pre-compiled Binaries
+        Download the appropriate archive for your platform below.
+
+        ## Documentation
+
+        - [Integration Guide](https://github.com/crlotwhite/vv-dsp/blob/main/docs/integration.md)
+        - [API Documentation](https://github.com/crlotwhite/vv-dsp/tree/main/docs)
+        - [Examples](https://github.com/crlotwhite/vv-dsp/tree/main/examples)
+
+        ## Supported Platforms
+
+        - **Linux**: x86_64, tested on Ubuntu 20.04+
+        - **Windows**: x86_64, tested on Windows 10/11 with MSVC 2022
+        - **macOS**: x86_64, tested on macOS 11+
+
+        ## Full Changelog
+
+        See [CHANGELOG.md](https://github.com/crlotwhite/vv-dsp/blob/main/CHANGELOG.md) for detailed changes.
+        EOF
+
+    - name: Create Release
+      id: create_release
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        tag_name: ${{ github.ref }}
+        release_name: vv-dsp v${{ steps.version.outputs.VERSION }}
+        body_path: release_notes.md
+        draft: false
+        prerelease: false
+
+    - name: Upload Linux archive
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: vv-dsp-linux-x64/vv-dsp-linux-x64.tar.gz
+        asset_name: vv-dsp-linux-x64.tar.gz
+        asset_content_type: application/gzip
+
+    - name: Upload Windows archive
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: vv-dsp-windows-x64/vv-dsp-windows-x64.zip
+        asset_name: vv-dsp-windows-x64.zip
+        asset_content_type: application/zip
+
+    - name: Upload macOS archive
+      uses: actions/upload-release-asset@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      with:
+        upload_url: ${{ steps.create_release.outputs.upload_url }}
+        asset_path: vv-dsp-macos-x64/vv-dsp-macos-x64.tar.gz
+        asset_name: vv-dsp-macos-x64.tar.gz
+        asset_content_type: application/gzip
+
+  integration-test:
+    name: Integration Test
+    needs: test
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+
+    - name: Setup CMake
+      uses: lukka/get-cmake@latest
+
+    - name: Download Linux artifacts
+      uses: actions/download-artifact@v3
+      with:
+        name: vv-dsp-linux-x64
+
+    - name: Extract and install vv-dsp
+      run: |
+        tar -xzf vv-dsp-linux-x64.tar.gz
+        sudo cp -r * /usr/local/
+
+    - name: Test integration with example consumer
+      run: |
+        # Create a simple test project
+        mkdir test_integration
+        cd test_integration
+
+        cat > CMakeLists.txt << 'EOF'
+        cmake_minimum_required(VERSION 3.15)
+        project(IntegrationTest LANGUAGES C)
+
+        find_package(vv-dsp CONFIG REQUIRED)
+
+        add_executable(test_app main.c)
+        target_link_libraries(test_app PRIVATE vv-dsp::vv-dsp)
+        set_property(TARGET test_app PROPERTY C_STANDARD 99)
+        EOF
+
+        cat > main.c << 'EOF'
+        #include <stdio.h>
+        #include <vv_dsp/vv_dsp.h>
+
+        int main(void) {
+            printf("Testing vv-dsp integration...\n");
+
+            const size_t N = 64;
+            vv_dsp_real window[64];
+            vv_dsp_status status = vv_dsp_window_hann(N, window);
+
+            if (status != VV_DSP_OK) {
+                printf("FAILED: Could not create window\n");
+                return 1;
+            }
+
+            printf("SUCCESS: Integration test passed\n");
+            return 0;
+        }
+        EOF
+
+        # Build and run
+        cmake -S . -B build
+        cmake --build build
+        ./build/test_app

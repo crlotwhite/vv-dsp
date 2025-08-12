@@ -1,0 +1,8 @@
+{
+  "dependencies": [
+    {
+      "name": "vv-dsp",
+      "features": ["simd"]
+    }
+  ]
+}

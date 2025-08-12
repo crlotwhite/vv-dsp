@@ -1,0 +1,41 @@
+name: Update Baseline
+
+on:
+  push:
+    branches: [ main ]
+  workflow_dispatch:
+
+jobs:
+  update-baseline:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v4
+
+    - name: Setup vcpkg
+      run: |
+        git clone https://github.com/Microsoft/vcpkg.git
+        ./vcpkg/bootstrap-vcpkg.sh
+
+    - name: Update baseline
+      run: |
+        # Get current commit hash
+        BASELINE=$(git rev-parse HEAD)
+        echo "Current baseline: $BASELINE"
+
+        # Update vcpkg-configuration.json with current commit
+        sed -i "s/\"baseline\": \".*\"/\"baseline\": \"$BASELINE\"/" vcpkg-configuration.json
+
+    - name: Commit changes
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+        git add vcpkg-configuration.json
+        git diff --cached --exit-code || git commit -m "Update baseline to $(git rev-parse HEAD)"
+
+    - name: Push changes
+      if: github.ref == 'refs/heads/main'
+      uses: ad-m/github-push-action@master
+      with:
+        github_token: ${{ secrets.GITHUB_TOKEN }}
+        branch: main

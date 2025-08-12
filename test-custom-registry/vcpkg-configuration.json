@@ -1,0 +1,14 @@
+{
+  "default-registry": {
+    "kind": "git",
+    "repository": "https://github.com/Microsoft/vcpkg",
+    "baseline": "2024.01.12"
+  },
+  "registries": [
+    {
+      "kind": "filesystem",
+      "path": "../vcpkg-registry",
+      "packages": [ "vv-dsp" ]
+    }
+  ]
+}

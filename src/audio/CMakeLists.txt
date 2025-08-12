@@ -2,7 +2,10 @@ add_library(vv-dsp-audio
 	wav.c
 )
 
-target_include_directories(vv-dsp-audio PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../include)
+target_include_directories(vv-dsp-audio PUBLIC 
+  $<BUILD_INTERFACE:${CMAKE_CURRENT_SOURCE_DIR}/../../include>
+  $<INSTALL_INTERFACE:include>
+)
 
 # Link dependency on core for basic types and utilities
 target_link_libraries(vv-dsp-audio PUBLIC vv-dsp-core)
