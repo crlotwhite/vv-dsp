@@ -9,4 +9,4 @@ add_library(vv-dsp-filter
 target_include_directories(vv-dsp-filter PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/../../include)
 
 # Link dependency on spectral explicitly to resolve fft symbols from vv-dsp-filter
-target_link_libraries(vv-dsp-filter PUBLIC vv-dsp-spectral)
+target_link_libraries(vv-dsp-filter PUBLIC vv-dsp-spectral vv-dsp-core)

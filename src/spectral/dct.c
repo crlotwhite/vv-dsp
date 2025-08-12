@@ -1,8 +1,10 @@
 #include <stdlib.h>
 #include <math.h>
+#include <string.h>
 #include "vv_dsp/vv_dsp_math.h"
 #include "vv_dsp/vv_dsp_types.h"
 #include "vv_dsp/spectral/dct.h"
+#include "vv_dsp/core/nan_policy.h"
 
 struct vv_dsp_dct_plan {
     size_t n;
@@ -85,31 +87,52 @@ VV_DSP_NODISCARD vv_dsp_status vv_dsp_dct_execute(const vv_dsp_dct_plan* plan,
                                                   const vv_dsp_real* in,
                                                   vv_dsp_real* out) {
     if (!plan || !in || !out) return VV_DSP_ERROR_NULL_POINTER;
+    
     const size_t N = plan->n;
+    
+    // Allocate temporary buffer for NaN/Inf processed input
+    vv_dsp_real* temp_input = (vv_dsp_real*)malloc(N * sizeof(vv_dsp_real));
+    if (!temp_input) return VV_DSP_ERROR_INTERNAL;
+    
+    // Check and handle NaN/Inf in input according to policy
+    vv_dsp_status status = vv_dsp_apply_nan_policy_copy(in, N, temp_input);
+    if (status != VV_DSP_OK) {
+        free(temp_input);
+        return status;  // Return early on error (e.g., if policy is ERROR and NaN/Inf found)
+    }
+    
+    // Apply the appropriate DCT transform
     if (plan->type == VV_DSP_DCT_II) {
         if (plan->dir == VV_DSP_DCT_FORWARD) {
-            dct2_forward(in, out, N);
+            dct2_forward(temp_input, out, N);
         } else {
             // inverse of DCT-II is DCT-III with 2/N scaling and half-weight for k=0 term
-            dct3_inverse_from_ii(in, out, N);
+            dct3_inverse_from_ii(temp_input, out, N);
         }
-        return VV_DSP_OK;
-    }
-    if (plan->type == VV_DSP_DCT_III) {
+    } else if (plan->type == VV_DSP_DCT_III) {
         if (plan->dir == VV_DSP_DCT_FORWARD) {
             // Compute DCT-III directly
-            dct3_forward(in, out, N);
+            dct3_forward(temp_input, out, N);
         } else {
             // inverse of DCT-III recovers time via same formula as dct3_inverse_from_ii
-            dct3_inverse_from_ii(in, out, N);
+            dct3_inverse_from_ii(temp_input, out, N);
         }
-        return VV_DSP_OK;
+    } else if (plan->type == VV_DSP_DCT_IV) {
+        dct4_transform(temp_input, out, N, plan->dir == VV_DSP_DCT_BACKWARD);
+    } else {
+        free(temp_input);
+        return VV_DSP_ERROR_OUT_OF_RANGE;
     }
-    if (plan->type == VV_DSP_DCT_IV) {
-        dct4_transform(in, out, N, plan->dir == VV_DSP_DCT_BACKWARD);
-        return VV_DSP_OK;
+    
+    free(temp_input);
+    
+    // Apply NaN/Inf policy to output
+    status = vv_dsp_apply_nan_policy_inplace(out, N);
+    if (status != VV_DSP_OK) {
+        return status;
     }
-    return VV_DSP_ERROR_OUT_OF_RANGE;
+    
+    return VV_DSP_OK;
 }
 
 vv_dsp_status vv_dsp_dct_destroy(vv_dsp_dct_plan* plan) {

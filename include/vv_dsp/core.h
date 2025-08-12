@@ -15,6 +15,7 @@ extern "C" {
 #endif
 
 #include "vv_dsp/vv_dsp_types.h"
+#include "vv_dsp/core/nan_policy.h"
 
 /** @addtogroup core_group
  * @{

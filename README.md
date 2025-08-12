@@ -17,6 +17,7 @@ VV-DSP provides essential digital signal processing operations including:
 - **Signal Processing**: Windowing functions, envelope detection
 - **Feature Extraction**: MFCC and other audio features
 - **Mathematical Operations**: Complex numbers, statistics, linear algebra
+- **Numerical Stability**: Configurable NaN/Inf handling policies for robust processing
 
 ## Quick Start
 
@@ -134,6 +135,41 @@ ctest --test-dir build --output-on-failure
 1. Configure: `cmake -S . -B build -DVERIFY_WITH_PYTHON=ON -DVV_DSP_BUILD_TESTS=ON`
 1. Build: `cmake --build build -j`
 1. Test: `ctest --test-dir build -L validation --output-on-failure`
+
+## NaN/Inf Handling
+
+VV-DSP provides configurable policies for handling NaN (Not-a-Number) and Infinity values to ensure numerical stability and prevent undefined behavior in production environments.
+
+### Policy Configuration
+
+```c
+#include "vv_dsp/core/nan_policy.h"
+
+// Set global policy (thread-local if threading support is enabled)
+vv_dsp_set_nan_policy(VV_DSP_NAN_POLICY_IGNORE);
+
+// Get current policy
+vv_dsp_nan_policy_e policy = vv_dsp_get_nan_policy();
+```
+
+### Available Policies
+
+- **`VV_DSP_NAN_POLICY_PROPAGATE`** (default): Let NaN/Inf values pass through calculations
+- **`VV_DSP_NAN_POLICY_IGNORE`**: Replace NaN/Inf with neutral values (0.0)
+- **`VV_DSP_NAN_POLICY_ERROR`**: Return error code immediately upon detecting NaN/Inf
+- **`VV_DSP_NAN_POLICY_CLAMP`**: Replace +/-Inf with max/min finite values, NaN with 0.0
+
+### Error Handling
+
+When the policy is set to `VV_DSP_NAN_POLICY_ERROR`, functions return `VV_DSP_ERROR_NAN_INF` when NaN or Infinity values are detected in input or output data.
+
+### Supported Functions
+
+The NaN/Inf policy is automatically applied to:
+
+- Savitzky-Golay filters (`vv_dsp_savgol`)
+- DCT transforms (`vv_dsp_dct_execute`, convenience functions)
+- All module functions that process floating-point arrays
 
 ## API Example
 

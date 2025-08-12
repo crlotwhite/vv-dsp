@@ -1364,7 +1364,7 @@
         "description": "Implement a robust, configurable policy for handling NaN (Not-a-Number) and Inf (Infinity) values within the DSP library to ensure numerical stability and prevent undefined behavior in production environments.",
         "details": "This task involves implementing the NaN/Inf propagation rules as specified in the PRD's \"Platform/Edge Case Policy\". This is a cross-cutting concern that enhances the reliability of all DSP functions.\n\n**Implementation Steps:**\n\n1.  **Policy Enum Definition:**\n    *   In a new header file, `core/nan_policy.h`, define an enumeration for the handling policies:\n    ```c\n    typedef enum {\n        VV_DSP_NAN_POLICY_PROPAGATE, // Default: Let NaN/Inf values pass through calculations.\n        VV_DSP_NAN_POLICY_IGNORE,    // Replace NaN/Inf with a neutral value (0.0).\n        VV_DSP_NAN_POLICY_ERROR,     // Return an error code immediately upon detecting NaN/Inf.\n        VV_DSP_NAN_POLICY_CLAMP      // Replace +/-Inf with max/min finite values, and NaN with 0.0.\n    } vv_dsp_nan_policy_e;\n    ```\n\n2.  **Global Configuration API:**\n    *   Implement a thread-safe mechanism to manage the global policy. For non-threaded environments, a static global variable is sufficient. For threaded environments, use `thread_local` (C11) or platform-specific thread-local storage.\n    *   Expose the following functions in `core/nan_policy.h` and implement them in `core/nan_policy.c`:\n    ```c\n    // Sets the global policy for handling NaN/Inf values.\n    void vv_dsp_set_nan_policy(vv_dsp_nan_policy_e policy);\n\n    // Retrieves the current global policy.\n    vv_dsp_nan_policy_e vv_dsp_get_nan_policy(void);\n    ```\n\n3.  **NaN/Inf Detection and Handling Logic:**\n    *   Use the standard `<math.h>` functions `isnan()` and `isinf()` for detection.\n    *   Create internal, static inline helper functions or macros to check arrays and apply the current policy. This centralizes the logic and makes it easy to apply consistently.\n    *   Example helper signature:\n    ```c\n    // Checks an array for NaN/Inf values and applies the current policy.\n    // Returns 0 on success or an error code if the policy is ERROR and NaN/Inf is found.\n    static inline int vv_dsp_apply_nan_policy_inplace(vv_dsp_real* data, size_t len);\n    ```\n\n4.  **Integration with DSP Functions:**\n    *   Modify existing and new DSP functions to incorporate NaN/Inf checks.\n    *   **Inputs:** At the beginning of each public API function, check all floating-point input arrays for NaN/Inf values.\n    *   **Outputs:** After critical computations that can generate non-finite values (e.g., `log`, `sqrt`, division), check the results and apply the policy.\n    *   For functions that should return an error, ensure their return type is `int` and add a new error code (e.g., `VV_DSP_NAN_INF_ERROR`) to the library's error enum.\n\n5.  **Floating-Point Exceptions (FPE):**\n    *   The primary goal is to handle NaN/Inf *values*, not to trap the underlying floating-point exceptions. This approach is more portable and robust.\n    *   Avoid direct manipulation of the FPU environment (e.g., via `<fenv.h>`) unless explicitly required, as it can have performance implications and platform-specific behavior.",
         "testStrategy": "The test strategy must verify both the policy control mechanism and its correct application within DSP functions under all policy settings.\n\n**1. Unit Tests (CTest):**\n\n*   **API Verification:**\n    *   Create a test suite `test_nan_policy_api`.\n    *   Test that `vv_dsp_set_nan_policy()` correctly updates the internal state.\n    *   Test that `vv_dsp_get_nan_policy()` accurately returns the currently set policy, including the default.\n\n*   **Policy Behavior Verification:**\n    *   Create a dedicated test suite `test_nan_policy_behavior` using a simple vector operation (e.g., `vv_dsp_vector_copy`).\n    *   Prepare input test vectors containing various values: `0.0`, `1.0`, `-1.0`, `NAN`, `INFINITY`, `-INFINITY`.\n    *   **`VV_DSP_NAN_POLICY_PROPAGATE`:** Set policy, process the vector, and assert that `NAN` and `INFINITY` values in the input are present unchanged in the output.\n    *   **`VV_DSP_NAN_POLICY_IGNORE`:** Set policy, process the vector, and assert that `NAN` and `INFINITY` values are replaced with `0.0` in the output, while other numbers remain correct.\n    *   **`VV_DSP_NAN_POLICY_ERROR`:** Set policy, process a vector containing `NAN` or `INFINITY`, and assert that the function returns the specific error code `VV_DSP_NAN_INF_ERROR`. Also, verify that a clean vector processes successfully and returns `0`.\n    *   **`VV_DSP_NAN_POLICY_CLAMP`:** Set policy, process the vector, and assert that `INFINITY` is replaced with `FLT_MAX` (or `DBL_MAX`), `-INFINITY` with `-FLT_MAX` (or `-DBL_MAX`), and `NAN` with `0.0`.\n\n**2. Integration Tests:**\n\n*   For a representative set of complex DSP functions (`vv_dsp_savgol`, `vv_dsp_hilbert_analytic`, `vv_dsp_mfcc`), create tests that trigger non-finite values.\n*   **Test Case Example (Logarithm):**\n    *   Create an input signal for a log-spectrogram function that contains `0.0` and negative values.\n    *   Run the function under each of the four policies.\n    *   Verify the output is as expected: `PROPAGATE` yields `-inf` and `nan`; `IGNORE` yields `0.0`; `ERROR` returns an error code; `CLAMP` yields the minimum finite value and `0.0`.\n*   **Test Case Example (Division):**\n    *   Use a function that performs division (e.g., normalization) with a divisor of `0.0`.\n    *   Verify the output under each policy, similar to the logarithm example.",
-        "status": "pending",
+        "status": "done",
         "dependencies": [
           18,
           19,
@@ -1379,7 +1379,7 @@
             "description": "Create the `core/nan_policy.h` header file, define the `vv_dsp_nan_policy_e` enumeration, and declare the global configuration functions. Implement the thread-safe `vv_dsp_set_nan_policy()` and `vv_dsp_get_nan_policy()` functions in a new `core/nan_policy.c` file.",
             "dependencies": [],
             "details": "This subtask establishes the foundational API for the NaN/Inf handling policy. The implementation of the getter/setter functions must be thread-safe, using `thread_local` for C11-compliant compilers or an appropriate platform-specific equivalent for older standards. For non-threaded environments, a simple static global variable is sufficient.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Create a new unit test suite, `test_nan_policy_api`. Verify that `vv_dsp_set_nan_policy()` correctly updates the policy state and `vv_dsp_get_nan_policy()` retrieves the correct value. If the library supports threading, include tests that set and get the policy from multiple threads to ensure thread-locality."
           },
           {
@@ -1390,7 +1390,7 @@
               "23.1"
             ],
             "details": "This logic should be centralized, for example in a helper function like `static inline int vv_dsp_apply_nan_policy_inplace(vv_dsp_real* data, size_t len)`. This function will use `isnan()` and `isinf()` from `<math.h>` for detection. It will then call `vv_dsp_get_nan_policy()` to determine the action: propagate, replace with 0.0 (`IGNORE`), replace with max/min finite values (`CLAMP`), or return an error code (`ERROR`).",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Create a dedicated unit test suite, `test_nan_policy_logic`, that directly invokes the internal helper function. For each of the four policies, provide input arrays containing various combinations of finite numbers, NaNs, and Infs. Assert that the output array is modified correctly and that the function's return value is as expected (e.g., returns an error code only for the `ERROR` policy)."
           },
           {
@@ -1401,7 +1401,7 @@
               "23.2"
             ],
             "details": "At the entry point of the `vv_dsp_savgol` function, call the NaN/Inf handling helper on the input signal array. The function's return type must be updated to `int` to propagate the potential `VV_DSP_NAN_INF_ERROR` code. This serves as the first real-world application of the policy, establishing a pattern for integration into other DSP functions.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Extend the existing `savgol` unit tests. Add new test cases where the input signal to `vv_dsp_savgol` contains NaN or Inf values. Execute these tests under each of the four NaN policies and assert that the filter's output and return code are correct according to the active policy."
           },
           {
@@ -1412,7 +1412,7 @@
               "23.2"
             ],
             "details": "Apply the NaN/Inf handling helper to the input arrays of the public DCT functions. Ensure that an error is returned correctly when the policy is `ERROR`. This task validates the integration pattern against a different class of algorithm (transforms vs. filters) to ensure its general applicability.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Augment the DCT unit tests. Create test cases with input arrays containing NaN/Inf values. Verify the behavior of `vv_dsp_dct_forward` and `vv_dsp_dct_inverse` for each of the four policies, checking both the transformed output data and the function's return value."
           },
           {
@@ -1424,7 +1424,7 @@
               "23.2"
             ],
             "details": "The new error code must be added to the library's central error enum (e.g., in `core/errors.h`) with a unique value. The documentation, likely in Doxygen comments within `core/nan_policy.h` and potentially in higher-level project documentation (e.g., a Markdown file), must clearly explain the purpose of each policy, how to use the `vv_dsp_set_nan_policy` API, and the implications for function return values.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "This is a review-focused task. A peer review should confirm that the new error code is correctly defined and does not conflict with existing codes. The documentation must be reviewed for clarity, accuracy, and completeness, ensuring it provides developers with all necessary information to use the feature correctly."
           }
         ]
@@ -1856,7 +1856,7 @@
     ],
     "metadata": {
       "created": "2025-08-10T09:22:31.972Z",
-      "updated": "2025-08-11T16:41:48.504Z",
+      "updated": "2025-08-12T01:22:48.184Z",
       "description": "Tasks for master context"
     }
   }

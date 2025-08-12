@@ -6,6 +6,7 @@
 
 #include "vv_dsp/vv_dsp_types.h"
 #include "vv_dsp/filter/savgol.h"
+#include "vv_dsp/core/nan_policy.h"
 
 static VV_DSP_INLINE int is_odd(int x) { return (x & 1) != 0; }
 
@@ -233,23 +234,54 @@ vv_dsp_status vv_dsp_savgol(const vv_dsp_real* y,
     if ((size_t)window_length > N) return VV_DSP_ERROR_INVALID_SIZE;
     if (deriv > 0 && !(delta > (vv_dsp_real)0)) return VV_DSP_ERROR_OUT_OF_RANGE;
 
+    // Apply NaN/Inf policy to input data
+    // We need to create a copy of the input for policy processing since the input is const
+    vv_dsp_real* y_processed = (vv_dsp_real*)malloc(N * sizeof(vv_dsp_real));
+    if (!y_processed) return VV_DSP_ERROR_INTERNAL;
+    
+    // Apply NaN/Inf policy using the copy variant
+    vv_dsp_status policy_status = vv_dsp_apply_nan_policy_copy(y, N, y_processed);
+    if (policy_status != VV_DSP_OK) {
+        free(y_processed);
+        return policy_status;
+    }
+
     int m = window_length;
     int half = m/2;
     vv_dsp_real kernel_stack[257]; // supports up to m<=257; can extend if needed
-    if (m > (int)(sizeof(kernel_stack)/sizeof(kernel_stack[0]))) return VV_DSP_ERROR_OUT_OF_RANGE;
+    if (m > (int)(sizeof(kernel_stack)/sizeof(kernel_stack[0]))) {
+        free(y_processed);
+        return VV_DSP_ERROR_OUT_OF_RANGE;
+    }
     vv_dsp_status st;
     if (deriv == 0) st = sg_smoothing_kernel(m, polyorder, kernel_stack);
     else st = sg_derivative_kernel(m, polyorder, deriv, delta, kernel_stack);
-    if (st != VV_DSP_OK) return st;
+    if (st != VV_DSP_OK) {
+        free(y_processed);
+        return st;
+    }
 
-    // Prepare padded input
+    // Prepare padded input (using processed data)
     vv_dsp_real* xp = (vv_dsp_real*)malloc((size_t)(N + 2*(size_t)half) * sizeof(vv_dsp_real));
-    if (!xp) return VV_DSP_ERROR_INTERNAL;
-    pad_signal(y, N, half, mode, xp);
+    if (!xp) {
+        free(y_processed);
+        return VV_DSP_ERROR_INTERNAL;
+    }
+    pad_signal(y_processed, N, half, mode, xp);
 
     // Convolution (valid)
     convolve_valid(xp, N, kernel_stack, m, output);
 
+    // Apply NaN/Inf policy to output as well (in case computations generated non-finite values)
+    vv_dsp_status output_policy_status = vv_dsp_apply_nan_policy_inplace(output, N);
+    
     free(xp);
+    free(y_processed);
+    
+    // Return the more critical error if there was one
+    if (output_policy_status != VV_DSP_OK) {
+        return output_policy_status;
+    }
+    
     return VV_DSP_OK;
 }

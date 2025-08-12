@@ -122,7 +122,8 @@ typedef enum vv_dsp_status {
     VV_DSP_ERROR_NULL_POINTER = 1,  /**< One or more required pointers are NULL */
     VV_DSP_ERROR_INVALID_SIZE = 2,  /**< Invalid size parameter (e.g., zero or negative) */
     VV_DSP_ERROR_OUT_OF_RANGE = 3,  /**< Parameter value is outside valid range */
-    VV_DSP_ERROR_INTERNAL = 4       /**< Internal library error */
+    VV_DSP_ERROR_INTERNAL = 4,      /**< Internal library error */
+    VV_DSP_ERROR_NAN_INF = 5        /**< NaN or Inf encountered when policy is ERROR */
 } vv_dsp_status;
 /** @} */
 

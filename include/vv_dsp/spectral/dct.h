@@ -7,6 +7,7 @@ extern "C" {
 
 #include <stddef.h>
 #include "vv_dsp/vv_dsp_types.h"
+#include "vv_dsp/core/nan_policy.h"
 
 // DCT type
 typedef enum vv_dsp_dct_type {
