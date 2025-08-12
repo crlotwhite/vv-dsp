@@ -4,6 +4,8 @@ add_library(vv-dsp-core
   framing.c
   nan_policy.c
   fp_env.c
+  simd_memory.c
+  simd_core.c
 )
 
 target_include_directories(vv-dsp-core

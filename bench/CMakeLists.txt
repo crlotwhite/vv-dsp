@@ -18,6 +18,18 @@ add_executable(vv_dsp_bench
     bench_denormals.c
 )
 
+# Additional benchmark utilities
+add_executable(benchmark_simd benchmark_simd.c)
+target_link_libraries(benchmark_simd PRIVATE vv-dsp)
+
+add_executable(simple_bench
+    simple_bench.c
+    bench_framework.c
+    bench_stft.c
+    bench_timer.c
+)
+target_link_libraries(simple_bench PRIVATE vv-dsp)
+
 # Link against the vv-dsp umbrella target
 # TEMPORARY: Link directly to avoid Eigen/C++ issues
 target_link_libraries(vv_dsp_bench PRIVATE
@@ -37,6 +49,17 @@ target_include_directories(vv_dsp_bench PRIVATE
     ${VV_DSP_INCLUDE_DIR}
 )
 
+# Apply the same include directories to additional benchmarks
+target_include_directories(benchmark_simd PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${VV_DSP_INCLUDE_DIR}
+)
+
+target_include_directories(simple_bench PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${VV_DSP_INCLUDE_DIR}
+)
+
 # Platform-specific linking
 if(WIN32)
     # Windows: Link with winmm for high-resolution timing
@@ -50,6 +73,15 @@ endif()
 
 # Copy benchmark to build directory for easy access
 set_target_properties(vv_dsp_bench PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+)
+
+# Set the same properties for additional benchmarks
+set_target_properties(benchmark_simd PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+)
+
+set_target_properties(simple_bench PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
 )
 

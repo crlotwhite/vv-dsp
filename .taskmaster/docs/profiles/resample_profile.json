@@ -1,0 +1,89 @@
+{
+  "benchmark_suite": "vv-dsp",
+  "results": [
+    {
+      "name": "Resample_Downsample_2x",
+      "elapsed_seconds": 0.002202660,
+      "samples_per_second": 371913958.58,
+      "iterations": 50
+    },
+    {
+      "name": "Resample_Upsample_2x",
+      "elapsed_seconds": 0.009144396,
+      "samples_per_second": 89584921.74,
+      "iterations": 50
+    },
+    {
+      "name": "Resample_Resample_3_2",
+      "elapsed_seconds": 0.006795985,
+      "samples_per_second": 120541761.05,
+      "iterations": 50
+    },
+    {
+      "name": "Resample_Resample_4_3",
+      "elapsed_seconds": 0.006109990,
+      "samples_per_second": 134075505.85,
+      "iterations": 50
+    },
+    {
+      "name": "Resample_CD_to_48k",
+      "elapsed_seconds": 0.002009811,
+      "samples_per_second": 407600515.67,
+      "iterations": 50
+    },
+    {
+      "name": "ResampleQuality_Linear",
+      "elapsed_seconds": 0.006893126,
+      "samples_per_second": 118843032.90,
+      "iterations": 50
+    },
+    {
+      "name": "ResampleQuality_Sinc_16_taps",
+      "elapsed_seconds": 0.388400264,
+      "samples_per_second": 2109164.37,
+      "iterations": 50
+    },
+    {
+      "name": "ResampleQuality_Sinc_32_taps",
+      "elapsed_seconds": 0.775411392,
+      "samples_per_second": 1056471.45,
+      "iterations": 50
+    },
+    {
+      "name": "ResampleQuality_Sinc_64_taps",
+      "elapsed_seconds": 1.528305010,
+      "samples_per_second": 536018.66,
+      "iterations": 50
+    },
+    {
+      "name": "ResampleStreaming_64_samples",
+      "elapsed_seconds": 1.018053749,
+      "samples_per_second": 804672.64,
+      "iterations": 50
+    },
+    {
+      "name": "ResampleStreaming_128_samples",
+      "elapsed_seconds": 0.999898026,
+      "samples_per_second": 819283.55,
+      "iterations": 50
+    },
+    {
+      "name": "ResampleStreaming_256_samples",
+      "elapsed_seconds": 1.005129946,
+      "samples_per_second": 815019.00,
+      "iterations": 50
+    },
+    {
+      "name": "ResampleStreaming_512_samples",
+      "elapsed_seconds": 0.999692294,
+      "samples_per_second": 819452.15,
+      "iterations": 50
+    },
+    {
+      "name": "ResampleStreaming_1024_samples",
+      "elapsed_seconds": 1.012140157,
+      "samples_per_second": 809374.07,
+      "iterations": 50
+    }
+  ]
+}

@@ -51,9 +51,82 @@ set(VV_PY_RTOL "" CACHE STRING "Python validation relative tolerance override (e
 set(VV_PY_ATOL "" CACHE STRING "Python validation absolute tolerance override (e.g., 5e-5)")
 option(VV_PY_VERBOSE "Enable verbose output in Python validation tests" OFF)
 
+# SIMD instruction set options - more granular control
+option(VV_DSP_ENABLE_SSE4_1 "Enable SSE4.1 optimizations on x86/x64" OFF)
+option(VV_DSP_ENABLE_AVX2 "Enable AVX2 optimizations on x86/x64" OFF)
+option(VV_DSP_ENABLE_AVX512 "Enable AVX512 optimizations on x86/x64" OFF)
+option(VV_DSP_ENABLE_NEON "Enable NEON optimizations on ARM/AArch64" OFF)
+
+# Auto-detect SIMD capability if VV_DSP_USE_SIMD is enabled
+if(VV_DSP_USE_SIMD)
+  include(CheckCXXCompilerFlag)
+  include(CheckCCompilerFlag)
+
+  # Try to enable appropriate SIMD instruction sets based on platform
+  if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64|amd64")
+    # Check for AVX2 support
+    check_cxx_compiler_flag("-mavx2" COMPILER_SUPPORTS_AVX2)
+    if(COMPILER_SUPPORTS_AVX2 AND NOT VV_DSP_ENABLE_AVX2)
+      set(VV_DSP_ENABLE_AVX2 ON CACHE BOOL "Enable AVX2 optimizations" FORCE)
+      message(STATUS "vv-dsp: Auto-enabling AVX2 optimizations")
+    endif()
+
+    # Check for SSE4.1 support
+    check_cxx_compiler_flag("-msse4.1" COMPILER_SUPPORTS_SSE41)
+    if(COMPILER_SUPPORTS_SSE41 AND NOT VV_DSP_ENABLE_SSE4_1)
+      set(VV_DSP_ENABLE_SSE4_1 ON CACHE BOOL "Enable SSE4.1 optimizations" FORCE)
+      message(STATUS "vv-dsp: Auto-enabling SSE4.1 optimizations")
+    endif()
+  elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64|ARM64")
+    # Check for NEON support
+    check_cxx_compiler_flag("-mfpu=neon" COMPILER_SUPPORTS_NEON)
+    if(COMPILER_SUPPORTS_NEON AND NOT VV_DSP_ENABLE_NEON)
+      set(VV_DSP_ENABLE_NEON ON CACHE BOOL "Enable NEON optimizations" FORCE)
+      message(STATUS "vv-dsp: Auto-enabling NEON optimizations")
+    endif()
+  endif()
+endif()
+
 # Public compile definitions
 if(VV_DSP_USE_SIMD)
   add_compile_definitions(VV_DSP_USE_SIMD=1)
+endif()
+
+# Apply SIMD compiler flags and definitions
+if(VV_DSP_ENABLE_SSE4_1)
+  add_compile_definitions(VV_DSP_USE_SSE4_1=1)
+  if(NOT MSVC)
+    add_compile_options(-msse4.1)
+  endif()
+  message(STATUS "vv-dsp: SSE4.1 optimizations enabled")
+endif()
+
+if(VV_DSP_ENABLE_AVX2)
+  add_compile_definitions(VV_DSP_USE_AVX2=1)
+  if(NOT MSVC)
+    add_compile_options(-mavx2)
+  else()
+    add_compile_options(/arch:AVX2)
+  endif()
+  message(STATUS "vv-dsp: AVX2 optimizations enabled")
+endif()
+
+if(VV_DSP_ENABLE_AVX512)
+  add_compile_definitions(VV_DSP_USE_AVX512=1)
+  if(NOT MSVC)
+    add_compile_options(-mavx512f)
+  else()
+    add_compile_options(/arch:AVX512)
+  endif()
+  message(STATUS "vv-dsp: AVX512 optimizations enabled")
+endif()
+
+if(VV_DSP_ENABLE_NEON)
+  add_compile_definitions(VV_DSP_USE_NEON=1)
+  if(NOT MSVC AND CMAKE_SYSTEM_PROCESSOR MATCHES "arm")
+    add_compile_options(-mfpu=neon)
+  endif()
+  message(STATUS "vv-dsp: NEON optimizations enabled")
 endif()
 
 # FFT backend compile definitions - KissFFT is always enabled

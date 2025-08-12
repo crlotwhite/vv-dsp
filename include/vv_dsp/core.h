@@ -17,6 +17,8 @@ extern "C" {
 #include "vv_dsp/vv_dsp_types.h"
 #include "vv_dsp/core/nan_policy.h"
 #include "vv_dsp/core/fp_env.h"
+#include "core/simd_utils.h"
+#include "core/simd_core.h"
 
 /** @addtogroup core_group
  * @{

@@ -110,3 +110,21 @@ add_test(NAME vv-dsp-hilbert COMMAND $<TARGET_FILE:vv-dsp-hilbert-tests>)
 add_executable(vv-dsp-mfcc-tests mfcc_tests.c)
 target_link_libraries(vv-dsp-mfcc-tests PRIVATE vv-dsp)
 add_test(NAME vv-dsp-mfcc COMMAND $<TARGET_FILE:vv-dsp-mfcc-tests>)
+
+# SIMD tests (if SIMD support is enabled)
+if(VV_DSP_USE_SIMD)
+  add_executable(vv-dsp-simd-core-tests test_simd_core.c)
+  target_link_libraries(vv-dsp-simd-core-tests PRIVATE vv-dsp)
+  add_test(NAME vv-dsp-simd-core COMMAND $<TARGET_FILE:vv-dsp-simd-core-tests>)
+
+  add_executable(vv-dsp-simd-memory-tests test_simd_memory.c)
+  target_link_libraries(vv-dsp-simd-memory-tests PRIVATE vv-dsp)
+  add_test(NAME vv-dsp-simd-memory COMMAND $<TARGET_FILE:vv-dsp-simd-memory-tests>)
+endif()
+
+# Additional debug/test utilities
+add_executable(vv-dsp-debug-stft debug_stft.c)
+target_link_libraries(vv-dsp-debug-stft PRIVATE vv-dsp)
+
+add_executable(vv-dsp-test-stft-simple test_stft_simple.c)
+target_link_libraries(vv-dsp-test-stft-simple PRIVATE vv-dsp)

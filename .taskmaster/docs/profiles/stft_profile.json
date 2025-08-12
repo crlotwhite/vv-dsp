@@ -1,0 +1,48 @@
+{
+  "benchmark_suite": "vv-dsp",
+  "results": [
+    {
+      "name": "STFT_processing_loop",
+      "elapsed_seconds": 0.046152074,
+      "samples_per_second": 3120119.80,
+      "real_time_factor": 0.015384,
+      "iterations": 3
+    },
+    {
+      "name": "STFT_frame_rate",
+      "elapsed_seconds": 0.040401604,
+      "samples_per_second": 6336382.09,
+      "iterations": 1000
+    },
+    {
+      "name": "STFT_size_256",
+      "elapsed_seconds": 0.001624231,
+      "samples_per_second": 7880652.44,
+      "iterations": 200
+    },
+    {
+      "name": "STFT_size_512",
+      "elapsed_seconds": 0.003602987,
+      "samples_per_second": 7105215.76,
+      "iterations": 200
+    },
+    {
+      "name": "STFT_size_1024",
+      "elapsed_seconds": 0.008031192,
+      "samples_per_second": 6375143.32,
+      "iterations": 200
+    },
+    {
+      "name": "STFT_size_2048",
+      "elapsed_seconds": 0.016856760,
+      "samples_per_second": 6074714.24,
+      "iterations": 200
+    },
+    {
+      "name": "STFT_size_4096",
+      "elapsed_seconds": 0.036992543,
+      "samples_per_second": 5536250.91,
+      "iterations": 200
+    }
+  ]
+}

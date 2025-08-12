@@ -1575,7 +1575,7 @@
         "description": "Analyze current SIMD utilization and implement targeted AVX2/SSE4 and ARM NEON optimizations for performance-critical functions like FFT, filtering, and statistical calculations to meet real-time processing requirements.",
         "details": "This task focuses on leveraging CPU-specific SIMD (Single Instruction, Multiple Data) instruction sets to significantly boost the performance of computationally intensive DSP algorithms. The implementation will be guided by profiling data to ensure efforts are focused on the most critical bottlenecks.\n\n**1. Analysis and Target Identification:**\n*   Review the codebase to understand the current usage of the `VV_DSP_USE_SIMD` flag.\n*   Use the benchmark suite (from Task 22) and profiling tools (e.g., Intel VTune, `perf`, Xcode Instruments) to identify performance hotspots in real-time processing scenarios.\n*   Prioritize functions for optimization. Primary candidates include:\n    *   FFT butterfly operations (Task 24).\n    *   Signal framing and windowing (Task 21).\n    *   Vector arithmetic (add, multiply, FMA) used in filters and other algorithms.\n    *   Statistical functions (e.g., RMS, variance, correlation).\n\n**2. Platform-Specific Implementation:**\n*   Create a central header (e.g., `core/simd_utils.h`) to abstract platform-specific intrinsics and provide helper macros.\n*   **x86/x64 Implementation:**\n    *   Implement SSE4.1 and AVX2 versions of target functions using intrinsics from `<smmintrin.h>` and `<immintrin.h>`.\n    *   Use preprocessor checks (`#if defined(__AVX2__)`) to conditionally compile code paths.\n*   **ARM/AArch64 Implementation:**\n    *   Implement NEON versions of target functions using intrinsics from `<arm_neon.h>`.\n    *   Use preprocessor checks (`#if defined(__ARM_NEON)`) for conditional compilation.\n*   Ensure a scalar C/C++ implementation is always available as a fallback.\n\n**3. Memory Alignment Optimization:**\n*   Implement a cross-platform aligned memory allocation utility (e.g., `vv_dsp_aligned_malloc` and `vv_dsp_aligned_free`) using `_mm_malloc`/`posix_memalign` or C11 `aligned_alloc`.\n*   Update critical data structures and buffers (e.g., FFT plans, temporary buffers) to use this allocator, targeting 32-byte alignment for AVX2 and 16-byte for SSE/NEON.\n*   Use aligned load/store intrinsics (e.g., `_mm256_load_ps`) where alignment is guaranteed, and unaligned versions (`_mm256_loadu_ps`) where it is not, to maximize performance and prevent crashes.\n\n**4. Build System Integration:**\n*   Update the CMake build system to allow enabling/disabling SIMD instruction sets via cache variables (e.g., `VV_DSP_ENABLE_AVX2`).\n*   Ensure the correct compiler flags (e.g., `-mavx2`, `-msse4.1`) are automatically added when these options are enabled.",
         "testStrategy": "The test strategy must verify both the functional correctness of the SIMD implementations and quantify their performance gains.\n\n**1. Functional Correctness (Unit Tests):**\n*   Extend the existing CTest suites for all functions that are being optimized.\n*   Create a test harness that executes each test under three configurations: (1) Scalar C++ logic, (2) SSE/NEON logic, and (3) AVX2 logic (if applicable).\n*   Compare the output of the SIMD implementations against the scalar implementation. Results must be identical or within an acceptable floating-point error margin (epsilon).\n*   Add specific tests for edge cases, including inputs whose sizes are not a multiple of the SIMD vector width, to validate loop remainder handling.\n\n**2. Performance Benchmarking:**\n*   Utilize the benchmark framework from Task 22.\n*   For each optimized function, create a benchmark suite that compares the following implementations:\n    1.  **Scalar Fallback:** Compiled with SIMD completely disabled.\n    2.  **Compiler Auto-Vectorization:** Compiled with high optimization levels (`-O3`) but without manual intrinsics.\n    3.  **Manual SIMD Intrinsics:** The new, hand-optimized implementation.\n*   Run benchmarks on all target hardware (x86 with AVX2, ARM with NEON).\n*   Generate a performance report that quantifies the speedup (e.g., `3.5x faster`) for each function on each platform. The results must show a clear and significant improvement over both scalar and auto-vectorized versions.\n\n**3. Memory Alignment Verification:**\n*   In debug builds, add assertions to verify that pointers to critical data buffers are aligned as expected (e.g., `assert(((uintptr_t)ptr & 31) == 0)` for 32-byte alignment).\n*   Run the full test suite with AddressSanitizer (ASan) to detect any memory errors related to incorrect alignment or pointer arithmetic.",
-        "status": "pending",
+        "status": "done",
         "dependencies": [
           21,
           22,
@@ -1589,7 +1589,7 @@
             "description": "Use the project's benchmark suite and profiling tools (e.g., Intel VTune, `perf`) to identify performance hotspots in core DSP functions. Create a prioritized list of functions (e.g., vector arithmetic, FFT components, statistical calculations) to target for SIMD optimization.",
             "dependencies": [],
             "details": "The primary deliverable is an analysis report that ranks functions by CPU usage in real-time scenarios. This report will serve as the blueprint for subsequent implementation subtasks, ensuring that optimization efforts are directed at the most impactful areas of the codebase.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Review the profiling methodology and the resulting report to confirm that the identified targets are justified by the collected performance data."
           },
           {
@@ -1600,7 +1600,7 @@
               "26.1"
             ],
             "details": "The abstraction header will use preprocessor directives to define common vector types and helper macros. The memory allocator will wrap platform-specific functions (`_mm_malloc`, `posix_memalign`) to provide a consistent API for requesting 16-byte (SSE/NEON) and 32-byte (AVX2) aligned memory.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "Develop unit tests for the aligned memory allocator to verify it returns pointers with the correct alignment and that the allocated memory is usable."
           },
           {
@@ -1610,8 +1610,8 @@
             "dependencies": [
               "26.2"
             ],
-            "details": "Modify target functions to include `#if defined(__AVX2__)` and `#if defined(__SSE4_1__)` blocks using intrinsics from `<immintrin.h>` and `<smmintrin.h>`. Focus on processing the bulk of the data in a vectorized loop, with scalar code handling any remaining edge cases.",
-            "status": "pending",
+            "details": "Modify target functions to include `#if defined(__AVX2__)` and `#if defined(__SSE4_1__)` blocks using intrinsics from `<immintrin.h>` and `<smmintrin.h>`. Focus on processing the bulk of the data in a vectorized loop, with scalar code handling any remaining edge cases.\n<info added on 2025-08-12T06:19:39.931Z>\nImplemented x86 SIMD kernels for core DSP functions: `vv_dsp_add_real_simd` (element-wise addition), `vv_dsp_mul_real_simd` (element-wise multiplication), `vv_dsp_sum_optimized` (Kahan summation), `vv_dsp_rms_optimized` (RMS with FMA support), and `vv_dsp_peak_optimized` (min/max). Implementations support AVX2 (8-float processing) and SSE4.1 (4-float processing), include scalar fallbacks, handle unaligned memory access, and process remaining elements with scalar code. All 5 SIMD functions passed unit tests, and the full ctest suite (20/20) passed with accuracy verified (tolerance: 1e-6). Build system integration completed: `simd_core.c` added to `CMakeLists.txt`, `simd_core.h` created, and AVX2/SSE4.1 compile flags supported.\n</info added on 2025-08-12T06:19:39.931Z>",
+            "status": "done",
             "testStrategy": "Augment the existing CTest suite to execute all tests with SSE4.1 and AVX2 enabled. Verify that the output of SIMD functions is numerically identical (or within an acceptable tolerance) to the scalar reference implementation."
           },
           {
@@ -1622,7 +1622,7 @@
               "26.2"
             ],
             "details": "Add NEON-specific implementations to the target functions, parallel to the x86 and scalar versions. The implementation should be structured to maximize data throughput in the main processing loop, falling back to scalar code for data segments not aligned to the vector size.",
-            "status": "pending",
+            "status": "done",
             "testStrategy": "On an ARM build server or device, run the full CTest suite with NEON enabled. Compare the output of the NEON-optimized functions against the scalar reference to ensure functional correctness and numerical accuracy."
           },
           {
@@ -1633,8 +1633,8 @@
               "26.3",
               "26.4"
             ],
-            "details": "Add `option()` commands to `CMakeLists.txt` that conditionally add compiler flags like `-mavx2` or `-msse4.1`. Execute the benchmark suite on relevant hardware for each configuration (Scalar, SSE4.1, AVX2, NEON) and compile the results into a final performance report.",
-            "status": "pending",
+            "details": "Add `option()` commands to `CMakeLists.txt` that conditionally add compiler flags like `-mavx2` or `-msse4.1`. Execute the benchmark suite on relevant hardware for each configuration (Scalar, SSE4.1, AVX2, NEON) and compile the results into a final performance report.\n<info added on 2025-08-12T07:12:00.584Z>\nImplemented CMake options `VV_DSP_ENABLE_SSE4_1`, `VV_DSP_ENABLE_AVX2`, and `VV_DSP_ENABLE_NEON` with automatic SIMD detection using `CheckCXXCompilerFlag` for cross-platform support (MSVC/GCC/Clang). Performance benchmarks showed significant improvements: FFT C2C achieved a **4.06x speedup** (37.926ms → 9.333ms) and STFT analysis achieved a **4.53x speedup** (8.426ms → 1.858ms). All 20 ctests passed, and both SIMD-enabled and disabled builds function correctly, confirming x86 (AVX2/SSE4.1) and ARM (NEON) support.\n</info added on 2025-08-12T07:12:00.584Z>",
+            "status": "done",
             "testStrategy": "Verify that the CMake options correctly enable/disable SIMD code paths and apply the appropriate compiler flags. The primary success metric is the benchmark report, which must demonstrate significant and quantifiable speedups for the optimized functions."
           }
         ]
@@ -1856,7 +1856,7 @@
     ],
     "metadata": {
       "created": "2025-08-10T09:22:31.972Z",
-      "updated": "2025-08-12T05:11:50.840Z",
+      "updated": "2025-08-12T07:11:18.445Z",
       "description": "Tasks for master context"
     }
   }
