@@ -1,9 +1,10 @@
 name: Documentation
 
 on:
-  push:
-    branches: [ main ]
-  pull_request:
+  workflow_run:
+    workflows: ["CI"]
+    types:
+      - completed
     branches: [ main ]
 
 # Allow one concurrent deployment
@@ -21,6 +22,8 @@ jobs:
   # Build documentation job
   build:
     runs-on: ubuntu-latest
+    # Only run if the CI workflow completed successfully
+    if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
     steps:
     - name: Checkout repository
@@ -46,18 +49,18 @@ jobs:
         # echo "docs.your-domain.com" > docs/html/CNAME
 
     - name: Setup Pages
-      if: github.ref == 'refs/heads/main'
+      if: github.event.workflow_run.head_branch == 'main'
       uses: actions/configure-pages@v4
 
     - name: Upload artifact
-      if: github.ref == 'refs/heads/main'
+      if: github.event.workflow_run.head_branch == 'main'
       uses: actions/upload-pages-artifact@v3
       with:
         path: ./docs/html
 
-  # Deployment job (only on main branch)
+  # Deployment job (only on main branch and when CI succeeded)
   deploy:
-    if: github.ref == 'refs/heads/main'
+    if: github.event.workflow_run.conclusion == 'success' && github.event.workflow_run.head_branch == 'main'
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
