@@ -47,3 +47,4 @@
 {"type":"relation","from":"vv-dsp","relationType":"follows","to":"comprehensive_testing"}
 {"type":"relation","from":"cmake_build_system","relationType":"supports","to":"comprehensive_testing"}
 {"type":"relation","from":"recent_updates","relationType":"improves","to":"vv-dsp"}
+{"type":"relation","from":"default_user","to":"vv-dsp","relationType":"develops"}
