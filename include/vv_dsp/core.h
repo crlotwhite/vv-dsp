@@ -16,6 +16,7 @@ extern "C" {
 
 #include "vv_dsp/vv_dsp_types.h"
 #include "vv_dsp/core/nan_policy.h"
+#include "vv_dsp/core/fp_env.h"
 
 /** @addtogroup core_group
  * @{
@@ -296,6 +297,7 @@ vv_dsp_real vv_dsp_clamp(vv_dsp_real v, vv_dsp_real lo, vv_dsp_real hi);
 
 /**
  * @brief Flush denormal floating-point numbers to zero
+ * @deprecated Use vv_dsp_set_flush_denormals(true) instead
  * @details Sets processor flags to treat denormal numbers as zero for better performance
  * @note This is a platform-specific optimization and may not be available on all systems
  */

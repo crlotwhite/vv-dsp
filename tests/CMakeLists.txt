@@ -12,6 +12,11 @@ add_executable(vv-dsp-core-tests core_tests.c)
 target_link_libraries(vv-dsp-core-tests PRIVATE vv-dsp)
 add_test(NAME vv-dsp-core COMMAND $<TARGET_FILE:vv-dsp-core-tests>)
 
+# FP Environment tests
+add_executable(vv-dsp-fp-env-tests test_fp_env.c)
+target_link_libraries(vv-dsp-fp-env-tests PRIVATE vv-dsp)
+add_test(NAME vv-dsp-fp-env COMMAND $<TARGET_FILE:vv-dsp-fp-env-tests>)
+
 # Framing tests
 add_executable(vv-dsp-framing-tests framing_tests.c)
 target_link_libraries(vv-dsp-framing-tests PRIVATE vv-dsp)

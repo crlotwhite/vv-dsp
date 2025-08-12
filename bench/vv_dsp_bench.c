@@ -17,6 +17,7 @@ extern void run_stft_benchmarks(vv_bench_suite* suite);
 extern void run_filter_benchmarks(vv_bench_suite* suite);
 extern void run_resample_benchmarks(vv_bench_suite* suite);
 extern void run_pipeline_benchmarks(vv_bench_suite* suite);
+extern void run_denormal_benchmarks(vv_bench_suite* suite);
 
 /* Global options */
 static struct {
@@ -50,6 +51,7 @@ static void list_benchmarks(void) {
     printf("  filter      - FIR and IIR filtering performance\n");
     printf("  resample    - Audio resampling performance\n");
     printf("  pipeline    - End-to-end DSP pipeline performance\n");
+    printf("  denormal    - Denormal number processing performance (FTZ/DAZ)\n");
     printf("\n");
     printf("Use --filter=CATEGORY to run specific benchmark categories.\n");
 }
@@ -172,6 +174,10 @@ int main(int argc, char* argv[]) {
 
         if (should_run_benchmark("pipeline")) {
             run_pipeline_benchmarks(&suite);
+        }
+
+        if (should_run_benchmark("denormal")) {
+            run_denormal_benchmarks(&suite);
         }
     }
 

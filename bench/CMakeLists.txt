@@ -15,6 +15,7 @@ add_executable(vv_dsp_bench
     bench_filter_fixed.c
     bench_resample_fixed.c
     bench_pipeline.c
+    bench_denormals.c
 )
 
 # Link against the vv-dsp umbrella target

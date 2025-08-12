@@ -132,7 +132,6 @@ vv_dsp_real vv_dsp_clamp(vv_dsp_real v, vv_dsp_real lo, vv_dsp_real hi) {
 }
 
 void vv_dsp_flush_denormals(void) {
-    // Best-effort: set FTZ/DAZ on supported platforms (no-op portable fallback)
-    // On x86 with SSE: could set MXCSR bits 15 (FTZ) and 6 (DAZ). Omitted for portability.
-    (void)0;
+    // Legacy function: use new API for better control
+    vv_dsp_set_flush_denormals(true);
 }

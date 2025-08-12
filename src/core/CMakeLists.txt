@@ -3,6 +3,7 @@ add_library(vv-dsp-core
   stats.c
   framing.c
   nan_policy.c
+  fp_env.c
 )
 
 target_include_directories(vv-dsp-core
