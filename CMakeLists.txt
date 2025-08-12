@@ -1,7 +1,7 @@
 
 cmake_minimum_required(VERSION 3.15)
 
-project(vv-dsp VERSION 0.1.0 LANGUAGES C)
+project(vv-dsp VERSION 0.1.0 LANGUAGES C CXX)
 
 # C standard and compiler warnings
 set(CMAKE_C_STANDARD 99)
@@ -16,7 +16,25 @@ if(MSVC)
   # Define math constants and disable CRT security warnings for MSVC
   add_compile_definitions(_USE_MATH_DEFINES _CRT_SECURE_NO_WARNINGS)
 else()
-  add_compile_options(-Wall -Wextra -Wpedantic -Wshadow -Wconversion -Wdouble-promotion -Wformat=2 -Wstrict-prototypes)
+  # C specific compiler flags
+  add_compile_options($<$<COMPILE_LANGUAGE:C>:-Wall>)
+  add_compile_options($<$<COMPILE_LANGUAGE:C>:-Wextra>)
+  add_compile_options($<$<COMPILE_LANGUAGE:C>:-Wpedantic>)
+  add_compile_options($<$<COMPILE_LANGUAGE:C>:-Wshadow>)
+  add_compile_options($<$<COMPILE_LANGUAGE:C>:-Wconversion>)
+  add_compile_options($<$<COMPILE_LANGUAGE:C>:-Wdouble-promotion>)
+  add_compile_options($<$<COMPILE_LANGUAGE:C>:-Wformat=2>)
+  add_compile_options($<$<COMPILE_LANGUAGE:C>:-Wstrict-prototypes>)
+
+  # C++ specific compiler flags (without -Wstrict-prototypes)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wall>)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wextra>)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wpedantic>)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wshadow>)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wconversion>)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wdouble-promotion>)
+  add_compile_options($<$<COMPILE_LANGUAGE:CXX>:-Wformat=2>)
+
   if(VV_DSP_WERROR)
     add_compile_options(-Werror)
   endif()
@@ -26,6 +44,7 @@ endif()
 option(VV_DSP_BUILD_TESTS "Build vv-dsp tests" ON)
 option(VV_DSP_BUILD_EXAMPLES "Build vv-dsp examples" ON)
 option(VV_DSP_BUILD_BENCHMARKS "Build vv-dsp performance benchmarks" OFF)
+option(VV_DSP_USE_GTEST "Enable Google Test and Google Benchmark for modern testing" OFF)
 option(VV_DSP_USE_SIMD "Enable SIMD optimizations where available" OFF)
 option(VV_DSP_ENABLE_AUDIO_IO "Enable WAV audio file I/O utilities" OFF)
 
@@ -277,6 +296,52 @@ if(VV_DSP_USE_MATH_APPROX)
   add_compile_definitions(VV_DSP_USE_MATH_APPROX=1)
 endif()
 
+# Google Test and Google Benchmark (when VV_DSP_USE_GTEST is enabled)
+if(VV_DSP_USE_GTEST)
+  # Store original flags
+  set(ORIG_CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+  set(ORIG_CMAKE_C_FLAGS "${CMAKE_C_FLAGS}")
+
+  # Disable problematic flags for external dependencies
+  string(REGEX REPLACE "-Werror[^ ]*" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+  string(REGEX REPLACE "-Wconversion[^ ]*" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+  string(REGEX REPLACE "-Wdouble-promotion[^ ]*" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+  string(REGEX REPLACE "-Wformat=[0-9][^ ]*" "" CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS}")
+
+  # Set GoogleTest options to build static libs and avoid installing
+  set(BUILD_GMOCK OFF CACHE BOOL "" FORCE)
+  set(INSTALL_GTEST OFF CACHE BOOL "" FORCE)
+  set(gtest_force_shared_crt ON CACHE BOOL "" FORCE)
+
+  # Set Google Benchmark options
+  set(BENCHMARK_ENABLE_TESTING OFF CACHE BOOL "" FORCE)
+  set(BENCHMARK_ENABLE_INSTALL OFF CACHE BOOL "" FORCE)
+  set(BENCHMARK_DOWNLOAD_DEPENDENCIES ON CACHE BOOL "" FORCE)
+  set(BENCHMARK_ENABLE_WERROR OFF CACHE BOOL "" FORCE)
+
+  # Fetch GoogleTest
+  FetchContent_Declare(
+    googletest
+    GIT_REPOSITORY https://github.com/google/googletest.git
+    GIT_TAG v1.14.0
+  )
+
+  # Fetch Google Benchmark
+  FetchContent_Declare(
+    googlebenchmark
+    GIT_REPOSITORY https://github.com/google/benchmark.git
+    GIT_TAG v1.8.3
+  )
+
+  FetchContent_MakeAvailable(googletest googlebenchmark)
+
+  # Restore original flags for our own code
+  set(CMAKE_CXX_FLAGS "${ORIG_CMAKE_CXX_FLAGS}")
+  set(CMAKE_C_FLAGS "${ORIG_CMAKE_C_FLAGS}")
+
+  message(STATUS "vv-dsp: Google Test and Google Benchmark enabled")
+endif()
+
 # Include directories
 set(VV_DSP_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
@@ -347,6 +412,13 @@ endif()
 if(VV_DSP_BUILD_TESTS)
   enable_testing()
   add_subdirectory(tests)
+
+  # Add Google Test and Google Benchmark subdirectories if enabled
+  if(VV_DSP_USE_GTEST)
+    add_subdirectory(tests/gtest)
+    add_subdirectory(tests/benchmark)
+  endif()
+
   # Optional: configure CTest MemCheck to use valgrind if available
   find_program(VALGRIND_EXECUTABLE valgrind)
   if(VALGRIND_EXECUTABLE)
