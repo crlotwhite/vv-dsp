@@ -153,7 +153,7 @@ class STFTProcessingTest : public STFTTest, public ::testing::WithParamInterface
 
 TEST_P(STFTProcessingTest, BasicProcessing) {
     const auto [fft_size, hop_size, window_type] = GetParam();
-    
+
     vv_dsp_stft_params params = {fft_size, hop_size, window_type};
     vv_dsp_stft* stft = nullptr;
 
@@ -163,7 +163,7 @@ TEST_P(STFTProcessingTest, BasicProcessing) {
     // Generate test frame
     std::vector<vv_dsp_real> input_frame(fft_size);
     std::vector<vv_dsp_cpx> output_spectrum(fft_size);
-    
+
     // Generate sine wave at a known frequency
     generateSineWave(input_frame, static_cast<vv_dsp_real>(fft_size) / 8.0, static_cast<vv_dsp_real>(fft_size));
 
@@ -177,7 +177,7 @@ TEST_P(STFTProcessingTest, BasicProcessing) {
     // Find peak frequency - should be around bin fft_size/8
     size_t expected_bin = fft_size / 8;
     size_t peak_bin = findPeakBin(output_spectrum);
-    
+
     // Allow some tolerance for windowing effects
     EXPECT_NEAR(static_cast<double>(peak_bin), static_cast<double>(expected_bin), static_cast<double>(fft_size / 4))
         << "Peak frequency mismatch for fft_size=" << fft_size << ", window=" << static_cast<int>(window_type);
@@ -187,12 +187,12 @@ TEST_P(STFTProcessingTest, BasicProcessing) {
 
 TEST_P(STFTProcessingTest, ReconstructionProperty) {
     const auto [fft_size, hop_size, window_type] = GetParam();
-    
+
     // Skip very small sizes for reconstruction test
     if (fft_size < 16 || hop_size < 4) {
         GTEST_SKIP() << "Skipping reconstruction test for small sizes";
     }
-    
+
     vv_dsp_stft_params params = {fft_size, hop_size, window_type};
     vv_dsp_stft* stft = nullptr;
 
@@ -214,8 +214,8 @@ TEST_P(STFTProcessingTest, ReconstructionProperty) {
         ASSERT_EQ(vv_dsp_stft_process(stft, &original_signal[frame_start], spectrum.data()), VV_DSP_OK);
 
         // Synthesis (overlap-add)
-        ASSERT_EQ(vv_dsp_stft_reconstruct(stft, spectrum.data(), 
-                                         &reconstructed_signal[frame_start], 
+        ASSERT_EQ(vv_dsp_stft_reconstruct(stft, spectrum.data(),
+                                         &reconstructed_signal[frame_start],
                                          &normalization[frame_start]), VV_DSP_OK);
 
         frame_start += hop_size;
@@ -231,32 +231,32 @@ TEST_P(STFTProcessingTest, ReconstructionProperty) {
     // Check reconstruction quality in the central region (avoid edge effects)
     size_t start_check = fft_size;
     size_t end_check = signal_length - fft_size;
-    
+
     if (start_check < end_check) {
         vv_dsp_real original_rms = 0.0, error_rms = 0.0;
         size_t check_samples = 0;
-        
+
         for (size_t i = start_check; i < end_check; ++i) {
             vv_dsp_real original = original_signal[i];
             vv_dsp_real reconstructed = reconstructed_signal[i];
             vv_dsp_real error = original - reconstructed;
-            
+
             original_rms += original * original;
             error_rms += error * error;
             check_samples++;
         }
-        
+
         if (check_samples > 0) {
             original_rms = std::sqrt(original_rms / check_samples);
             error_rms = std::sqrt(error_rms / check_samples);
-            
+
             // Reconstruction should be quite good for reasonable hop sizes
             if (original_rms > 1e-10) {
                 vv_dsp_real relative_error = error_rms / original_rms;
                 // More tolerant threshold, especially for edge cases like hop_size == fft_size
                 vv_dsp_real threshold = (hop_size >= fft_size) ? 0.2 : 0.05;  // 20% for critical sampling, 5% otherwise
                 EXPECT_LT(relative_error, threshold)
-                    << "Poor reconstruction quality for fft_size=" << fft_size 
+                    << "Poor reconstruction quality for fft_size=" << fft_size
                     << ", hop_size=" << hop_size << ", window=" << static_cast<int>(window_type);
             }
         }
@@ -280,7 +280,7 @@ INSTANTIATE_TEST_SUITE_P(
 TEST_F(STFTTest, SpectrogramGeneration) {
     const size_t fft_size = 32;  // Smaller size to avoid memory issues
     const size_t hop_size = 16;
-    
+
     vv_dsp_stft_params params = {fft_size, hop_size, VV_DSP_STFT_WIN_HANN};
     vv_dsp_stft* stft = nullptr;
 
@@ -289,7 +289,7 @@ TEST_F(STFTTest, SpectrogramGeneration) {
     // Generate simple test signal
     const size_t signal_length = 128;  // Much smaller signal
     std::vector<vv_dsp_real> test_signal(signal_length);
-    
+
     // Simple sine wave instead of chirp
     for (size_t i = 0; i < signal_length; ++i) {
         test_signal[i] = std::sin(2.0 * M_PI * static_cast<double>(i) / 8.0);
@@ -297,15 +297,15 @@ TEST_F(STFTTest, SpectrogramGeneration) {
 
     // Calculate expected number of frames
     size_t expected_frames = (signal_length >= fft_size) ? ((signal_length - fft_size) / hop_size + 1) : 0;
-    
+
     if (expected_frames > 0) {
         std::vector<vv_dsp_real> spectrogram(expected_frames * fft_size);
         size_t actual_frames = 0;
 
         // Generate spectrogram
-        vv_dsp_status status = vv_dsp_stft_spectrogram(stft, test_signal.data(), signal_length, 
+        vv_dsp_status status = vv_dsp_stft_spectrogram(stft, test_signal.data(), signal_length,
                                                       spectrogram.data(), &actual_frames);
-        
+
         if (status == VV_DSP_OK) {
             // Check that we got reasonable number of frames
             EXPECT_GT(actual_frames, 0);
@@ -323,7 +323,7 @@ TEST_F(STFTTest, SpectrogramGeneration) {
 TEST_F(STFTTest, WindowTypeComparison) {
     const size_t fft_size = 64;
     const size_t hop_size = 32;
-    
+
     std::vector<vv_dsp_stft_window> windows = {
         VV_DSP_STFT_WIN_BOXCAR,
         VV_DSP_STFT_WIN_HANN,
@@ -342,7 +342,7 @@ TEST_F(STFTTest, WindowTypeComparison) {
         vv_dsp_stft* stft = nullptr;
 
         ASSERT_EQ(vv_dsp_stft_create(&params, &stft), VV_DSP_OK);
-        
+
         spectra[w].resize(fft_size);
         ASSERT_EQ(vv_dsp_stft_process(stft, input_frame.data(), spectra[w].data()), VV_DSP_OK);
 
@@ -352,15 +352,15 @@ TEST_F(STFTTest, WindowTypeComparison) {
     // Compare window effects
     // Boxcar window should have more spectral leakage (wider main lobe)
     // Hann and Hamming should have better frequency selectivity
-    
+
     for (size_t w = 0; w < windows.size(); ++w) {
         size_t peak_bin = findPeakBin(spectra[w]);
         vv_dsp_real peak_magnitude = magnitude(spectra[w][peak_bin]);
-        
+
         // All windows should find roughly the same peak frequency
         EXPECT_NEAR(static_cast<double>(peak_bin), static_cast<double>(fft_size / 8), static_cast<double>(fft_size / 4))
             << "Window type " << static_cast<int>(windows[w]) << " found wrong peak";
-        
+
         // Peak magnitude should be significant
         EXPECT_GT(peak_magnitude, 1.0)
             << "Window type " << static_cast<int>(windows[w]) << " has too small peak";
@@ -380,7 +380,7 @@ TEST_F(STFTTest, EdgeCases) {
     // Test with all zeros
     std::fill(input_frame.begin(), input_frame.end(), 0.0);
     EXPECT_EQ(vv_dsp_stft_process(stft, input_frame.data(), output_spectrum.data()), VV_DSP_OK);
-    
+
     // Output should be close to zero
     for (const auto& sample : output_spectrum) {
         EXPECT_LT(magnitude(sample), 1e-10) << "Non-zero output for zero input";
@@ -407,12 +407,12 @@ TEST_F(STFTTest, MinimalSizes) {
     vv_dsp_status status = vv_dsp_stft_create(&params, &stft);
     if (status == VV_DSP_OK) {
         EXPECT_NE(stft, nullptr);
-        
+
         std::vector<vv_dsp_real> input_frame(2, 1.0);
         std::vector<vv_dsp_cpx> output_spectrum(2);
 
         EXPECT_EQ(vv_dsp_stft_process(stft, input_frame.data(), output_spectrum.data()), VV_DSP_OK);
-        
+
         // Basic sanity check - should not be all zeros
         bool has_nonzero = false;
         for (const auto& sample : output_spectrum) {
@@ -433,7 +433,7 @@ TEST_F(STFTTest, PerfectReconstructionConditions) {
     // Test configuration known to have good reconstruction properties
     const size_t fft_size = 512;
     const size_t hop_size = 128; // 75% overlap
-    
+
     vv_dsp_stft_params params = {fft_size, hop_size, VV_DSP_STFT_WIN_HANN};
     vv_dsp_stft* stft = nullptr;
 
@@ -442,7 +442,7 @@ TEST_F(STFTTest, PerfectReconstructionConditions) {
     // Generate high-quality test signal
     const size_t signal_length = fft_size * 4;
     std::vector<vv_dsp_real> original_signal(signal_length);
-    
+
     // Multi-tone signal
     for (size_t i = 0; i < signal_length; ++i) {
         original_signal[i] = 0.5 * std::sin(2.0 * M_PI * 5.0 * i / fft_size) +
@@ -461,8 +461,8 @@ TEST_F(STFTTest, PerfectReconstructionConditions) {
         ASSERT_EQ(vv_dsp_stft_process(stft, &original_signal[frame_start], spectrum.data()), VV_DSP_OK);
 
         // Synthesis
-        ASSERT_EQ(vv_dsp_stft_reconstruct(stft, spectrum.data(), 
-                                         &reconstructed_signal[frame_start], 
+        ASSERT_EQ(vv_dsp_stft_reconstruct(stft, spectrum.data(),
+                                         &reconstructed_signal[frame_start],
                                          &normalization[frame_start]), VV_DSP_OK);
 
         frame_start += hop_size;
@@ -478,21 +478,21 @@ TEST_F(STFTTest, PerfectReconstructionConditions) {
     // Check high-quality reconstruction in stable region
     size_t start_check = fft_size;
     size_t end_check = signal_length - fft_size;
-    
+
     vv_dsp_real max_error = 0.0;
     vv_dsp_real rms_error = 0.0;
     size_t check_samples = 0;
-    
+
     for (size_t i = start_check; i < end_check; ++i) {
         vv_dsp_real error = std::abs(original_signal[i] - reconstructed_signal[i]);
         max_error = std::max(max_error, error);
         rms_error += error * error;
         check_samples++;
     }
-    
+
     if (check_samples > 0) {
         rms_error = std::sqrt(rms_error / check_samples);
-        
+
         // For good STFT parameters, reconstruction should be very accurate
         EXPECT_LT(max_error, 1e-3) << "Maximum reconstruction error too large";
         EXPECT_LT(rms_error, 1e-5) << "RMS reconstruction error too large";

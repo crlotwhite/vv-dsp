@@ -175,7 +175,7 @@ BENCHMARK_REGISTER_F(FFTBenchmarkFixture, RealFFTForward)
 static void BM_FFTBackendComparison(benchmark::State& state) {
     const size_t N = 1024;
     std::vector<vv_dsp_cpx> input(N), output(N);
-    
+
     // Generate test data
     std::mt19937 gen{42};
     std::uniform_real_distribution<vv_dsp_real> dist{-1.0, 1.0};
@@ -186,7 +186,7 @@ static void BM_FFTBackendComparison(benchmark::State& state) {
 
     // Get current backend
     vv_dsp_fft_backend current_backend = vv_dsp_fft_get_backend();
-    
+
     vv_dsp_fft_plan* plan = nullptr;
     if (vv_dsp_fft_make_plan(N, VV_DSP_FFT_C2C, VV_DSP_FFT_FORWARD, &plan) != VV_DSP_OK) {
         state.SkipWithError("Failed to create FFT plan");
@@ -200,7 +200,7 @@ static void BM_FFTBackendComparison(benchmark::State& state) {
 
     vv_dsp_fft_destroy(plan);
     state.SetItemsProcessed(state.iterations() * N);
-    
+
     // Set label with backend name
     std::string backend_name;
     switch (current_backend) {
@@ -218,7 +218,7 @@ BENCHMARK(BM_FFTBackendComparison);
 static void BM_FFTMemoryThroughput(benchmark::State& state) {
     const size_t N = state.range(0);
     std::vector<vv_dsp_cpx> input(N), output(N);
-    
+
     // Generate test data
     std::mt19937 gen{42};
     std::uniform_real_distribution<vv_dsp_real> dist{-1.0, 1.0};
@@ -239,7 +239,7 @@ static void BM_FFTMemoryThroughput(benchmark::State& state) {
     }
 
     vv_dsp_fft_destroy(plan);
-    
+
     // Calculate memory throughput
     size_t bytes_per_iteration = N * sizeof(vv_dsp_cpx) * 2; // input + output
     state.SetBytesProcessed(state.iterations() * bytes_per_iteration);

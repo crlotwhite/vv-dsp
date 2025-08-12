@@ -167,7 +167,7 @@ TEST_P(FFTComplexTest, ComplexFFTForwardBackward) {
 
     // Check reconstruction (should be equal to input within tolerance)
     for (size_t i = 0; i < N; ++i) {
-        EXPECT_NEAR(reconstructed[i].re, input[i].re, 1e-5) 
+        EXPECT_NEAR(reconstructed[i].re, input[i].re, 1e-5)
             << "Real part mismatch at index " << i << " for N=" << N;
         EXPECT_NEAR(reconstructed[i].im, input[i].im, 1e-5)
             << "Imaginary part mismatch at index " << i << " for N=" << N;
@@ -241,7 +241,7 @@ TEST_P(FFTRealTest, RealFFTBasicProperties) {
 
     // Nyquist component should be real (if N is even)
     if (N % 2 == 0) {
-        EXPECT_NEAR(output[spectrum_size-1].im, 0.0, 1e-5) 
+        EXPECT_NEAR(output[spectrum_size-1].im, 0.0, 1e-5)
             << "Nyquist component should be real for N=" << N;
     }
 
@@ -306,12 +306,12 @@ INSTANTIATE_TEST_SUITE_P(
 );
 
 // Test FFT with different backends (if available)
-class FFTBackendTest : public FFTTest, 
+class FFTBackendTest : public FFTTest,
                        public ::testing::WithParamInterface<std::tuple<vv_dsp_fft_backend, size_t>> {};
 
 TEST_P(FFTBackendTest, BackendConsistency) {
     const auto [backend, N] = GetParam();
-    
+
     // Skip if backend is not available
     if (!vv_dsp_fft_is_backend_available(backend)) {
         GTEST_SKIP() << "Backend not available";

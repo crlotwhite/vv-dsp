@@ -59,7 +59,7 @@ VV-DSP provides comprehensive testing through CTest with multiple test categorie
 # Run all tests
 ctest --test-dir build --output-on-failure
 
-# Run only Google Test unit tests  
+# Run only Google Test unit tests
 ctest --test-dir build -L gtest --output-on-failure
 
 # Run performance benchmarks (non-failing)
@@ -173,7 +173,7 @@ jobs:
           - name: "Standard Tests"
             cmake_flags: "-DVV_DSP_BUILD_TESTS=ON"
             test_filter: "-E gtest"
-          - name: "Google Test Suite"  
+          - name: "Google Test Suite"
             cmake_flags: "-DVV_DSP_USE_GTEST=ON"
             test_filter: "-L gtest"
           - name: "Performance Benchmarks"

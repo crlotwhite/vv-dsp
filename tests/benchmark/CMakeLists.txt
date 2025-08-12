@@ -31,7 +31,7 @@ add_test(NAME vv-dsp-benchmark-fft-run
   COMMAND $<TARGET_FILE:vv-dsp-benchmark-fft> --benchmark_min_time=0.1s)
 
 # Label benchmarks for easy identification
-set_tests_properties(vv-dsp-benchmark-window-run vv-dsp-benchmark-fft-run 
+set_tests_properties(vv-dsp-benchmark-window-run vv-dsp-benchmark-fft-run
   PROPERTIES LABELS "benchmark;performance")
 
 # Create a combined benchmark executable for all algorithms
