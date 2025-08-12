@@ -16,7 +16,7 @@
 #define STFT_SIGNAL_LEN 48000      /* 1 second at 48kHz */
 #define STFT_FRAME_SIZE 1024       /* Standard FFT size */
 #define STFT_HOP_SIZE   256        /* 75% overlap */
-#define STFT_NUM_ITERATIONS 10     /* Number of benchmark iterations */
+#define STFT_NUM_ITERATIONS 3      /* Reduced iterations for faster debug */
 
 /* Global test data to avoid stack allocation */
 static vv_dsp_real test_signal[STFT_SIGNAL_LEN];
@@ -38,6 +38,8 @@ static void generate_test_signal(vv_dsp_real* signal, size_t length) {
 }
 
 static void benchmark_stft_processing_loop(vv_bench_suite* suite) {
+    printf("DEBUG: Starting STFT processing loop benchmark\n");
+
     vv_dsp_stft* stft_handle = NULL;
     vv_dsp_stft_params params = {
         .fft_size = STFT_FRAME_SIZE,
@@ -45,14 +47,17 @@ static void benchmark_stft_processing_loop(vv_bench_suite* suite) {
         .window = VV_DSP_STFT_WIN_HANN
     };
 
+    printf("DEBUG: Creating STFT handle...\n");
     /* Create STFT handle */
     vv_dsp_status status = vv_dsp_stft_create(&params, &stft_handle);
     if (status != VV_DSP_OK || !stft_handle) {
         fprintf(stderr, "Failed to create STFT handle\n");
         return;
     }
+    printf("DEBUG: STFT handle created successfully\n");
 
     /* Generate test signal */
+    printf("DEBUG: Generating test signal...\n");
     generate_test_signal(test_signal, STFT_SIGNAL_LEN);
 
     /* Clear output buffer */
@@ -60,16 +65,23 @@ static void benchmark_stft_processing_loop(vv_bench_suite* suite) {
 
     /* Calculate number of frames */
     size_t num_frames = vv_dsp_get_num_frames(STFT_SIGNAL_LEN, STFT_FRAME_SIZE, STFT_HOP_SIZE, 0);
+    printf("DEBUG: Number of frames calculated: %zu\n", num_frames);
 
     /* Benchmark the complete analysis-synthesis loop */
+    printf("DEBUG: Starting benchmark timing...\n");
     vv_bench_time start = vv_bench_get_time();
 
     size_t iter;
     for (iter = 0; iter < STFT_NUM_ITERATIONS; iter++) {
+        printf("DEBUG: Iteration %zu/%d\n", iter, STFT_NUM_ITERATIONS);
         size_t frame_idx;
 
         /* Analysis phase */
         for (frame_idx = 0; frame_idx < num_frames; frame_idx++) {
+            if (frame_idx % 50 == 0) {
+                printf("DEBUG: Processing frame %zu/%zu in iteration %zu\n", frame_idx, num_frames, iter);
+            }
+
             /* Fetch frame */
             status = vv_dsp_fetch_frame(test_signal, STFT_SIGNAL_LEN,
                                         frame_buffer, STFT_FRAME_SIZE,
@@ -89,6 +101,8 @@ static void benchmark_stft_processing_loop(vv_bench_suite* suite) {
     vv_bench_time end = vv_bench_get_time();
     double elapsed = vv_bench_elapsed_seconds(start, end);
 
+    printf("DEBUG: Benchmark completed in %f seconds\n", elapsed);
+
     /* Calculate metrics */
     double total_samples_processed = (double)(STFT_SIGNAL_LEN * STFT_NUM_ITERATIONS);
     double samples_per_second = total_samples_processed / elapsed;
@@ -100,6 +114,7 @@ static void benchmark_stft_processing_loop(vv_bench_suite* suite) {
 
     /* Cleanup */
     vv_dsp_stft_destroy(stft_handle);
+    printf("DEBUG: STFT handle destroyed\n");
 }
 
 static void benchmark_stft_frame_rate(vv_bench_suite* suite) {
@@ -213,9 +228,9 @@ static void benchmark_stft_different_sizes(vv_bench_suite* suite) {
 
 void run_stft_benchmarks(vv_bench_suite* suite) {
     if (!suite) return;
-
-    /* Run STFT benchmarks */
+    printf("DEBUG: run_stft_benchmarks (ENABLED)\n");
     benchmark_stft_processing_loop(suite);
     benchmark_stft_frame_rate(suite);
     benchmark_stft_different_sizes(suite);
+    printf("DEBUG: run_stft_benchmarks done\n");
 }

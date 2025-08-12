@@ -12,7 +12,8 @@
 #include <math.h>
 
 #define FILTER_SIGNAL_LEN 16384
-#define FILTER_NUM_ITERATIONS 100
+/* Reduced iterations for faster turnaround; can override via env */
+#define FILTER_NUM_ITERATIONS 40
 
 static vv_dsp_real test_signal[FILTER_SIGNAL_LEN];
 static vv_dsp_real output_signal[FILTER_SIGNAL_LEN];
@@ -49,6 +50,15 @@ static void generate_lowpass_fir(vv_dsp_real* coeffs, size_t M, vv_dsp_real fc) 
 }
 
 /* FIR time-domain benchmark using the correct API */
+static size_t get_iterations_override(void) {
+    const char* env = getenv("VV_DSP_BENCH_ITER");
+    if (env && *env) {
+        long v = strtol(env, NULL, 10);
+        if (v > 0 && v < 1000000) return (size_t)v;
+    }
+    return FILTER_NUM_ITERATIONS;
+}
+
 static void benchmark_fir_time_domain(vv_bench_suite* suite) {
     generate_test_signal();
 
@@ -76,17 +86,21 @@ static void benchmark_fir_time_domain(vv_bench_suite* suite) {
         vv_bench_time start = vv_bench_get_time();
 
         size_t iter;
-        for (iter = 0; iter < FILTER_NUM_ITERATIONS; iter++) {
+        size_t max_iter = get_iterations_override();
+        for (iter = 0; iter < max_iter; iter++) {
             vv_dsp_status status = vv_dsp_fir_apply(&fir_state, filter_coeffs,
                                                    test_signal, output_signal, FILTER_SIGNAL_LEN);
             if (status != VV_DSP_OK) break;
+            if ((iter & 15) == 0) {
+                printf("[FIR TD %zu taps] iter %zu/%zu\n", filter_len, iter, max_iter);
+            }
         }
 
         vv_bench_time end = vv_bench_get_time();
         double elapsed = vv_bench_elapsed_seconds(start, end);
 
         /* Calculate metrics */
-        double total_samples = (double)(FILTER_SIGNAL_LEN * iter);
+    double total_samples = (double)(FILTER_SIGNAL_LEN * iter);
         double samples_per_second = total_samples / elapsed;
 
         /* Create benchmark result */
@@ -133,10 +147,14 @@ static void benchmark_fir_fft_domain(vv_bench_suite* suite) {
         vv_bench_time start = vv_bench_get_time();
 
         size_t iter;
-        for (iter = 0; iter < FILTER_NUM_ITERATIONS; iter++) {
+        size_t max_iter = get_iterations_override();
+        for (iter = 0; iter < max_iter; iter++) {
             vv_dsp_status status = vv_dsp_fir_apply_fft(&fir_state, filter_coeffs,
                                                        test_signal, output_signal, FILTER_SIGNAL_LEN);
             if (status != VV_DSP_OK) break;
+            if ((iter & 15) == 0) {
+                printf("[FIR FFT %zu taps] iter %zu/%zu\n", filter_len, iter, max_iter);
+            }
         }
 
         vv_bench_time end = vv_bench_get_time();
@@ -175,11 +193,15 @@ static void benchmark_iir_filters(vv_bench_suite* suite) {
     vv_bench_time start = vv_bench_get_time();
 
     size_t iter;
-    for (iter = 0; iter < FILTER_NUM_ITERATIONS; iter++) {
+    size_t max_iter = get_iterations_override();
+    for (iter = 0; iter < max_iter; iter++) {
         vv_dsp_status status = vv_dsp_iir_apply(&biquad, 1, /* single stage */
                                                test_signal, output_signal, FILTER_SIGNAL_LEN);
         if (status != VV_DSP_OK) break;
         vv_dsp_biquad_reset(&biquad); /* Reset state for consistent timing */
+        if ((iter & 15) == 0) {
+            printf("[IIR biquad] iter %zu/%zu\n", iter, max_iter);
+        }
     }
 
     vv_bench_time end = vv_bench_get_time();
@@ -211,12 +233,16 @@ static void benchmark_savgol_filter(vv_bench_suite* suite) {
         vv_bench_time start = vv_bench_get_time();
 
         size_t iter;
-        for (iter = 0; iter < FILTER_NUM_ITERATIONS; iter++) {
+        size_t max_iter = get_iterations_override();
+        for (iter = 0; iter < max_iter; iter++) {
             vv_dsp_status status = vv_dsp_savgol(test_signal, FILTER_SIGNAL_LEN,
                                                 (int)window_len, 3, 0, 1.0,
                                                 VV_DSP_SAVGOL_MODE_REFLECT,
                                                 output_signal);
             if (status != VV_DSP_OK) break;
+            if ((iter & 15) == 0) {
+                printf("[SavGol %zu] iter %zu/%zu\n", window_len, iter, max_iter);
+            }
         }
 
         vv_bench_time end = vv_bench_get_time();
@@ -235,6 +261,11 @@ static void benchmark_savgol_filter(vv_bench_suite* suite) {
 
 /* Main filter benchmark function */
 void run_filter_benchmarks(vv_bench_suite* suite) {
+    const char* only = getenv("VV_DSP_BENCH_ONLY");
+    if (only && strcmp(only, "filter") != 0) {
+        printf("Skipping filter benchmarks due to VV_DSP_BENCH_ONLY=%s\n", only);
+        return;
+    }
     printf("Running filter benchmarks...\n");
 
     benchmark_fir_time_domain(suite);

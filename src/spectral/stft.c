@@ -12,6 +12,9 @@ struct vv_dsp_stft {
     vv_dsp_real* timebuf;  // temp buffer length nfft
     vv_dsp_fft_plan* plan_f;
     vv_dsp_fft_plan* plan_b;
+    // Reusable complex buffers to avoid per-call allocations
+    vv_dsp_cpx* work_fft_in;
+    vv_dsp_cpx* work_fft_time;
 };
 
 static vv_dsp_status make_window(vv_dsp_stft_window wt, size_t n, vv_dsp_real* out) {
@@ -35,7 +38,12 @@ VV_DSP_NODISCARD vv_dsp_status vv_dsp_stft_create(const vv_dsp_stft_params* para
     h->win_type = params->window;
     h->win = (vv_dsp_real*)malloc(sizeof(vv_dsp_real)*h->nfft);
     h->timebuf = (vv_dsp_real*)malloc(sizeof(vv_dsp_real)*h->nfft);
-    if (!h->win || !h->timebuf) { free(h->win); free(h->timebuf); free(h); return VV_DSP_ERROR_INTERNAL; }
+    h->work_fft_in = (vv_dsp_cpx*)malloc(sizeof(vv_dsp_cpx)*h->nfft);
+    h->work_fft_time = (vv_dsp_cpx*)malloc(sizeof(vv_dsp_cpx)*h->nfft);
+    if (!h->win || !h->timebuf || !h->work_fft_in || !h->work_fft_time) {
+        free(h->win); free(h->timebuf); free(h->work_fft_in); free(h->work_fft_time); free(h);
+        return VV_DSP_ERROR_INTERNAL;
+    }
     vv_dsp_status s = make_window(h->win_type, h->nfft, h->win);
     if (s != VV_DSP_OK) { free(h->win); free(h->timebuf); free(h); return s; }
 
@@ -56,6 +64,8 @@ vv_dsp_status vv_dsp_stft_destroy(vv_dsp_stft* h) {
     vv_dsp_fft_destroy(h->plan_b);
     free(h->win);
     free(h->timebuf);
+    free(h->work_fft_in);
+    free(h->work_fft_time);
     free(h);
     return VV_DSP_OK;
 }
@@ -65,14 +75,12 @@ VV_DSP_NODISCARD vv_dsp_status vv_dsp_stft_process(vv_dsp_stft* h,
                                                    vv_dsp_cpx* out) {
     if (!h || !in || !out) return VV_DSP_ERROR_NULL_POINTER;
     // Apply window into temp complex buffer (real as re, 0 as im)
-    vv_dsp_cpx* tmp = (vv_dsp_cpx*)malloc(sizeof(vv_dsp_cpx)*h->nfft);
-    if (!tmp) return VV_DSP_ERROR_INTERNAL;
+    vv_dsp_cpx* tmp = h->work_fft_in;
     for (size_t i=0;i<h->nfft;++i) {
         vv_dsp_real v = in[i] * h->win[i];
         tmp[i].re = v; tmp[i].im = 0;
     }
     vv_dsp_status s = vv_dsp_fft_execute(h->plan_f, tmp, out);
-    free(tmp);
     return s;
 }
 
@@ -82,17 +90,15 @@ VV_DSP_NODISCARD vv_dsp_status vv_dsp_stft_reconstruct(vv_dsp_stft* h,
                                                        vv_dsp_real* out_add,
                                                        vv_dsp_real* norm_add) {
     if (!h || !in || !out_add) return VV_DSP_ERROR_NULL_POINTER;
-    vv_dsp_cpx* time = (vv_dsp_cpx*)malloc(sizeof(vv_dsp_cpx)*h->nfft);
-    if (!time) return VV_DSP_ERROR_INTERNAL;
+    vv_dsp_cpx* time = h->work_fft_time;
     vv_dsp_status s = vv_dsp_fft_execute(h->plan_b, in, time);
-    if (s != VV_DSP_OK) { free(time); return s; }
+    if (s != VV_DSP_OK) { return s; }
     for (size_t i=0;i<h->nfft;++i) {
         vv_dsp_real w = h->win[i];
         vv_dsp_real v = time[i].re * w;
         out_add[i] += v; // caller manages buffer position and zeroing
         if (norm_add) norm_add[i] += w*w;
     }
-    free(time);
     return VV_DSP_OK;
 }
 

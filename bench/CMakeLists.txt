@@ -18,7 +18,17 @@ add_executable(vv_dsp_bench
 )
 
 # Link against the vv-dsp umbrella target
-target_link_libraries(vv_dsp_bench PRIVATE vv-dsp)
+# TEMPORARY: Link directly to avoid Eigen/C++ issues
+target_link_libraries(vv_dsp_bench PRIVATE
+    vv-dsp-core
+    vv-dsp-spectral
+    vv-dsp-window
+    vv-dsp-filter
+    vv-dsp-resample
+    vv-dsp-envelope
+    vv-dsp-features
+    vv-dsp-adapters
+)
 
 # Include directories
 target_include_directories(vv_dsp_bench PRIVATE

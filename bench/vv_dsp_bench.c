@@ -103,10 +103,13 @@ static int should_run_benchmark(const char* category) {
 }
 
 int main(int argc, char* argv[]) {
+    printf("DEBUG: Starting main function\n");
+
     /* Parse command line arguments */
     if (parse_arguments(argc, argv) != 0) {
         return 1;
     }
+    printf("DEBUG: Arguments parsed\n");
 
     if (options.show_help) {
         print_usage(argv[0]);
@@ -118,11 +121,13 @@ int main(int argc, char* argv[]) {
         return 0;
     }
 
+    printf("DEBUG: Before timer init\n");
     /* Initialize timing subsystem */
     if (vv_bench_timer_init() != 0) {
         fprintf(stderr, "Error: Failed to initialize high-resolution timer\n");
         return 1;
     }
+    printf("DEBUG: Timer initialized\n");
 
     /* Open output file if specified */
     FILE* output_file = NULL;
@@ -133,6 +138,7 @@ int main(int argc, char* argv[]) {
             return 1;
         }
     }
+    printf("DEBUG: Output file handled\n");
 
     /* Initialize benchmark suite */
     vv_bench_suite suite;
@@ -141,30 +147,42 @@ int main(int argc, char* argv[]) {
         if (output_file) fclose(output_file);
         return 1;
     }
+    printf("DEBUG: Suite initialized\n");
 
+    printf("DEBUG: Before should_run_benchmark check\n");
     /* Run benchmark categories */
     if (should_run_benchmark("stft")) {
+        printf("DEBUG: About to call run_stft_benchmarks\n");
         run_stft_benchmarks(&suite);
+        printf("DEBUG: run_stft_benchmarks returned\n");
     }
 
-    if (should_run_benchmark("filter")) {
-        run_filter_benchmarks(&suite);
+    /* Optional debug short-circuit: if VV_DSP_BENCH_ONLY_STFT env var is set, skip others */
+    const char* only_stft = getenv("VV_DSP_BENCH_ONLY_STFT");
+    if (only_stft && only_stft[0] != '\0') {
+        printf("DEBUG: VV_DSP_BENCH_ONLY_STFT set -> skipping other benchmark categories\n");
+    } else {
+        if (should_run_benchmark("filter")) {
+            run_filter_benchmarks(&suite);
+        }
+
+        if (should_run_benchmark("resample")) {
+            run_resample_benchmarks(&suite);
+        }
+
+        if (should_run_benchmark("pipeline")) {
+            run_pipeline_benchmarks(&suite);
+        }
     }
 
-    if (should_run_benchmark("resample")) {
-        run_resample_benchmarks(&suite);
-    }
-
-    if (should_run_benchmark("pipeline")) {
-        run_pipeline_benchmarks(&suite);
-    }
-
+    printf("DEBUG: Before write results\n");
     /* Write results */
     if (vv_bench_write_results(&suite) != 0) {
         fprintf(stderr, "Error: Failed to write benchmark results\n");
         if (output_file) fclose(output_file);
         return 1;
     }
+    printf("DEBUG: Results written\n");
 
     /* Cleanup */
     if (output_file) {
@@ -178,5 +196,6 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    printf("DEBUG: Main function completed\n");
     return 0;
 }
