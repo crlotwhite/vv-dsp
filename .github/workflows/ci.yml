@@ -8,6 +8,7 @@ on:
 
 jobs:
   build-and-test:
+    name: ${{ matrix.os }} (${{ matrix.fft_backend != 'default' && matrix.fft_backend || 'KissFFT' }}${{ matrix.sanitize == 'asan_ubsan' && ', sanitizers' || '' }})
     runs-on: ${{ matrix.os }}
     strategy:
       fail-fast: false
@@ -15,19 +16,32 @@ jobs:
         os: [ubuntu-latest, macos-latest, windows-latest]
         build_type: [RelWithDebInfo]
         sanitize: [none]
+        fft_backend: [default]
         include:
           - os: ubuntu-latest
             build_type: RelWithDebInfo
             sanitize: none
+            fft_backend: default
           - os: ubuntu-latest
             build_type: RelWithDebInfo
             sanitize: asan_ubsan
+            fft_backend: default
+          - os: ubuntu-latest
+            build_type: RelWithDebInfo
+            sanitize: none
+            fft_backend: fftw
+          - os: ubuntu-latest
+            build_type: RelWithDebInfo
+            sanitize: none
+            fft_backend: ffts
           - os: macos-latest
             build_type: RelWithDebInfo
             sanitize: none
+            fft_backend: default
           - os: windows-latest
             build_type: RelWithDebInfo
             sanitize: none
+            fft_backend: default
     steps:
       - name: Checkout
         uses: actions/checkout@v4
@@ -42,6 +56,21 @@ jobs:
         run: |
           sudo apt-get update
           sudo apt-get install -y cmake build-essential
+          # Install FFTW if needed
+          if [[ "${{ matrix.fft_backend }}" == "fftw" ]]; then
+            sudo apt-get install -y libfftw3-dev
+          fi
+          # Install FFTS if needed
+          if [[ "${{ matrix.fft_backend }}" == "ffts" ]]; then
+            # Build FFTS from source since it's not available in Ubuntu packages
+            git clone https://github.com/anthonix/ffts.git /tmp/ffts
+            cd /tmp/ffts
+            mkdir build && cd build
+            cmake .. -DCMAKE_BUILD_TYPE=Release -DCMAKE_INSTALL_PREFIX=/usr/local
+            make -j$(nproc)
+            sudo make install
+            sudo ldconfig
+          fi
 
       - name: Install Python deps (Linux)
         if: runner.os == 'Linux'
@@ -58,11 +87,24 @@ jobs:
       - name: Configure CMake (Linux)
         if: runner.os == 'Linux'
         run: |
-          cmake -S . -B build \
+          cmake_args="-S . -B build \
             -DVERIFY_WITH_PYTHON=ON \
             -DVV_DSP_BUILD_TESTS=ON \
-            ${{ matrix.sanitize == 'asan_ubsan' && '-DVV_DSP_ENABLE_ASAN=ON -DVV_DSP_ENABLE_UBSAN=ON' || '' }} \
-            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
+            -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}"
+          
+          # Add sanitizer options
+          if [[ "${{ matrix.sanitize }}" == "asan_ubsan" ]]; then
+            cmake_args="$cmake_args -DVV_DSP_ENABLE_ASAN=ON -DVV_DSP_ENABLE_UBSAN=ON"
+          fi
+          
+          # Add FFT backend options
+          if [[ "${{ matrix.fft_backend }}" == "fftw" ]]; then
+            cmake_args="$cmake_args -DVV_DSP_WITH_FFTW=ON -DVV_DSP_BACKEND_FFT=fftw"
+          elif [[ "${{ matrix.fft_backend }}" == "ffts" ]]; then
+            cmake_args="$cmake_args -DVV_DSP_WITH_FFTS=ON -DVV_DSP_BACKEND_FFT=ffts"
+          fi
+          
+          eval "cmake $cmake_args"
 
       - name: Configure CMake (macOS/Windows)
         if: runner.os != 'Linux'

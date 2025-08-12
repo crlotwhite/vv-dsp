@@ -79,6 +79,11 @@ add_executable(vv-dsp-czt-tests czt_tests.c)
 target_link_libraries(vv-dsp-czt-tests PRIVATE vv-dsp)
 add_test(NAME vv-dsp-czt COMMAND $<TARGET_FILE:vv-dsp-czt-tests>)
 
+# FFT Backend tests
+add_executable(vv-dsp-fft-backend-tests fft_backend_tests.c)
+target_link_libraries(vv-dsp-fft-backend-tests PRIVATE vv-dsp)
+add_test(NAME vv-dsp-fft-backend COMMAND $<TARGET_FILE:vv-dsp-fft-backend-tests>)
+
 # Hilbert tests
 add_executable(vv-dsp-hilbert-tests hilbert_tests.c)
 target_link_libraries(vv-dsp-hilbert-tests PRIVATE vv-dsp)
