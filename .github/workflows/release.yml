@@ -5,6 +5,9 @@ on:
     tags:
       - 'v*.*.*'
 
+permissions:
+  contents: write
+
 env:
   # Common build options for all platforms
   CMAKE_BUILD_TYPE: Release
