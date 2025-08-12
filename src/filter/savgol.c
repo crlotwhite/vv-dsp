@@ -238,7 +238,7 @@ vv_dsp_status vv_dsp_savgol(const vv_dsp_real* y,
     // We need to create a copy of the input for policy processing since the input is const
     vv_dsp_real* y_processed = (vv_dsp_real*)malloc(N * sizeof(vv_dsp_real));
     if (!y_processed) return VV_DSP_ERROR_INTERNAL;
-    
+
     // Apply NaN/Inf policy using the copy variant
     vv_dsp_status policy_status = vv_dsp_apply_nan_policy_copy(y, N, y_processed);
     if (policy_status != VV_DSP_OK) {
@@ -274,14 +274,14 @@ vv_dsp_status vv_dsp_savgol(const vv_dsp_real* y,
 
     // Apply NaN/Inf policy to output as well (in case computations generated non-finite values)
     vv_dsp_status output_policy_status = vv_dsp_apply_nan_policy_inplace(output, N);
-    
+
     free(xp);
     free(y_processed);
-    
+
     // Return the more critical error if there was one
     if (output_policy_status != VV_DSP_OK) {
         return output_policy_status;
     }
-    
+
     return VV_DSP_OK;
 }

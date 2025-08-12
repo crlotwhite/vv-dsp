@@ -87,20 +87,20 @@ VV_DSP_NODISCARD vv_dsp_status vv_dsp_dct_execute(const vv_dsp_dct_plan* plan,
                                                   const vv_dsp_real* in,
                                                   vv_dsp_real* out) {
     if (!plan || !in || !out) return VV_DSP_ERROR_NULL_POINTER;
-    
+
     const size_t N = plan->n;
-    
+
     // Allocate temporary buffer for NaN/Inf processed input
     vv_dsp_real* temp_input = (vv_dsp_real*)malloc(N * sizeof(vv_dsp_real));
     if (!temp_input) return VV_DSP_ERROR_INTERNAL;
-    
+
     // Check and handle NaN/Inf in input according to policy
     vv_dsp_status status = vv_dsp_apply_nan_policy_copy(in, N, temp_input);
     if (status != VV_DSP_OK) {
         free(temp_input);
         return status;  // Return early on error (e.g., if policy is ERROR and NaN/Inf found)
     }
-    
+
     // Apply the appropriate DCT transform
     if (plan->type == VV_DSP_DCT_II) {
         if (plan->dir == VV_DSP_DCT_FORWARD) {
@@ -123,15 +123,15 @@ VV_DSP_NODISCARD vv_dsp_status vv_dsp_dct_execute(const vv_dsp_dct_plan* plan,
         free(temp_input);
         return VV_DSP_ERROR_OUT_OF_RANGE;
     }
-    
+
     free(temp_input);
-    
+
     // Apply NaN/Inf policy to output
     status = vv_dsp_apply_nan_policy_inplace(out, N);
     if (status != VV_DSP_OK) {
         return status;
     }
-    
+
     return VV_DSP_OK;
 }
 

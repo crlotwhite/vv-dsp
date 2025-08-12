@@ -47,7 +47,7 @@ typedef enum vv_dsp_nan_policy {
  * @code{.c}
  * // Set policy to replace NaN/Inf with 0.0
  * vv_dsp_set_nan_policy(VV_DSP_NAN_POLICY_IGNORE);
- * 
+ *
  * // Set policy to return error on NaN/Inf
  * vv_dsp_set_nan_policy(VV_DSP_NAN_POLICY_ERROR);
  * @endcode
