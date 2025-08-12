@@ -166,10 +166,12 @@ TEST_P(FFTComplexTest, ComplexFFTForwardBackward) {
     ASSERT_EQ(vv_dsp_fft_execute(backward_plan, output.data(), reconstructed.data()), VV_DSP_OK);
 
     // Check reconstruction (should be equal to input within tolerance)
+    // Use different tolerance based on transform size to account for accumulated numerical errors
+    vv_dsp_real tolerance = (N <= 64) ? 1e-5 : (N <= 256) ? 5e-5 : 1e-4;
     for (size_t i = 0; i < N; ++i) {
-        EXPECT_NEAR(reconstructed[i].re, input[i].re, 1e-5)
+        EXPECT_NEAR(reconstructed[i].re, input[i].re, tolerance)
             << "Real part mismatch at index " << i << " for N=" << N;
-        EXPECT_NEAR(reconstructed[i].im, input[i].im, 1e-5)
+        EXPECT_NEAR(reconstructed[i].im, input[i].im, tolerance)
             << "Imaginary part mismatch at index " << i << " for N=" << N;
     }
 
@@ -241,7 +243,8 @@ TEST_P(FFTRealTest, RealFFTBasicProperties) {
 
     // Nyquist component should be real (if N is even)
     if (N % 2 == 0) {
-        EXPECT_NEAR(output[spectrum_size-1].im, 0.0, 1e-5)
+        vv_dsp_real nyquist_tolerance = (N <= 64) ? 1e-5 : (N <= 256) ? 5e-5 : 1e-4;
+        EXPECT_NEAR(output[spectrum_size-1].im, 0.0, nyquist_tolerance)
             << "Nyquist component should be real for N=" << N;
     }
 

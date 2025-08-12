@@ -31,6 +31,10 @@ vv_dsp_fft_backend vv_dsp_fft_get_backend(void) {
 
 int vv_dsp_fft_is_backend_available(vv_dsp_fft_backend backend) {
     if (backend >= 3) return 0;
+
+    // Ensure backends are initialized
+    vv_dsp_fft_init_backends_once();
+
     return g_fft_backends[backend] && g_fft_backends[backend]->is_available();
 }
 
@@ -96,7 +100,7 @@ VV_DSP_NODISCARD vv_dsp_status vv_dsp_fft_execute(const vv_dsp_fft_plan* plan,
 }
 
 vv_dsp_status vv_dsp_fft_destroy(vv_dsp_fft_plan* plan) {
-    if (!plan) return VV_DSP_ERROR_NULL_POINTER;
+    if (!plan) return VV_DSP_OK;  // Allow safe destruction of null plan
     vv_dsp_fft_backend_free(plan->backend_plan.generic);
     free(plan);
     return VV_DSP_OK;

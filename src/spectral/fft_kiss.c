@@ -124,9 +124,24 @@ static vv_dsp_status kiss_execute(const struct vv_dsp_fft_plan* spec, void* back
         vv_dsp_cpx* tmp_out = (vv_dsp_cpx*)malloc(sizeof(vv_dsp_cpx) * n);
         if (!tmp_in || !tmp_out) { free(tmp_in); free(tmp_out); return VV_DSP_ERROR_INTERNAL; }
         for (size_t i = 0; i < n; ++i) tmp_in[i] = vv_dsp_cpx_make(rin[i], 0);
-        dft_naive(tmp_in, tmp_out, n, +1);
+
+        // Use fast FFT for power-of-two sizes, naive DFT for others
+        if (is_power_of_two(n)) {
+            memcpy(tmp_out, tmp_in, sizeof(vv_dsp_cpx) * n);
+            fft_iterative_radix2(tmp_out, n, +1);
+        } else {
+            dft_naive(tmp_in, tmp_out, n, +1);
+        }
+
         size_t nh = n/2 + 1;
-        memcpy(out, tmp_out, sizeof(vv_dsp_cpx) * nh);
+        vv_dsp_cpx* cout = (vv_dsp_cpx*)out;
+        memcpy(cout, tmp_out, sizeof(vv_dsp_cpx) * nh);
+
+        // Ensure Nyquist component is real for even-sized inputs
+        if (n % 2 == 0 && nh > 1) {
+            cout[nh-1].im = (vv_dsp_real)0.0;
+        }
+
         free(tmp_in); free(tmp_out);
         return VV_DSP_OK;
     }
@@ -143,9 +158,14 @@ static vv_dsp_status kiss_execute(const struct vv_dsp_fft_plan* spec, void* back
         for (size_t k = 0; k < nh; ++k) full[k] = inhp[k];
         for (size_t k = nh; k < n; ++k) {
             size_t m = n - k; // mirror index
-            vv_dsp_cpx v = inhp[m];
-            full[k].re = v.re;
-            full[k].im = -v.im;
+            if (m < nh && m > 0) {  // Ensure valid index and skip DC
+                vv_dsp_cpx v = inhp[m];
+                full[k].re = v.re;
+                full[k].im = -v.im;
+            } else {
+                full[k].re = (vv_dsp_real)0.0;
+                full[k].im = (vv_dsp_real)0.0;
+            }
         }
         dft_naive(full, time, n, -1);
         for (size_t i = 0; i < n; ++i) rout[i] = time[i].re; // imaginary should be ~0
