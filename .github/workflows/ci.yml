@@ -91,19 +91,19 @@ jobs:
             -DVERIFY_WITH_PYTHON=ON \
             -DVV_DSP_BUILD_TESTS=ON \
             -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}"
-          
+
           # Add sanitizer options
           if [[ "${{ matrix.sanitize }}" == "asan_ubsan" ]]; then
             cmake_args="$cmake_args -DVV_DSP_ENABLE_ASAN=ON -DVV_DSP_ENABLE_UBSAN=ON"
           fi
-          
+
           # Add FFT backend options
           if [[ "${{ matrix.fft_backend }}" == "fftw" ]]; then
             cmake_args="$cmake_args -DVV_DSP_WITH_FFTW=ON -DVV_DSP_BACKEND_FFT=fftw"
           elif [[ "${{ matrix.fft_backend }}" == "ffts" ]]; then
             cmake_args="$cmake_args -DVV_DSP_WITH_FFTS=ON -DVV_DSP_BACKEND_FFT=ffts"
           fi
-          
+
           eval "cmake $cmake_args"
 
       - name: Configure CMake (macOS/Windows)
