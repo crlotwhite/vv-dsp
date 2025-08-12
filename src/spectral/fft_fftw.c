@@ -280,7 +280,7 @@ static vv_dsp_status fftw_make_plan(const struct vv_dsp_fft_plan* spec, void** b
     return VV_DSP_OK;
 }
 
-static vv_dsp_status fftw_execute(const struct vv_dsp_fft_plan* spec, void* backend_data, const void* in, void* out) {
+static vv_dsp_status vv_dsp_fftw_execute(const struct vv_dsp_fft_plan* spec, void* backend_data, const void* in, void* out) {
     if (!spec || !backend_data || !in || !out) return VV_DSP_ERROR_NULL_POINTER;
 
     fftw_plan_wrapper* wrapper = (fftw_plan_wrapper*)backend_data;
@@ -378,7 +378,7 @@ static int fftw_is_available(void) {
 // FFTW vtable
 const vv_dsp_fft_backend_vtable vv_dsp_fft_fftw_vtable = {
     .make_plan = fftw_make_plan,
-    .execute = fftw_execute,
+    .execute = vv_dsp_fftw_execute,
     .free_plan = fftw_free_plan,
     .is_available = fftw_is_available,
     .name = "FFTW3"
