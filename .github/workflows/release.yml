@@ -143,6 +143,8 @@ jobs:
     steps:
     - name: Checkout code
       uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch full history for changelog generation
 
     - name: Download all artifacts
       uses: actions/download-artifact@v4
@@ -154,9 +156,53 @@ jobs:
         echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
         echo "Extracted version: $VERSION"
 
+    - name: Get previous version
+      id: previous_version
+      run: |
+        # Get the previous tag
+        PREV_TAG=$(git tag --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -2 | tail -1)
+        if [ -n "$PREV_TAG" ]; then
+          echo "PREV_VERSION=$PREV_TAG" >> $GITHUB_OUTPUT
+          echo "Previous version: $PREV_TAG"
+        else
+          echo "PREV_VERSION=" >> $GITHUB_OUTPUT
+          echo "No previous version found"
+        fi
+
+    - name: Generate changelog
+      run: |
+        # Make sure scripts directory exists and script is executable
+        chmod +x scripts/generate_changelog.sh
+
+        # Generate changelog with version info
+        if [ -n "${{ steps.previous_version.outputs.PREV_VERSION }}" ]; then
+          ./scripts/generate_changelog.sh "${{ steps.version.outputs.VERSION }}" "${{ steps.previous_version.outputs.PREV_VERSION }}"
+        else
+          ./scripts/generate_changelog.sh "${{ steps.version.outputs.VERSION }}"
+        fi
+
+    - name: Commit and push changelog
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+
+        # Add and commit the changelog if it has changes
+        git add CHANGELOG.md
+        if git diff --staged --quiet; then
+          echo "No changes to commit"
+        else
+          git commit -m "docs: update CHANGELOG.md for v${{ steps.version.outputs.VERSION }}"
+          # Use force-with-lease to safely push to main
+          git push origin HEAD:main --force-with-lease
+        fi
+
     - name: Create release notes
       run: |
-        cat > release_notes.md << EOF
+        # Use generated release notes if available, otherwise create default
+        if [ -f "release_notes_${{ steps.version.outputs.VERSION }}.md" ]; then
+          cp "release_notes_${{ steps.version.outputs.VERSION }}.md" release_notes.md
+        else
+          cat > release_notes.md << EOF
         # vv-dsp Release ${{ steps.version.outputs.VERSION }}
 
         ## What's New
@@ -206,6 +252,7 @@ jobs:
 
         See [CHANGELOG.md](https://github.com/crlotwhite/vv-dsp/blob/main/CHANGELOG.md) for detailed changes.
         EOF
+        fi
 
     - name: Create Release
       id: create_release

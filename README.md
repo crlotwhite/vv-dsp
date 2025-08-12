@@ -311,6 +311,21 @@ cmake -S . -B build \
     -DCMAKE_BUILD_TYPE=Debug
 ```
 
+### Release Management
+
+VV-DSP uses automated changelog generation based on conventional commits:
+
+- **📋 [CHANGELOG.md](CHANGELOG.md)** - Auto-generated from git history during releases
+- **🔄 Manual Updates** - Use GitHub Actions "Update Changelog" workflow for manual generation
+- **📝 Commit Format** - Follow conventional commits (feat:, fix:, docs:, etc.) for better categorization
+
+**Commit Message Guidelines:**
+
+- `feat:` or `add:` → **Added** section
+- `fix:` or `bugfix:` → **Fixed** section
+- `refactor:`, `style:`, `docs:`, `perf:` → **Changed** section
+- `remove:` or `delete:` → **Removed** section
+
 ### Contribution Guidelines
 
 - **🎯 Code Style**: Follow existing C99 conventions and naming patterns

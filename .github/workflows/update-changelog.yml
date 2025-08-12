@@ -1,0 +1,115 @@
+name: Update Changelog
+
+on:
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version to generate changelog for (e.g., "1.0.0" or "Unreleased")'
+        required: false
+        default: 'Unreleased'
+        type: string
+      previous_version:
+        description: 'Previous version tag (e.g., "v0.9.0"). Leave empty to auto-detect.'
+        required: false
+        type: string
+
+jobs:
+  update-changelog:
+    name: Update Changelog
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write
+
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+      with:
+        fetch-depth: 0  # Fetch full history for changelog generation
+        token: ${{ secrets.GITHUB_TOKEN }}
+
+    - name: Get previous version (if not provided)
+      id: previous_version
+      if: ${{ github.event.inputs.previous_version == '' }}
+      run: |
+        # Get the most recent tag
+        PREV_TAG=$(git tag --sort=-version:refname | grep -E '^v[0-9]+\.[0-9]+\.[0-9]+$' | head -1)
+        if [ -n "$PREV_TAG" ]; then
+          echo "PREV_VERSION=$PREV_TAG" >> $GITHUB_OUTPUT
+          echo "Auto-detected previous version: $PREV_TAG"
+        else
+          echo "PREV_VERSION=" >> $GITHUB_OUTPUT
+          echo "No previous version found"
+        fi
+
+    - name: Set previous version
+      id: set_previous_version
+      run: |
+        if [ -n "${{ github.event.inputs.previous_version }}" ]; then
+          echo "PREV_VERSION=${{ github.event.inputs.previous_version }}" >> $GITHUB_OUTPUT
+          echo "Using provided previous version: ${{ github.event.inputs.previous_version }}"
+        else
+          echo "PREV_VERSION=${{ steps.previous_version.outputs.PREV_VERSION }}" >> $GITHUB_OUTPUT
+          echo "Using auto-detected previous version: ${{ steps.previous_version.outputs.PREV_VERSION }}"
+        fi
+
+    - name: Generate changelog
+      run: |
+        # Make sure scripts directory exists and script is executable
+        chmod +x scripts/generate_changelog.sh
+
+        # Generate changelog
+        VERSION="${{ github.event.inputs.version }}"
+        PREV_VERSION="${{ steps.set_previous_version.outputs.PREV_VERSION }}"
+
+        if [ -n "$PREV_VERSION" ]; then
+          echo "Generating changelog from $PREV_VERSION to HEAD for version $VERSION"
+          ./scripts/generate_changelog.sh "$VERSION" "$PREV_VERSION"
+        else
+          echo "Generating changelog for all commits for version $VERSION"
+          ./scripts/generate_changelog.sh "$VERSION"
+        fi
+
+    - name: Check for changes
+      id: check_changes
+      run: |
+        if git diff --quiet CHANGELOG.md; then
+          echo "has_changes=false" >> $GITHUB_OUTPUT
+          echo "No changes detected in CHANGELOG.md"
+        else
+          echo "has_changes=true" >> $GITHUB_OUTPUT
+          echo "Changes detected in CHANGELOG.md"
+        fi
+
+    - name: Commit and push changelog
+      if: steps.check_changes.outputs.has_changes == 'true'
+      run: |
+        git config --local user.email "action@github.com"
+        git config --local user.name "GitHub Action"
+
+        git add CHANGELOG.md
+
+        # Also add release notes if generated
+        if [ -f "release_notes_${{ github.event.inputs.version }}.md" ]; then
+          git add "release_notes_${{ github.event.inputs.version }}.md"
+          git commit -m "docs: update CHANGELOG.md and release notes for v${{ github.event.inputs.version }}"
+        else
+          git commit -m "docs: update CHANGELOG.md for ${{ github.event.inputs.version }}"
+        fi
+
+        git push origin HEAD:${{ github.ref_name }}
+
+    - name: Summary
+      run: |
+        echo "## Changelog Update Summary" >> $GITHUB_STEP_SUMMARY
+        echo "" >> $GITHUB_STEP_SUMMARY
+        if [ "${{ steps.check_changes.outputs.has_changes }}" == "true" ]; then
+          echo "✅ Changelog was successfully updated for version ${{ github.event.inputs.version }}" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Changes:" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+          git diff HEAD~1 CHANGELOG.md || echo "Unable to show diff" >> $GITHUB_STEP_SUMMARY
+          echo "\`\`\`" >> $GITHUB_STEP_SUMMARY
+        else
+          echo "ℹ️ No changes were made to the changelog" >> $GITHUB_STEP_SUMMARY
+        fi
