@@ -67,35 +67,8 @@ if(TARGET vv-dsp-audio)
   add_test(NAME vv-dsp-audio COMMAND $<TARGET_FILE:vv-dsp-audio-tests>)
 endif()
 
-# C++ sanity compile test for RAII wrapper skeleton
-add_executable(vv-dsp-cpp-sanity tests_cpp_sanity.cpp)
-target_link_libraries(vv-dsp-cpp-sanity PRIVATE vv-dsp)
-add_test(NAME vv-dsp-cpp-sanity COMMAND $<TARGET_FILE:vv-dsp-cpp-sanity>)
-
-# C++ wrapper functional smoke tests
-add_executable(vv-dsp-cpp-fft test_cpp_fft.cpp)
-target_link_libraries(vv-dsp-cpp-fft PRIVATE vv-dsp)
-add_test(NAME vv-dsp-cpp-fft COMMAND $<TARGET_FILE:vv-dsp-cpp-fft>)
-
-add_executable(vv-dsp-cpp-misc test_cpp_misc.cpp)
-target_link_libraries(vv-dsp-cpp-misc PRIVATE vv-dsp)
-add_test(NAME vv-dsp-cpp-misc COMMAND $<TARGET_FILE:vv-dsp-cpp-misc>)
-
-add_executable(vv-dsp-cpp-math test_cpp_math.cpp)
-target_link_libraries(vv-dsp-cpp-math PRIVATE vv-dsp)
-add_test(NAME vv-dsp-cpp-math COMMAND $<TARGET_FILE:vv-dsp-cpp-math>)
-
-add_executable(vv-dsp-cpp-iir test_cpp_iir.cpp)
-target_link_libraries(vv-dsp-cpp-iir PRIVATE vv-dsp)
-add_test(NAME vv-dsp-cpp-iir COMMAND $<TARGET_FILE:vv-dsp-cpp-iir>)
-
-# IIRFilter C++ wrapper comprehensive tests
-add_executable(vv-dsp-iirfilter-tests test_IIRFilter.cpp)
-target_link_libraries(vv-dsp-iirfilter-tests PRIVATE vv-dsp)
-add_test(NAME vv-dsp-iirfilter COMMAND $<TARGET_FILE:vv-dsp-iirfilter-tests>)
-
-# Simple micro-benchmark (not part of pass/fail by default)
-add_executable(vv-dsp-bench bench_fft_stft.cpp)
+# Simple micro-benchmark (C implementation only)
+add_executable(vv-dsp-bench bench_fft_simple.c)
 target_link_libraries(vv-dsp-bench PRIVATE vv-dsp)
 # You can run manually: ctest -R bench -V or just execute vv-dsp-bench binary
 add_test(NAME vv-dsp-bench-run COMMAND $<TARGET_FILE:vv-dsp-bench>)

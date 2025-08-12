@@ -1,13 +1,11 @@
 
 cmake_minimum_required(VERSION 3.15)
 
-project(vv-dsp VERSION 0.1.0 LANGUAGES C CXX)
+project(vv-dsp VERSION 0.1.0 LANGUAGES C)
 
 # C standard and compiler warnings
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_C_STANDARD_REQUIRED ON)
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 option(VV_DSP_WERROR "Treat warnings as errors" OFF)
 option(VV_DSP_UNITY_BUILD "Enable unity/jumbo builds where supported" OFF)
@@ -45,7 +43,6 @@ option(VV_DSP_ENABLE_UBSAN "Enable UBSanitizer for sanitizing builds" OFF)
 # External dependency options
 option(VV_DSP_USE_FASTAPPROX "Enable fast math approximations using fastapprox" OFF)
 option(VV_DSP_USE_MATH_APPROX "Enable DSP-optimized math approximations" OFF)
-option(VV_DSP_USE_EIGEN "Enable Eigen library for linear algebra operations" OFF)
 option(VERIFY_WITH_PYTHON "Enable Python-based verification tests (NumPy/SciPy)" OFF)
 set(VV_PY_RTOL "" CACHE STRING "Python validation relative tolerance override (e.g., 5e-5)")
 set(VV_PY_ATOL "" CACHE STRING "Python validation absolute tolerance override (e.g., 5e-5)")
@@ -59,27 +56,26 @@ option(VV_DSP_ENABLE_NEON "Enable NEON optimizations on ARM/AArch64" OFF)
 
 # Auto-detect SIMD capability if VV_DSP_USE_SIMD is enabled
 if(VV_DSP_USE_SIMD)
-  include(CheckCXXCompilerFlag)
   include(CheckCCompilerFlag)
 
   # Try to enable appropriate SIMD instruction sets based on platform
   if(CMAKE_SYSTEM_PROCESSOR MATCHES "x86_64|AMD64|amd64")
     # Check for AVX2 support
-    check_cxx_compiler_flag("-mavx2" COMPILER_SUPPORTS_AVX2)
+    check_c_compiler_flag("-mavx2" COMPILER_SUPPORTS_AVX2)
     if(COMPILER_SUPPORTS_AVX2 AND NOT VV_DSP_ENABLE_AVX2)
       set(VV_DSP_ENABLE_AVX2 ON CACHE BOOL "Enable AVX2 optimizations" FORCE)
       message(STATUS "vv-dsp: Auto-enabling AVX2 optimizations")
     endif()
 
     # Check for SSE4.1 support
-    check_cxx_compiler_flag("-msse4.1" COMPILER_SUPPORTS_SSE41)
+    check_c_compiler_flag("-msse4.1" COMPILER_SUPPORTS_SSE41)
     if(COMPILER_SUPPORTS_SSE41 AND NOT VV_DSP_ENABLE_SSE4_1)
       set(VV_DSP_ENABLE_SSE4_1 ON CACHE BOOL "Enable SSE4.1 optimizations" FORCE)
       message(STATUS "vv-dsp: Auto-enabling SSE4.1 optimizations")
     endif()
   elseif(CMAKE_SYSTEM_PROCESSOR MATCHES "aarch64|arm64|ARM64")
     # Check for NEON support
-    check_cxx_compiler_flag("-mfpu=neon" COMPILER_SUPPORTS_NEON)
+    check_c_compiler_flag("-mfpu=neon" COMPILER_SUPPORTS_NEON)
     if(COMPILER_SUPPORTS_NEON AND NOT VV_DSP_ENABLE_NEON)
       set(VV_DSP_ENABLE_NEON ON CACHE BOOL "Enable NEON optimizations" FORCE)
       message(STATUS "vv-dsp: Auto-enabling NEON optimizations")
@@ -281,21 +277,6 @@ if(VV_DSP_USE_MATH_APPROX)
   add_compile_definitions(VV_DSP_USE_MATH_APPROX=1)
 endif()
 
-# Eigen - Linear algebra library
-if(VV_DSP_USE_EIGEN)
-  FetchContent_Declare(
-    eigen
-    GIT_REPOSITORY https://gitlab.com/libeigen/eigen.git
-    GIT_TAG 3.4.0
-  )
-  set(BUILD_TESTING OFF CACHE BOOL "" FORCE)
-  set(EIGEN_BUILD_DOC OFF CACHE BOOL "" FORCE)
-  set(EIGEN_BUILD_PKGCONFIG OFF CACHE BOOL "" FORCE)
-  FetchContent_MakeAvailable(eigen)
-  message(STATUS "vv-dsp: Eigen linear algebra library enabled")
-  add_compile_definitions(VV_DSP_USE_EIGEN=1)
-endif()
-
 # Include directories
 set(VV_DSP_INCLUDE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/include)
 
@@ -328,9 +309,6 @@ if(VV_DSP_USE_FASTAPPROX AND TARGET fastapprox)
 endif()
 if(VV_DSP_USE_MATH_APPROX AND TARGET math_approx)
   target_link_libraries(vv-dsp INTERFACE math_approx)
-endif()
-if(VV_DSP_USE_EIGEN AND TARGET Eigen3::Eigen)
-  target_link_libraries(vv-dsp INTERFACE Eigen3::Eigen)
 endif()
 
 # Link interface to module libs so consumers only link vv-dsp

@@ -2,7 +2,6 @@ add_library(vv-dsp-filter
 	filter.c
 	fir.c
 	iir.c
-	IIRFilter.cpp
 	common.c
 	savgol.c
 )
