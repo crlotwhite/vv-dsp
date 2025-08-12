@@ -14,10 +14,10 @@ const vv_dsp_fft_backend_vtable* g_fft_backends[3] = {NULL, NULL, NULL};
 // Backend management API implementations
 VV_DSP_NODISCARD vv_dsp_status vv_dsp_fft_set_backend(vv_dsp_fft_backend backend) {
     if (backend >= 3) return VV_DSP_ERROR_OUT_OF_RANGE;
-    
+
     // Ensure backends are initialized
     vv_dsp_fft_init_backends_once();
-    
+
     if (!g_fft_backends[backend] || !g_fft_backends[backend]->is_available()) {
         return VV_DSP_ERROR_UNSUPPORTED;
     }
@@ -107,7 +107,7 @@ static volatile int g_backends_initialized = 0;
 
 static void vv_dsp_fft_init_backends_once(void) {
     if (g_backends_initialized) return;
-    
+
     g_fft_backends[VV_DSP_FFT_BACKEND_KISS] = &vv_dsp_fft_kiss_vtable;
 #ifdef VV_DSP_BACKEND_FFT_fftw
     g_fft_backends[VV_DSP_FFT_BACKEND_FFTW] = &vv_dsp_fft_fftw_vtable;
@@ -115,6 +115,6 @@ static void vv_dsp_fft_init_backends_once(void) {
 #ifdef VV_DSP_BACKEND_FFT_ffts
     g_fft_backends[VV_DSP_FFT_BACKEND_FFTS] = &vv_dsp_fft_ffts_vtable;
 #endif
-    
+
     g_backends_initialized = 1;
 }
