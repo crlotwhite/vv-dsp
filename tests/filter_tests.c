@@ -29,12 +29,8 @@ static void test_fir_apply_impulse(void) {
     assert(vv_dsp_fir_apply_fft(&st, h, x, y, L) == VV_DSP_OK);
 
     // First N samples should equal h mirrored with history behavior starting from t=0
-    for (size_t i = 0; i < N; ++i) {
-        // Because we treat current x[i] as h[0]*x[i], impulse at 0 propagates as h[0] at y[0]
-        // and subsequent terms from history are zeros, so only y[0]=h[0]
-        // Later samples accumulate via history write; this simple check ensures finite energy
-        (void)i;
-    }
+    // For this simple test, we just verify that we get finite energy output
+    (void)N; /* Suppress unused variable warning */
     // Energy must be positive
     double e = 0; for (size_t i=0;i<L;++i) e += (double)y[i]*(double)y[i];
     assert(e > 0);

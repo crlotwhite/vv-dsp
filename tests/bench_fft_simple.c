@@ -6,15 +6,32 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
+#ifdef _WIN32
+#include <windows.h>
+#endif
 #include "vv_dsp/vv_dsp.h"
 
 #define BENCHMARK_SIZE 1024
 #define BENCHMARK_ITERATIONS 1000
 
 static double get_time_ms(void) {
+#ifdef _WIN32
+    /* Windows-specific high-resolution timer */
+    static LARGE_INTEGER frequency = {0};
+    LARGE_INTEGER counter;
+
+    if (frequency.QuadPart == 0) {
+        QueryPerformanceFrequency(&frequency);
+    }
+
+    QueryPerformanceCounter(&counter);
+    return (double)(counter.QuadPart * 1000) / frequency.QuadPart;
+#else
+    /* POSIX systems */
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return ts.tv_sec * 1000.0 + ts.tv_nsec / 1000000.0;
+#endif
 }
 
 static void benchmark_fft(void) {

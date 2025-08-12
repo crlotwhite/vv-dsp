@@ -93,7 +93,7 @@ vv_dsp_status vv_dsp_czt_exec_cpx(
     vv_dsp_real e = (vv_dsp_real)0.5 * (vv_dsp_real)((double)n*(double)n);
     vv_dsp_real ang = e * argW;
     vv_dsp_real mag = (vv_dsp_real)VV_DSP_POW((double)magW, (double)e);
-    vv_dsp_cpx W_n2 = cpx_from(mag * VV_DSP_COS(ang), mag * VV_DSP_SIN(ang));
+    vv_dsp_cpx W_n2 = cpx_from(mag * (vv_dsp_real)VV_DSP_COS(ang), mag * (vv_dsp_real)VV_DSP_SIN(ang));
         if (n==0){ A_pow = cpx_from(1,0); A_inv_pow = cpx_from(1,0); }
         else {
             // A_pow = A_pow * A
@@ -107,7 +107,7 @@ vv_dsp_status vv_dsp_czt_exec_cpx(
         vv_dsp_real e = (vv_dsp_real)0.5 * (vv_dsp_real)((double)k*(double)k);
         vv_dsp_real ang = -e * argW;
         vv_dsp_real mag = (vv_dsp_real)VV_DSP_POW((double)magW, (double)(-e));
-        h[k] = cpx_from(mag * VV_DSP_COS(ang), mag * VV_DSP_SIN(ang));
+        h[k] = cpx_from(mag * (vv_dsp_real)VV_DSP_COS(ang), mag * (vv_dsp_real)VV_DSP_SIN(ang));
     }
 
     // Convolution length L = N+M-1; use FFT length P >= next_pow2(L)
@@ -133,7 +133,7 @@ vv_dsp_status vv_dsp_czt_exec_cpx(
         vv_dsp_real e = (vv_dsp_real)0.5 * dm * dm;
         vv_dsp_real ang = -e * argW;
         vv_dsp_real mag = (vv_dsp_real)VV_DSP_POW((double)magW, (double)(-e));
-        b[i] = cpx_from(mag * VV_DSP_COS(ang), mag * VV_DSP_SIN(ang));
+        b[i] = cpx_from(mag * (vv_dsp_real)VV_DSP_COS(ang), mag * (vv_dsp_real)VV_DSP_SIN(ang));
     }
 
     // FFT(a), FFT(b)
