@@ -30,6 +30,14 @@ add_executable(simple_bench
 )
 target_link_libraries(simple_bench PRIVATE vv-dsp)
 
+# Vectorized math benchmark
+add_executable(bench_vectorized_math bench_vectorized_math.c)
+target_link_libraries(bench_vectorized_math PRIVATE vv-dsp)
+
+# Accuracy-performance trade-offs benchmark
+add_executable(bench_accuracy_performance_trade_offs bench_accuracy_performance_trade_offs.c)
+target_link_libraries(bench_accuracy_performance_trade_offs PRIVATE vv-dsp)
+
 # Link against the vv-dsp umbrella target
 # TEMPORARY: Link directly to avoid Eigen/C++ issues
 target_link_libraries(vv_dsp_bench PRIVATE
@@ -60,6 +68,16 @@ target_include_directories(simple_bench PRIVATE
     ${VV_DSP_INCLUDE_DIR}
 )
 
+target_include_directories(bench_vectorized_math PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${VV_DSP_INCLUDE_DIR}
+)
+
+target_include_directories(bench_accuracy_performance_trade_offs PRIVATE
+    ${CMAKE_CURRENT_SOURCE_DIR}
+    ${VV_DSP_INCLUDE_DIR}
+)
+
 # Platform-specific linking
 if(WIN32)
     # Windows: Link with winmm for high-resolution timing
@@ -82,6 +100,14 @@ set_target_properties(benchmark_simd PROPERTIES
 )
 
 set_target_properties(simple_bench PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+)
+
+set_target_properties(bench_vectorized_math PROPERTIES
+    RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
+)
+
+set_target_properties(bench_accuracy_performance_trade_offs PROPERTIES
     RUNTIME_OUTPUT_DIRECTORY ${CMAKE_BINARY_DIR}
 )
 

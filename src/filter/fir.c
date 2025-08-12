@@ -1,15 +1,16 @@
 #include "vv_dsp/filter/fir.h"
 #include "vv_dsp/vv_dsp_math.h"
 #include "vv_dsp/spectral/fft.h"
+#include "vv_dsp/core/vv_dsp_vectorized_math.h"
 #include <stdlib.h>
 #include <string.h>
 
 static vv_dsp_real sinc_r(vv_dsp_real x) {
     if (x == (vv_dsp_real)0) return (vv_dsp_real)1;
 #if defined(VV_DSP_USE_DOUBLE)
-    return (vv_dsp_real)(sin(VV_DSP_PI_D * (double)x) / (VV_DSP_PI_D * (double)x));
+    return (vv_dsp_real)(VV_DSP_SIN(VV_DSP_PI_D * (double)x) / (VV_DSP_PI_D * (double)x));
 #else
-    return (vv_dsp_real)(sinf(VV_DSP_PI * x) / (VV_DSP_PI * x));
+    return (vv_dsp_real)(VV_DSP_SIN(VV_DSP_PI * x) / (VV_DSP_PI * x));
 #endif
 }
 
@@ -31,8 +32,8 @@ static vv_dsp_status apply_window(vv_dsp_real* w, size_t N, vv_dsp_window_type t
         case VV_DSP_WINDOW_BLACKMAN: {
             const double a0 = 0.42, a1 = 0.5, a2 = 0.08;
             for (size_t n = 0; n < N; ++n) {
-                double c1 = cos(VV_DSP_TWO_PI_D * (double)n / (double)(N - 1));
-                double c2 = cos(2.0 * VV_DSP_TWO_PI_D * (double)n / (double)(N - 1));
+                double c1 = VV_DSP_COS(VV_DSP_TWO_PI_D * (double)n / (double)(N - 1));
+                double c2 = VV_DSP_COS(2.0 * VV_DSP_TWO_PI_D * (double)n / (double)(N - 1));
                 w[n] = (vv_dsp_real)(a0 - a1 * c1 + a2 * c2);
             }
             break;
@@ -108,13 +109,19 @@ vv_dsp_status vv_dsp_fir_apply_fft(vv_dsp_fir_state* st,
     vv_dsp_status s;
     s = vv_dsp_fft_execute(p_r2c, xb, X); if (s!=VV_DSP_OK) goto cleanup;
     s = vv_dsp_fft_execute(p_r2c, hb, H); if (s!=VV_DSP_OK) goto cleanup;
-    // Pointwise multiply
-    for (size_t k = 0; k < Nc; ++k) {
-        vv_dsp_real ar = X[k].re, ai = X[k].im;
-        vv_dsp_real br = H[k].re, bi = H[k].im;
-        Y[k].re = ar*br - ai*bi;
-        Y[k].im = ar*bi + ai*br;
+
+    // Pointwise multiply using vectorized operations if available
+    s = vv_dsp_vectorized_complex_multiply(X, H, Y, Nc);
+    if (s != VV_DSP_OK) {
+        // Fallback to scalar implementation
+        for (size_t k = 0; k < Nc; ++k) {
+            vv_dsp_real ar = X[k].re, ai = X[k].im;
+            vv_dsp_real br = H[k].re, bi = H[k].im;
+            Y[k].re = ar*br - ai*bi;
+            Y[k].im = ar*bi + ai*br;
+        }
     }
+
     // IFFT to time domain (backend inverse already scales by 1/Nfft)
     s = vv_dsp_fft_execute(p_c2r, Y, xb); if (s!=VV_DSP_OK) goto cleanup;
     // Copy first n samples for linear convolution result (zero initial conditions)

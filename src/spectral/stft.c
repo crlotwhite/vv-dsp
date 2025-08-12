@@ -1,5 +1,6 @@
 #include "vv_dsp/spectral/stft.h"
 #include "vv_dsp/window.h"
+#include "vv_dsp/core/vv_dsp_vectorized_math.h"
 #include <stdlib.h>
 #include <string.h>
 #include <math.h>
@@ -74,13 +75,19 @@ VV_DSP_NODISCARD vv_dsp_status vv_dsp_stft_process(vv_dsp_stft* h,
                                                    const vv_dsp_real* in,
                                                    vv_dsp_cpx* out) {
     if (!h || !in || !out) return VV_DSP_ERROR_NULL_POINTER;
-    // Apply window into temp complex buffer (real as re, 0 as im)
+
+    // Apply window to input using vectorized operations if available
+    vv_dsp_status s = vv_dsp_vectorized_window_apply(in, h->win, h->timebuf, h->nfft);
+    if (s != VV_DSP_OK) return s;
+
+    // Copy windowed real data into complex buffer (real as re, 0 as im)
     vv_dsp_cpx* tmp = h->work_fft_in;
-    for (size_t i=0;i<h->nfft;++i) {
-        vv_dsp_real v = in[i] * h->win[i];
-        tmp[i].re = v; tmp[i].im = 0;
+    for (size_t i = 0; i < h->nfft; ++i) {
+        tmp[i].re = h->timebuf[i];
+        tmp[i].im = 0;
     }
-    vv_dsp_status s = vv_dsp_fft_execute(h->plan_f, tmp, out);
+
+    s = vv_dsp_fft_execute(h->plan_f, tmp, out);
     return s;
 }
 

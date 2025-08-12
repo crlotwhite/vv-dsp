@@ -24,7 +24,7 @@ vv_dsp_real vv_dsp_mel_to_hz(vv_dsp_real mel) {
     if (mel < 0.0f) {
         return 0.0f;  // Handle negative input gracefully
     }
-    return 700.0f * (powf(10.0f, mel / 2595.0f) - 1.0f);
+    return 700.0f * (VV_DSP_POW(10.0f, mel / 2595.0f) - 1.0f);
 }
 
 // --------------- Helper Functions ---------------
@@ -237,7 +237,7 @@ VV_DSP_NODISCARD vv_dsp_status vv_dsp_compute_log_mel_spectrogram(
             }
 
             // Apply logarithm with epsilon to avoid log(0)
-            frame_log_mel[m] = logf(mel_energy + log_epsilon);
+            frame_log_mel[m] = VV_DSP_LOG(mel_energy + log_epsilon);
         }
     }
 
@@ -298,7 +298,7 @@ VV_DSP_NODISCARD vv_dsp_status vv_dsp_mfcc(
         // Apply liftering if requested
         if (lifter_coeff > 0.0f) {
             for (size_t i = 1; i < num_mfcc_coeffs; i++) {  // Skip c[0]
-                vv_dsp_real lifter_factor = 1.0f + (lifter_coeff / 2.0f) * sinf((vv_dsp_real)M_PI * (vv_dsp_real)i / lifter_coeff);
+                vv_dsp_real lifter_factor = 1.0f + (lifter_coeff / 2.0f) * VV_DSP_SIN((vv_dsp_real)M_PI * (vv_dsp_real)i / lifter_coeff);
                 frame_mfcc[i] *= lifter_factor;
             }
         }

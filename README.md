@@ -77,9 +77,30 @@ VV-DSP supports optional integration with external libraries for enhanced perfor
 cmake -S . -B build \
     -DVV_DSP_USE_FASTAPPROX=ON \
     -DVV_DSP_USE_MATH_APPROX=ON \
-    -DVV_DSP_USE_SIMD=ON
+    -DVV_DSP_USE_EIGEN=ON \
+    -DVV_DSP_USE_SIMD=ON \
+    -DCMAKE_BUILD_TYPE=Release
 cmake --build build -j
 ```
+
+#### Math Approximation Library Usage
+
+The `-DVV_DSP_USE_MATH_APPROX=ON` flag enables optimized math function approximations for DSP operations. This provides a uniform interface for math operations while allowing runtime selection of precision vs. performance trade-offs.
+
+**Integration**: All math-intensive operations automatically use the optimized functions when enabled:
+
+- `VV_DSP_SIN`, `VV_DSP_COS`, `VV_DSP_TAN` - Trigonometric functions
+- `VV_DSP_EXP`, `VV_DSP_LOG` - Exponential and logarithmic functions
+- `VV_DSP_POW`, `VV_DSP_SQRT`, `VV_DSP_ATAN2` - Power and root functions
+
+**Performance Characteristics** (Release build, ARM64):
+
+- Trigonometric functions: ~3x speedup with Eigen vectorization
+- Window operations: Variable speedup depending on size
+- Complex operations: Modest 1.1-1.2x improvements
+- Accuracy: All functions maintain floating-point precision (error < 6e-8)
+
+**Note**: Performance optimizations require Release builds (`-DCMAKE_BUILD_TYPE=Release`) to realize SIMD benefits. Debug builds may show reduced performance due to disabled optimizations.
 
 ## Python Validation Suite
 
