@@ -221,8 +221,9 @@ static void benchmark_short_buffer_resampling(vv_bench_suite* suite) {
         }
 
 short_buffer_done:
-        vv_bench_time end = vv_bench_get_time();
-        double elapsed = vv_bench_elapsed_seconds(start, end);
+        {
+            vv_bench_time end = vv_bench_get_time();
+            double elapsed = vv_bench_elapsed_seconds(start, end);
 
         /* Calculate metrics */
         double input_samples_per_second = (double)total_processed / elapsed;
@@ -231,6 +232,7 @@ short_buffer_done:
         char name[64];
         snprintf(name, sizeof(name), "ResampleStreaming_%zu_samples", buffer_size);
         vv_bench_add_result(suite, name, elapsed, input_samples_per_second, 0.0, iter);
+        }
 
         free(output_buffer);
         vv_dsp_resampler_destroy(resampler);

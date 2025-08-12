@@ -106,7 +106,7 @@ if(VV_DSP_USE_FASTAPPROX)
   # Add fastapprox include directory
   set(FASTAPPROX_INCLUDE_DIR ${fastapprox_SOURCE_DIR}/fastapprox/src)
   add_library(fastapprox INTERFACE)
-  target_include_directories(fastapprox INTERFACE ${FASTAPPROX_INCLUDE_DIR})
+  target_include_directories(fastapprox SYSTEM INTERFACE ${FASTAPPROX_INCLUDE_DIR})
 
   message(STATUS "vv-dsp: FastApprox enabled")
   add_compile_definitions(VV_DSP_USE_FASTAPPROX=1)

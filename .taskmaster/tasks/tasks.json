@@ -1306,7 +1306,7 @@
             "description": "Create the foundational structure for the benchmark suite, including the new executable target, integration of a benchmarking library, and command-line argument parsing for test selection and output formatting.",
             "dependencies": [],
             "details": "Based on 'Benchmark Framework Setup', this subtask involves creating a new executable target, `vv_dsp_bench`, within a `bench/` directory. It requires integrating a lightweight C/C++ benchmarking library like Google Benchmark or implementing a custom high-resolution timer. The benchmark runner must be configurable via command-line arguments to select specific tests and to output results in a machine-readable format like JSON or CSV.\n<info added on 2025-08-11T16:31:44.572Z>\nThe benchmark executable `vv_dsp_bench` is built and the framework is set up. However, when running the STFT benchmark, an infinite loop occurs, likely within the STFT API function calls. This issue needs to be investigated and resolved as part of this subtask.\n</info added on 2025-08-11T16:31:44.572Z>",
-            "status": "review",
+            "status": "done",
             "testStrategy": "Verify that the `vv_dsp_bench` executable can be built and run. Confirm that it can execute a simple placeholder benchmark and that command-line flags for filtering tests and specifying output formats function correctly."
           },
           {
@@ -1856,7 +1856,7 @@
     ],
     "metadata": {
       "created": "2025-08-10T09:22:31.972Z",
-      "updated": "2025-08-12T01:22:48.184Z",
+      "updated": "2025-08-12T01:40:34.979Z",
       "description": "Tasks for master context"
     }
   }

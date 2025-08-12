@@ -213,8 +213,9 @@ static void benchmark_savgol_filter(vv_bench_suite* suite) {
         size_t iter;
         for (iter = 0; iter < FILTER_NUM_ITERATIONS; iter++) {
             vv_dsp_status status = vv_dsp_savgol(test_signal, FILTER_SIGNAL_LEN,
-                                                output_signal, window_len, 3, 0, 1.0,
-                                                VV_DSP_SAVGOL_MODE_REFLECT);
+                                                (int)window_len, 3, 0, 1.0,
+                                                VV_DSP_SAVGOL_MODE_REFLECT,
+                                                output_signal);
             if (status != VV_DSP_OK) break;
         }
 
