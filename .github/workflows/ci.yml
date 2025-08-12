@@ -90,6 +90,8 @@ jobs:
           cmake_args="-S . -B build \
             -DVERIFY_WITH_PYTHON=ON \
             -DVV_DSP_BUILD_TESTS=ON \
+            -DVV_DSP_USE_GTEST=ON \
+            -DVV_DSP_BUILD_BENCHMARKS=ON \
             -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}"
 
           # Add sanitizer options
@@ -112,6 +114,8 @@ jobs:
           cmake -S . -B build
           -DVERIFY_WITH_PYTHON=ON
           -DVV_DSP_BUILD_TESTS=ON
+          -DVV_DSP_USE_GTEST=ON
+          -DVV_DSP_BUILD_BENCHMARKS=ON
           -DCMAKE_BUILD_TYPE=${{ matrix.build_type }}
 
       - name: Build (Windows)
@@ -130,6 +134,66 @@ jobs:
         if: runner.os == 'Windows'
         run: ctest --test-dir build -C ${{ matrix.build_type }} -L validation --output-on-failure
 
+      - name: Run Google Test suite (Linux)
+        if: runner.os == 'Linux' && matrix.sanitize == 'none'
+        run: ctest --test-dir build -L gtest --output-on-failure
+
+      - name: Run Google Test suite (Windows)
+        if: runner.os == 'Windows'
+        run: ctest --test-dir build -C ${{ matrix.build_type }} -L gtest --output-on-failure
+
+      - name: Run Google Test suite (macOS)
+        if: runner.os == 'macOS'
+        run: ctest --test-dir build -L gtest --output-on-failure
+
+      - name: Run benchmarks and collect results (Linux)
+        if: runner.os == 'Linux' && matrix.sanitize == 'none' && matrix.fft_backend == 'default'
+        run: |
+          mkdir -p benchmark-results
+          # Run individual benchmarks with JSON output
+          ctest --test-dir build -L benchmark --output-on-failure -V | tee benchmark-results/benchmark-raw.log
+
+          # Run benchmarks directly for JSON output
+          if [ -f build/tests/benchmark/vv-dsp-benchmark-all ]; then
+            build/tests/benchmark/vv-dsp-benchmark-all \
+              --benchmark_format=json \
+              --benchmark_out=benchmark-results/benchmark-results.json \
+              --benchmark_min_time=0.1s || true
+          fi
+
+          # Generate benchmark summary
+          echo "## Benchmark Results" > benchmark-results/summary.md
+          echo "" >> benchmark-results/summary.md
+          echo "Platform: Ubuntu Latest ($(uname -m))" >> benchmark-results/summary.md
+          echo "Build Type: ${{ matrix.build_type }}" >> benchmark-results/summary.md
+          echo "FFT Backend: ${{ matrix.fft_backend }}" >> benchmark-results/summary.md
+          echo "Timestamp: $(date -u)" >> benchmark-results/summary.md
+          echo "" >> benchmark-results/summary.md
+
+          if [ -f benchmark-results/benchmark-results.json ]; then
+            echo "Raw JSON results saved to benchmark-results.json" >> benchmark-results/summary.md
+          fi
+
+      - name: Run benchmarks (Windows)
+        if: runner.os == 'Windows' && matrix.fft_backend == 'default'
+        run: |
+          mkdir benchmark-results
+          ctest --test-dir build -C ${{ matrix.build_type }} -L benchmark --output-on-failure -V | Tee-Object -FilePath benchmark-results/benchmark-raw.log
+
+      - name: Run benchmarks (macOS)
+        if: runner.os == 'macOS' && matrix.fft_backend == 'default'
+        run: |
+          mkdir -p benchmark-results
+          ctest --test-dir build -L benchmark --output-on-failure -V | tee benchmark-results/benchmark-raw.log
+
+      - name: Upload benchmark results
+        if: (runner.os == 'Linux' || runner.os == 'Windows' || runner.os == 'macOS') && matrix.fft_backend == 'default' && matrix.sanitize == 'none'
+        uses: actions/upload-artifact@v4
+        with:
+          name: benchmark-results-${{ matrix.os }}
+          path: benchmark-results/
+          retention-days: 7
+
       - name: Run full test suite (Windows)
         if: runner.os == 'Windows'
         run: ctest --test-dir build -C ${{ matrix.build_type }} --output-on-failure
@@ -137,3 +201,85 @@ jobs:
       - name: Run full test suite (macOS/Linux)
         if: runner.os != 'Windows'
         run: ctest --test-dir build --output-on-failure
+
+  # Performance analysis and benchmark comparison job
+  benchmark-analysis:
+    name: Benchmark Analysis
+    runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.event_name == 'pull_request'
+    steps:
+      - name: Download benchmark results
+        uses: actions/download-artifact@v4
+        with:
+          name: benchmark-results-ubuntu-latest
+          path: current-benchmarks/
+
+      - name: Check for benchmark results
+        id: check_benchmarks
+        run: |
+          if [ -f current-benchmarks/benchmark-results.json ]; then
+            echo "benchmarks_exist=true" >> $GITHUB_OUTPUT
+          else
+            echo "benchmarks_exist=false" >> $GITHUB_OUTPUT
+            echo "No benchmark results found to analyze"
+          fi
+
+      - name: Download previous benchmark results
+        if: steps.check_benchmarks.outputs.benchmarks_exist == 'true'
+        run: |
+          # Try to get benchmark results from the target branch (main)
+          # This is a simplified approach - in production you might want to store results in a separate repo or use benchmark action
+          mkdir -p previous-benchmarks/
+          echo "Previous benchmark comparison would go here"
+          echo "In a real setup, you would fetch results from main branch or a benchmark database"
+
+      - name: Analyze benchmark results
+        if: steps.check_benchmarks.outputs.benchmarks_exist == 'true'
+        run: |
+          echo "=== Benchmark Analysis ==="
+          echo "Current benchmark results:"
+          if [ -f current-benchmarks/benchmark-results.json ]; then
+            cat current-benchmarks/benchmark-results.json
+          fi
+
+          echo ""
+          echo "=== Performance Summary ==="
+          if [ -f current-benchmarks/summary.md ]; then
+            cat current-benchmarks/summary.md
+          fi
+
+      - name: Comment PR with benchmark results
+        if: steps.check_benchmarks.outputs.benchmarks_exist == 'true' && github.event_name == 'pull_request'
+        uses: actions/github-script@v7
+        with:
+          script: |
+            const fs = require('fs');
+            let comment = '## 🚀 Benchmark Results\n\n';
+
+            try {
+              if (fs.existsSync('current-benchmarks/summary.md')) {
+                const summary = fs.readFileSync('current-benchmarks/summary.md', 'utf8');
+                comment += summary + '\n\n';
+              }
+
+              if (fs.existsSync('current-benchmarks/benchmark-results.json')) {
+                comment += '<details>\n<summary>📊 Detailed JSON Results</summary>\n\n```json\n';
+                const results = fs.readFileSync('current-benchmarks/benchmark-results.json', 'utf8');
+                comment += results;
+                comment += '\n```\n</details>\n\n';
+              }
+
+              comment += '> 💡 Benchmark results are automatically generated for each PR.\n';
+              comment += '> Results may vary between runs due to system load and other factors.\n';
+
+              // Post comment to PR
+              github.rest.issues.createComment({
+                issue_number: context.issue.number,
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                body: comment
+              });
+            } catch (error) {
+              console.log('Error posting benchmark comment:', error);
+            }
