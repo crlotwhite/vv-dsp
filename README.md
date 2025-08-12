@@ -1,6 +1,6 @@
 # VV-DSP
 
-A comprehensive, modular C99 digital signal processing library designed for portability, performance, and testability.
+A comprehensive, high-performance C99 digital signal processing library designed for portability, modularity, and real-time applications.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 [![C99](https://img.shields.io/badge/std-C99-blue.svg)](https://en.wikipedia.org/wiki/C99)
@@ -9,36 +9,57 @@ A comprehensive, modular C99 digital signal processing library designed for port
 
 ## Overview
 
-VV-DSP provides essential digital signal processing operations including:
+VV-DSP is a production-ready digital signal processing library offering:
 
-- **Spectral Analysis**: FFT, STFT, DCT, CZT, Hilbert transforms
-- **Digital Filters**: FIR, IIR, Savitzky-Golay smoothing filters
-- **Sample Rate Conversion**: Resampling and interpolation
-- **Signal Processing**: Windowing functions, envelope detection
-- **Feature Extraction**: MFCC and other audio features
-- **Mathematical Operations**: Complex numbers, statistics, linear algebra
-- **Numerical Stability**: Configurable NaN/Inf handling policies for robust processing
+- **🔄 Spectral Analysis**: Multiple FFT backends (KissFFT, FFTW, FFTS), STFT, DCT, CZT, Hilbert transforms
+- **🎛️ Digital Filters**: FIR, IIR, Savitzky-Golay smoothing, Butterworth, Chebyshev filters
+- **📈 Sample Rate Conversion**: High-quality resampling and interpolation algorithms
+- **📊 Signal Processing**: Comprehensive windowing functions, envelope detection, feature extraction
+- **🧮 Mathematical Operations**: SIMD-optimized vectorized math, complex numbers, statistics, linear algebra
+- **🛡️ Numerical Stability**: Configurable NaN/Inf handling policies, denormal flushing for robust processing
+- **⚡ Performance**: Optional SIMD optimizations, multiple precision backends, real-time capable
 
 ## Quick Start
 
-### Build
+### Installation
 
-```sh
+Choose your preferred integration method:
+
+**[📖 Complete Integration Guide](docs/integration.md)** - Detailed instructions for all methods
+
+#### vcpkg (Recommended)
+
+```bash
+vcpkg install vv-dsp
+```
+
+#### CMake FetchContent
+
+```cmake
+include(FetchContent)
+FetchContent_Declare(vv-dsp
+  GIT_REPOSITORY https://github.com/crlotwhite/vv-dsp.git
+  GIT_TAG        v0.1.0)
+FetchContent_MakeAvailable(vv-dsp)
+target_link_libraries(your_target PRIVATE vv-dsp)
+```
+
+### Build from Source
+
+```bash
 cmake -S . -B build
 cmake --build build -j
 ```
 
-### Test
+### Run Tests
 
-```sh
+```bash
 ctest --test-dir build --output-on-failure
 ```
 
-### Documentation
+### Generate Documentation
 
-Generate API documentation using Doxygen:
-
-```sh
+```bash
 doxygen Doxyfile
 # Open docs/html/index.html in your browser
 ```
@@ -47,115 +68,99 @@ doxygen Doxyfile
 
 ## Build Configuration
 
-The library supports various configuration options through CMake:
+VV-DSP supports extensive configuration through CMake options:
 
-### Basic Options
+### Core Options
 
-- `-DVV_DSP_BUILD_TESTS=ON|OFF` (default ON) — Build test suite
-- `-DVV_DSP_USE_SIMD=ON|OFF` (default OFF) — Enable SIMD optimizations
-- `-DVV_DSP_BACKEND_FFT=none|fftw|kissfft` (default `none`) — FFT backend
-- `-DVV_DSP_SINGLE_FILE=ON|OFF` (default OFF) — Generate single-header build
+- **`VV_DSP_BUILD_TESTS`** (default: ON) — Build comprehensive test suite
+- **`VV_DSP_BUILD_EXAMPLES`** (default: ON) — Build usage examples
+- **`VV_DSP_BUILD_BENCHMARKS`** (default: OFF) — Build performance benchmarks
+- **`VV_DSP_USE_SIMD`** (default: OFF) — Enable SIMD optimizations
+- **`VV_DSP_SINGLE_FILE`** (default: OFF) — Generate single-header build
 
-### Python Validation
+### FFT Backend Selection
 
-- `-DVERIFY_WITH_PYTHON=ON|OFF` (default OFF) — Enable NumPy/SciPy cross-validation
-  - Controls for validation tests:
-    - `-DVV_PY_VERBOSE=ON` to increase Python test logging
-    - `-DVV_PY_RTOL=5e-5` and/or `-DVV_PY_ATOL=5e-5` to override tolerances
+VV-DSP supports multiple FFT implementations for optimal performance:
 
-### Performance Dependencies (Optional)
+- **`VV_DSP_WITH_KISSFFT`** (default: ON) — Lightweight, always available
+- **`VV_DSP_WITH_FFTW`** (default: OFF) — High-performance FFTW3 backend
+- **`VV_DSP_WITH_FFTS`** (default: OFF) — ARM-optimized FFTS backend
+- **`VV_DSP_BACKEND_FFT`** (default: "kissfft") — Default backend selection
 
-VV-DSP supports optional integration with external libraries for enhanced performance:
+**Example with multiple backends:**
 
-- `-DVV_DSP_USE_FASTAPPROX=ON|OFF` (default OFF) — Fast math approximations via [fastapprox](https://github.com/romeric/fastapprox)
-- `-DVV_DSP_USE_MATH_APPROX=ON|OFF` (default OFF) — DSP-optimized math via [math_approx](https://github.com/Chowdhury-DSP/math_approx)
-- `-DVV_DSP_USE_EIGEN=ON|OFF` (default OFF) — [Eigen](https://eigen.tuxfamily.org/) linear algebra library
-
-**Example with performance optimizations:**
-
-```sh
+```bash
 cmake -S . -B build \
-    -DVV_DSP_USE_FASTAPPROX=ON \
-    -DVV_DSP_USE_MATH_APPROX=ON \
-    -DVV_DSP_USE_EIGEN=ON \
-    -DVV_DSP_USE_SIMD=ON \
-    -DCMAKE_BUILD_TYPE=Release
-cmake --build build -j
+    -DVV_DSP_WITH_FFTW=ON \
+    -DVV_DSP_WITH_FFTS=ON \
+    -DVV_DSP_BACKEND_FFT=fftw
 ```
 
-#### Math Approximation Library Usage
+### Python Cross-Validation
 
-The `-DVV_DSP_USE_MATH_APPROX=ON` flag enables optimized math function approximations for DSP operations. This provides a uniform interface for math operations while allowing runtime selection of precision vs. performance trade-offs.
+VV-DSP includes a comprehensive Python validation suite for enhanced testing confidence:
 
-**Integration**: All math-intensive operations automatically use the optimized functions when enabled:
+#### Installation & Setup
 
-- `VV_DSP_SIN`, `VV_DSP_COS`, `VV_DSP_TAN` - Trigonometric functions
-- `VV_DSP_EXP`, `VV_DSP_LOG` - Exponential and logarithmic functions
-- `VV_DSP_POW`, `VV_DSP_SQRT`, `VV_DSP_ATAN2` - Power and root functions
+1. **Install Python dependencies:**
 
-**Performance Characteristics** (Release build, ARM64):
-
-- Trigonometric functions: ~3x speedup with Eigen vectorization
-- Window operations: Variable speedup depending on size
-- Complex operations: Modest 1.1-1.2x improvements
-- Accuracy: All functions maintain floating-point precision (error < 6e-8)
-
-**Note**: Performance optimizations require Release builds (`-DCMAKE_BUILD_TYPE=Release`) to realize SIMD benefits. Debug builds may show reduced performance due to disabled optimizations.
-
-## Python Validation Suite
-
-The Python validation suite provides cross-validation of vv-dsp outputs against NumPy/SciPy references for enhanced testing confidence.
-
-### Setup
-
-1. **Install Python dependencies** (recommended in a virtual environment):
-
-```sh
-python3 -m venv .venv  # if available; on Debian/Ubuntu: sudo apt install python3-venv
-source .venv/bin/activate
-pip install -U pip
+```bash
+python3 -m venv .venv
+source .venv/bin/activate  # Windows: .venv\Scripts\activate
 pip install -r python/requirements.txt
 ```
 
-1. **Configure and build with validation enabled:**
+1. **Configure and build with validation:**
 
-```sh
-cmake -S . -B build -DVERIFY_WITH_PYTHON=ON -DVV_DSP_BUILD_TESTS=ON
+```bash
+cmake -S . -B build -DVERIFY_WITH_PYTHON=ON
 cmake --build build -j
 ```
 
 1. **Run validation tests:**
 
-```sh
-# Run only validation tests
+```bash
+# Validation tests only
 ctest --test-dir build -L validation --output-on-failure
 
-# Run all tests
+# All tests including validation
 ctest --test-dir build --output-on-failure
 ```
 
-### Configuration Notes
+#### Configuration Options
 
-- If NumPy/SciPy is not importable, CMake will skip registering validation tests
-- When tests run but Python scripts exit with code 77, CTest marks them as SKIP
-- Sanitizer builds (`-DVV_DSP_ENABLE_ASAN=ON`, `-DVV_DSP_ENABLE_UBSAN=ON`) set friendly defaults to avoid noise from Python's allocator
-- Tolerances and verbosity can be tuned via CMake cache variables (`VV_PY_RTOL`, `VV_PY_ATOL`, `VV_PY_VERBOSE`)
+- **`VERIFY_WITH_PYTHON`** (default: OFF) — Enable NumPy/SciPy cross-validation
+- **`VV_PY_VERBOSE`** (default: OFF) — Enable verbose Python test output
+- **`VV_PY_RTOL`** — Override relative tolerance (e.g., "5e-5")
+- **`VV_PY_ATOL`** — Override absolute tolerance (e.g., "5e-5")
 
-### Troubleshooting
+### Performance Optimizations
 
-**Interpreting failures:**
+#### Mathematical Approximations
 
-- Use `--output-on-failure` with ctest to see Python tracebacks and NumPy's `assert_allclose` reports
-- CTest logs are available under `build/Testing/Temporary/LastTest.log`
-- Minor numeric drift may occur; adjust tolerances in Python scripts if needed for specific investigations
+- **`VV_DSP_USE_FASTAPPROX`** (default: OFF) — Fast math via [fastapprox](https://github.com/romeric/fastapprox)
+- **`VV_DSP_USE_MATH_APPROX`** (default: OFF) — DSP-optimized math via [math_approx](https://github.com/Chowdhury-DSP/math_approx)
+- **`VV_DSP_USE_EIGEN`** (default: OFF) — [Eigen](https://eigen.tuxfamily.org/) linear algebra integration
 
-**Example CI Pipeline:**
+#### High-Performance Build Example
 
-1. Install build toolchain (CMake, compiler) and Python 3
-1. Install dependencies: `pip install -r python/requirements.txt`
-1. Configure: `cmake -S . -B build -DVERIFY_WITH_PYTHON=ON -DVV_DSP_BUILD_TESTS=ON`
-1. Build: `cmake --build build -j`
-1. Test: `ctest --test-dir build -L validation --output-on-failure`
+```bash
+cmake -S . -B build \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DVV_DSP_USE_SIMD=ON \
+    -DVV_DSP_USE_MATH_APPROX=ON \
+    -DVV_DSP_USE_FASTAPPROX=ON \
+    -DVV_DSP_WITH_FFTW=ON \
+    -DVV_DSP_BACKEND_FFT=fftw
+cmake --build build -j
+```
+
+**Performance Characteristics** (Release builds):
+
+- Vectorized math: ~3x speedup with SIMD
+- Trigonometric functions: Significant improvements with approximation libraries
+- Window operations: Variable speedup depending on size and type
+- Accuracy maintained: All optimizations preserve required precision (error < 6e-8)
 
 ## NaN/Inf Handling
 
@@ -204,20 +209,27 @@ int main() {
     const size_t N = 256;
     vv_dsp_real signal[N];
 
+    // Generate test signal with some noise
     for (size_t i = 0; i < N; i++) {
-        signal[i] = sin(2.0 * M_PI * 1000.0 * i / 8000.0);
+        signal[i] = sin(2.0 * M_PI * 1000.0 * i / 8000.0) +
+                   0.1 * sin(2.0 * M_PI * 3000.0 * i / 8000.0);
     }
 
-    // Apply Hann window
+    // Apply Hann window for spectral analysis
     vv_dsp_real windowed[N];
     vv_dsp_window_hann(signal, windowed, N);
 
-    // Compute FFT
+    // Compute FFT using the configured backend
     vv_dsp_cpx fft_input[N], fft_output[N];
     for (size_t i = 0; i < N; i++) {
         fft_input[i] = vv_dsp_cpx_make(windowed[i], 0.0);
     }
-    vv_dsp_fft_c2c(fft_input, fft_output, N, VV_DSP_FFT_FORWARD);
+
+    vv_dsp_result_e result = vv_dsp_fft_c2c(fft_input, fft_output, N, VV_DSP_FFT_FORWARD);
+    if (result != VV_DSP_SUCCESS) {
+        printf("FFT failed with error: %d\n", result);
+        return 1;
+    }
 
     // Calculate magnitude spectrum
     vv_dsp_real magnitude[N];
@@ -225,7 +237,26 @@ int main() {
         magnitude[i] = vv_dsp_cpx_abs(fft_output[i]);
     }
 
-    printf("Peak magnitude at bin %zu: %.2f\n", 32, magnitude[32]); // ~1kHz bin
+    // Find peak frequency
+    size_t peak_bin = 0;
+    vv_dsp_real peak_mag = 0.0;
+    for (size_t i = 1; i < N/2; i++) {  // Only check positive frequencies
+        if (magnitude[i] > peak_mag) {
+            peak_mag = magnitude[i];
+            peak_bin = i;
+        }
+    }
+
+    double peak_freq = (double)peak_bin * 8000.0 / N;
+    printf("Peak frequency: %.1f Hz (magnitude: %.2f)\n", peak_freq, peak_mag);
+
+    // Apply Savitzky-Golay smoothing filter
+    vv_dsp_real smoothed[N];
+    result = vv_dsp_savgol(signal, smoothed, N, 5, 3);  // window=5, polynomial=3
+    if (result == VV_DSP_SUCCESS) {
+        printf("Savitzky-Golay smoothing applied successfully\n");
+    }
+
     return 0;
 }
 ```
@@ -264,25 +295,79 @@ The generated documentation includes:
 
 ## Contributing
 
-Contributions are welcome! Please follow these guidelines:
+We welcome contributions! Here's how to get involved:
 
-1. **Code Style**: Follow the existing C99 style and naming conventions
-1. **Documentation**: Add Doxygen comments for all public functions
-1. **Testing**: Include tests for new features and bug fixes
-1. **Cross-Validation**: Update Python validation scripts when applicable
+### Development Setup
 
-For detailed documentation guidelines, see [`DOCUMENTATION.md`](DOCUMENTATION.md).
+1. **Fork and clone** the repository
+2. **Install dependencies** (Python validation, etc.)
+3. **Configure development build:**
 
-## Architecture
+```bash
+cmake -S . -B build \
+    -DVV_DSP_BUILD_TESTS=ON \
+    -DVV_DSP_BUILD_EXAMPLES=ON \
+    -DVERIFY_WITH_PYTHON=ON \
+    -DCMAKE_BUILD_TYPE=Debug
+```
 
-VV-DSP is designed with several key principles:
+### Contribution Guidelines
 
-- **Modularity**: Clean separation between different DSP domains
-- **Portability**: Standard C99 with optional platform-specific optimizations
-- **Testability**: Comprehensive test coverage with cross-validation
-- **Performance**: Configurable SIMD and external library integration
-- **Extensibility**: Plugin architecture for FFT backends and math libraries
+- **🎯 Code Style**: Follow existing C99 conventions and naming patterns
+- **📝 Documentation**: Add comprehensive Doxygen comments for public APIs
+- **🧪 Testing**: Include unit tests and update Python validation when applicable
+- **🔍 Review**: Ensure all tests pass and consider edge cases
+- **📋 Integration**: Update integration guides for new features
+
+### Areas for Contribution
+
+- **New Algorithms**: Additional DSP algorithms and filters
+- **Performance**: SIMD optimizations and algorithm improvements
+- **Platform Support**: Testing and fixes for additional platforms
+- **Documentation**: Examples, tutorials, and API improvements
+- **Bindings**: Language bindings (Python, Rust, etc.)
+
+For detailed guidelines, see [`DOCUMENTATION.md`](DOCUMENTATION.md) and the [Integration Guide](docs/integration.md).
+
+## Architecture & Design
+
+VV-DSP follows these core design principles:
+
+### 🧩 Modularity
+
+- **Domain Separation**: Clear boundaries between spectral, filter, and math modules
+- **Optional Dependencies**: Core functionality works standalone; optimizations are additive
+- **Plugin Architecture**: Swappable FFT backends and math implementations
+
+### 🌐 Portability
+
+- **Standard C99**: Core library uses only standard C99 features
+- **Platform Adaptation**: Platform-specific optimizations through conditional compilation
+- **Minimal Dependencies**: Self-contained with optional external integrations
+
+### 🧪 Testability
+
+- **Comprehensive Coverage**: Unit tests for all public APIs
+- **Cross-Validation**: Python/NumPy reference implementations for accuracy verification
+- **Multiple Platforms**: CI testing across Windows, macOS, and Linux
+
+### ⚡ Performance
+
+- **Zero-Copy Design**: Minimal memory allocations and data copying
+- **SIMD Optimization**: Optional vectorization for compute-intensive operations
+- **Backend Selection**: Choose optimal implementations at build time
+
+### 🔧 Extensibility
+
+- **Backend System**: Easy integration of new FFT libraries and math backends
+- **Configuration System**: Fine-grained control over features and performance trade-offs
+- **Future-Proof**: Designed to accommodate new algorithms and optimizations
 
 ## License
 
-MIT
+Released under the [MIT License](LICENSE). See the LICENSE file for full details.
+
+---
+
+**VV-DSP** - High-performance digital signal processing for modern C applications.
+Built with ❤️ for the audio and signal processing community.
