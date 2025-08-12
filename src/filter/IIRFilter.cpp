@@ -7,6 +7,8 @@
 #include "vv_dsp/core/fp_env.h"  // For denormal handling from Task 25
 #include <cmath>
 #include <algorithm>
+#include <string>
+#include <sstream>
 
 namespace vv {
 namespace dsp {
@@ -111,7 +113,9 @@ void IIRFilter::reset() noexcept {
 void IIRFilter::validateCoefficients(std::span<const vv_dsp_biquad> coeffs) {
     for (size_t i = 0; i < coeffs.size(); ++i) {
         if (!isValidBiquad(coeffs[i])) {
-            throw std::invalid_argument("IIRFilter: invalid or unstable biquad coefficients at index " + std::to_string(i));
+            std::ostringstream oss;
+            oss << "IIRFilter: invalid or unstable biquad coefficients at index " << i;
+            throw std::invalid_argument(oss.str());
         }
     }
 }
