@@ -1435,7 +1435,7 @@
         "description": "Finalize the FFT subsystem by implementing and integrating the FFTS and FFTW backends, providing runtime selection capabilities, and establishing comprehensive performance benchmarks.",
         "details": "This task completes the FFT backend system by implementing delayed subtasks for FFTS and FFTW integration. A core abstraction layer will be created to allow runtime switching between different FFT engines.\n\n**Implementation Steps:**\n\n1.  **FFT Abstraction Layer:**\n    *   Define a generic FFT interface in `fft/fft.h` that is backend-agnostic.\n    *   Create a dispatch function, e.g., `vv_dsp_fft_execute()`, that calls the currently selected backend implementation.\n\n2.  **FFTS Backend Integration (Subtask 4.6):**\n    *   Create a new implementation file `fft/backend_ffts.c`.\n    *   Implement the abstract FFT interface using the FFTS library functions (`ffts_init_1d`, `ffts_execute`, `ffts_free`).\n    *   Ensure proper handling of real-to-complex (R2C) and complex-to-real (C2R) transforms.\n    *   Manage any memory alignment requirements specified by FFTS.\n\n3.  **FFTW Backend Integration (Subtask 4.7):**\n    *   Create a new implementation file `fft/backend_fftw.c`.\n    *   Implement the abstract interface using the FFTW3 library (`fftwf_plan_dft_r2c_1d`, `fftwf_execute`, `fftwf_destroy_plan`, etc.).\n    *   Implement a robust plan caching mechanism. The cache should key plans by transform size, type, and flags to avoid costly re-planning.\n    *   Expose an API to control FFTW's plan generation flags (`FFTW_ESTIMATE`, `FFTW_MEASURE`, `FFTW_PATIENT`) to allow users to balance planning time against execution speed.\n\n4.  **Runtime Backend Selection:**\n    *   Define an enumeration in `fft/fft.h` for backend selection: `VV_DSP_FFT_BACKEND_FFTS`, `VV_DSP_FFT_BACKEND_FFTW`, etc.\n    *   Implement a global API function `vv_dsp_set_fft_backend(backend_enum)` to allow users to switch the active FFT engine at runtime.\n\n5.  **Memory Management Optimization:**\n    *   For the FFTW backend, ensure the plan cache has a clear lifecycle and can be flushed if necessary to manage memory usage.\n    *   Ensure all backend-specific memory allocations (e.g., aligned buffers) are correctly handled and freed by the abstraction layer.\n\n6.  **Build System Configuration:**\n    *   Update the CMake build system to use `find_package` for FFTS and FFTW3.\n    *   Add build options (e.g., `-DWITH_FFTS=ON`, `-DWITH_FFTW=ON`) to allow conditional compilation of the backends.",
         "testStrategy": "The test strategy will verify functional correctness for each backend, validate the runtime switching mechanism, and quantify performance and memory differences.\n\n**1. Unit Tests (CTest):**\n*   **Functional Parity:** Create a test suite `test_fft_backends` to verify the output of FFTS and FFTW against a known-good reference DFT implementation for various transform sizes (including powers of 2, and non-powers of 2).\n*   **Round-Trip Verification:** For each backend, perform a forward transform (R2C) followed by an inverse transform (C2R) and verify that the original signal is reconstructed within a small numerical tolerance.\n*   **API Verification:** Write tests for the `vv_dsp_set_fft_backend()` function to confirm that the correct backend is invoked after switching. Test the FFTW plan flag controls to ensure they are passed to the backend correctly.\n*   **Edge Cases:** Test with zero-length signals and other edge cases to ensure robust error handling.\n\n**2. Performance Benchmarks:**\n*   **Extend Benchmark Suite:** Add a new set of benchmarks to the `vv_dsp_bench` executable (from Task 22).\n*   **Backend Comparison:** For a range of typical FFT sizes (e.g., 256, 512, 1024, 2048, 4096), benchmark the execution speed of each available backend.\n*   **FFTW Plan Analysis:** Specifically benchmark the performance of FFTW using different planning flags (`FFTW_ESTIMATE` vs. `FFTW_MEASURE`) to quantify the trade-off between planning and execution time. The results should be documented to guide users.\n\n**3. Memory Analysis:**\n*   Use tools like Valgrind (Massif) to profile the memory usage of each backend, paying close attention to the FFTW plan cache.\n*   Write tests that repeatedly create and destroy FFT plans and switch backends to verify that no memory leaks occur.",
-        "status": "pending",
+        "status": "done",
         "dependencies": [
           21,
           22,
@@ -1448,8 +1448,8 @@
             "title": "Design and Implement FFT Abstraction Layer",
             "description": "Define a backend-agnostic FFT interface and dispatch mechanism in `fft/fft.h` to provide a unified API for all FFT operations, independent of the underlying library.",
             "dependencies": [],
-            "details": "Define a generic FFT interface in `fft/fft.h`, including common plan structures and function prototypes for plan creation, execution, and destruction. Create a dispatch function, e.g., `vv_dsp_fft_execute()`, that calls the currently selected backend implementation via function pointers. Define an enumeration in `fft/fft.h` for backend selection, such as `VV_DSP_FFT_BACKEND_FFTS` and `VV_DSP_FFT_BACKEND_FFTW`.",
-            "status": "pending",
+            "details": "Define a generic FFT interface in `fft/fft.h`, including common plan structures and function prototypes for plan creation, execution, and destruction. Create a dispatch function, e.g., `vv_dsp_fft_execute()`, that calls the currently selected backend implementation via function pointers. Define an enumeration in `fft/fft.h` for backend selection, such as `VV_DSP_FFT_BACKEND_FFTS` and `VV_DSP_FFT_BACKEND_FFTW`.\n<info added on 2025-08-12T05:04:05.576Z>\nThe FFT abstraction layer has been fully implemented. This includes:\n- Backend enumeration defined (VV_DSP_FFT_BACKEND_KISS, FFTW, FFTS).\n- Runtime backend selection API functions: `vv_dsp_fft_set_backend()`, `vv_dsp_fft_get_backend()`, `vv_dsp_fft_is_backend_available()`.\n- FFTW-specific configuration APIs: `vv_dsp_fft_set_fftw_flag()`, `vv_dsp_fft_flush_fftw_cache()`.\n- Vtable system implemented with structures defined in `fft_backend.h`.\n- Global backend state management and dispatch logic.\n- KissFFT refactored to integrate with the new vtable system.\nAll implemented functions incorporate appropriate error handling and input validation, and automatic backend initialization via constructors is also in place.\n</info added on 2025-08-12T05:04:05.576Z>",
+            "status": "done",
             "testStrategy": "Unit tests will verify the dispatch layer by using mock backends to ensure that function calls are correctly routed based on the selected backend state."
           },
           {
@@ -1459,8 +1459,8 @@
             "dependencies": [
               "24.1"
             ],
-            "details": "Create a new implementation file `fft/backend_ffts.c`. Implement the abstract FFT interface using the FFTS library functions (`ffts_init_1d`, `ffts_execute`, `ffts_free`). Ensure proper handling of real-to-complex (R2C) and complex-to-real (C2R) transforms and manage any memory alignment requirements specified by FFTS.",
-            "status": "pending",
+            "details": "Create a new implementation file `fft/backend_ffts.c`. Implement the abstract FFT interface using the FFTS library functions (`ffts_init_1d`, `ffts_execute`, `ffts_free`). Ensure proper handling of real-to-complex (R2C) and complex-to-real (C2R) transforms and manage any memory alignment requirements specified by FFTS.\n<info added on 2025-08-12T05:05:49.694Z>\nIntegrate with the abstract FFT vtable system. Support Complex-to-Complex (C2C) transforms in addition to R2C and C2R. Implement temporary buffer management. Ensure appropriate scaling, specifically 1/n for C2R transforms. Include robust error handling and explicit resource cleanup. Add conditional compilation support using `VV_DSP_BACKEND_FFT_ffts`. Implement efficient real FFT processing by leveraging Hermitian symmetry.\n</info added on 2025-08-12T05:05:49.694Z>",
+            "status": "done",
             "testStrategy": "A test suite will be created to verify the numerical output of the FFTS backend against known reference vectors and ensure functional parity with other backends for various transform sizes."
           },
           {
@@ -1470,8 +1470,8 @@
             "dependencies": [
               "24.1"
             ],
-            "details": "Create `fft/backend_fftw.c`. Implement the abstract interface using FFTW3 functions (`fftwf_plan_dft_r2c_1d`, `fftwf_execute`, etc.). Design and implement a robust plan caching mechanism. The cache should key plans by transform size, type (R2C/C2R), and flags to avoid costly re-planning. Ensure the cache is managed correctly.",
-            "status": "pending",
+            "details": "Create `fft/backend_fftw.c`. Implement the abstract interface using FFTW3 functions (`fftwf_plan_dft_r2c_1d`, `fftwf_execute`, etc.). Design and implement a robust plan caching mechanism. The cache should key plans by transform size, type (R2C/C2R), and flags to avoid costly re-planning. Ensure the cache is managed correctly.\n<info added on 2025-08-12T05:08:20.821Z>\nThe implementation includes integration with the vtable system. The robust plan caching system is hash table-based (64 buckets) with an LRU replacement policy, uses reference counting for safe plan management, and ensures thread safety via `pthread_mutex`. It supports FFTW planner flags (ESTIMATE, MEASURE, PATIENT), C2C transforms (in addition to R2C/C2R), and utilizes FFTW aligned memory allocation. Proper scaling is handled for C2C backward (1/n) and C2R (1/n) transforms. A cache flush function (`vv_dsp_fft_flush_fftw_cache`) is provided, and conditional compilation is supported.\n</info added on 2025-08-12T05:08:20.821Z>",
+            "status": "done",
             "testStrategy": "Unit tests will verify the numerical output of the FFTW backend. Specific tests will confirm the plan cache is working by measuring the performance difference between initial and subsequent calls with identical parameters and ensuring plans are reused."
           },
           {
@@ -1482,8 +1482,8 @@
               "24.2",
               "24.3"
             ],
-            "details": "Implement the global API function `vv_dsp_set_fft_backend(backend_enum)` to allow users to switch the active FFT engine. This function will update the internal state used by the dispatch layer. Additionally, expose an API to control FFTW's plan generation flags (`FFTW_ESTIMATE`, `FFTW_MEASURE`, `FFTW_PATIENT`) and to manually flush the plan cache to manage memory.",
-            "status": "pending",
+            "details": "Implement the global API function `vv_dsp_set_fft_backend(backend_enum)` to allow users to switch the active FFT engine. This function will update the internal state used by the dispatch layer. Additionally, expose an API to control FFTW's plan generation flags (`FFTW_ESTIMATE`, `FFTW_MEASURE`, `FFTW_PATIENT`) and to manually flush the plan cache to manage memory.\n<info added on 2025-08-12T05:10:33.809Z>\nThis includes the implementation of `vv_dsp_fft_get_backend()` and `vv_dsp_fft_is_backend_available()` functions. The global backend state management is thread-safe, and robust error handling (e.g., `VV_DSP_ERROR_UNSUPPORTED` for unavailable backends) is provided. Conditional compilation support ensures proper fallback behavior when specific backends are not available.\n</info added on 2025-08-12T05:10:33.809Z>",
+            "status": "done",
             "testStrategy": "Create a test that calls `vv_dsp_set_fft_backend()` to switch between FFTS and FFTW and verifies that the correct backend is used. Test the FFTW configuration API by checking that different planning flags affect planning time and that the cache flush function works as expected."
           },
           {
@@ -1494,8 +1494,8 @@
               "24.2",
               "24.3"
             ],
-            "details": "Update the project's `CMakeLists.txt` to use `find_package` to locate the FFTS and FFTW3 libraries. Add new build options, such as `-DWITH_FFTS=ON` and `-DWITH_FFTW=ON`, to control the conditional compilation of `backend_ffts.c` and `backend_fftw.c` and link the corresponding libraries.",
-            "status": "pending",
+            "details": "Update the project's `CMakeLists.txt` to use `find_package` to locate the FFTS and FFTW3 libraries. Add new build options, such as `-DWITH_FFTS=ON` and `-DWITH_FFTW=ON`, to control the conditional compilation of `backend_ffts.c` and `backend_fftw.c` and link the corresponding libraries.\n<info added on 2025-08-12T05:10:58.377Z>\nThe build options are now `VV_DSP_WITH_KISSFFT` (always ON), `VV_DSP_WITH_FFTW`, and `VV_DSP_WITH_FFTS`. FFTS library detection uses `find_library`. Conditional compilation definitions (`VV_DSP_BACKEND_FFT_*`) are set. The `spectral` module's `CMakeLists.txt` is updated for conditional source file inclusion (`fft_fftw.c`, `fft_ffts.c`) and library linking. FFTW threading support includes `pthread` linking. Appropriate warning messages and fallback mechanisms are implemented for build errors.\n</info added on 2025-08-12T05:10:58.377Z>",
+            "status": "done",
             "testStrategy": "The build process will be tested with various combinations of the new build flags (e.g., both ON, both OFF, one ON) to ensure the project compiles successfully and that the runtime selection API correctly reports the available backends."
           }
         ]
@@ -1856,7 +1856,7 @@
     ],
     "metadata": {
       "created": "2025-08-10T09:22:31.972Z",
-      "updated": "2025-08-12T04:35:34.520Z",
+      "updated": "2025-08-12T05:11:50.840Z",
       "description": "Tasks for master context"
     }
   }

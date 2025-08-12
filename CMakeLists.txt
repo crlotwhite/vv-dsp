@@ -30,8 +30,14 @@ option(VV_DSP_BUILD_EXAMPLES "Build vv-dsp examples" ON)
 option(VV_DSP_BUILD_BENCHMARKS "Build vv-dsp performance benchmarks" OFF)
 option(VV_DSP_USE_SIMD "Enable SIMD optimizations where available" OFF)
 option(VV_DSP_ENABLE_AUDIO_IO "Enable WAV audio file I/O utilities" OFF)
-set(VV_DSP_BACKEND_FFT "kissfft" CACHE STRING "FFT backend to use: none|fftw|kissfft")
-set_property(CACHE VV_DSP_BACKEND_FFT PROPERTY STRINGS none fftw kissfft)
+
+# FFT backend options - support multiple backends simultaneously
+option(VV_DSP_WITH_KISSFFT "Enable KissFFT backend (always available)" ON)
+option(VV_DSP_WITH_FFTW "Enable FFTW3 backend" OFF)
+option(VV_DSP_WITH_FFTS "Enable FFTS backend" OFF)
+set(VV_DSP_BACKEND_FFT "kissfft" CACHE STRING "Default FFT backend: kissfft|fftw|ffts")
+set_property(CACHE VV_DSP_BACKEND_FFT PROPERTY STRINGS kissfft fftw ffts)
+
 option(VV_DSP_SINGLE_FILE "Build as a single-file amalgamation" OFF)
 option(VV_DSP_ENABLE_ASAN "Enable AddressSanitizer for sanitizing builds" OFF)
 option(VV_DSP_ENABLE_UBSAN "Enable UBSanitizer for sanitizing builds" OFF)
@@ -50,9 +56,8 @@ if(VV_DSP_USE_SIMD)
   add_compile_definitions(VV_DSP_USE_SIMD=1)
 endif()
 
-add_compile_definitions(
-  VV_DSP_BACKEND_FFT_${VV_DSP_BACKEND_FFT}
-)
+# FFT backend compile definitions - KissFFT is always enabled
+add_compile_definitions(VV_DSP_BACKEND_FFT_kissfft)
 
 if(VV_DSP_SINGLE_FILE)
   add_compile_definitions(VV_DSP_SINGLE_FILE=1)
@@ -93,6 +98,85 @@ endif()
 
 # External dependencies using FetchContent
 include(FetchContent)
+
+# FFT backend dependencies
+# FFTW3 - High-performance FFT library
+if(VV_DSP_WITH_FFTW)
+  find_package(PkgConfig QUIET)
+  if(PkgConfig_FOUND)
+    pkg_check_modules(PC_FFTW3F QUIET fftw3f)
+  endif()
+
+  find_library(FFTW3F_LIBRARY
+    NAMES fftw3f libfftw3f
+    HINTS ${PC_FFTW3F_LIBDIR} ${PC_FFTW3F_LIBRARY_DIRS}
+    PATH_SUFFIXES lib
+  )
+
+  find_path(FFTW3F_INCLUDE_DIR
+    NAMES fftw3.h
+    HINTS ${PC_FFTW3F_INCLUDEDIR} ${PC_FFTW3F_INCLUDE_DIRS}
+    PATH_SUFFIXES include
+  )
+
+  include(FindPackageHandleStandardArgs)
+  find_package_handle_standard_args(FFTW3F
+    REQUIRED_VARS FFTW3F_LIBRARY FFTW3F_INCLUDE_DIR
+  )
+
+  if(FFTW3F_FOUND)
+    add_library(fftw3f UNKNOWN IMPORTED)
+    set_target_properties(fftw3f PROPERTIES
+      IMPORTED_LOCATION "${FFTW3F_LIBRARY}"
+      INTERFACE_INCLUDE_DIRECTORIES "${FFTW3F_INCLUDE_DIR}"
+    )
+    # FFTW3 requires threading support
+    find_package(Threads REQUIRED)
+    target_link_libraries(fftw3f INTERFACE Threads::Threads)
+    message(STATUS "vv-dsp: FFTW3 backend enabled")
+  else()
+    message(WARNING "vv-dsp: FFTW3 requested but not found, disabling FFTW backend")
+    set(VV_DSP_WITH_FFTW OFF CACHE BOOL "" FORCE)
+  endif()
+endif()
+
+# FFTS - Fast FFT library
+if(VV_DSP_WITH_FFTS)
+  find_library(FFTS_LIBRARY
+    NAMES ffts libffts
+    PATH_SUFFIXES lib
+  )
+
+  find_path(FFTS_INCLUDE_DIR
+    NAMES ffts.h
+    PATH_SUFFIXES include
+  )
+
+  include(FindPackageHandleStandardArgs)
+  find_package_handle_standard_args(FFTS
+    REQUIRED_VARS FFTS_LIBRARY FFTS_INCLUDE_DIR
+  )
+
+  if(FFTS_FOUND)
+    add_library(ffts UNKNOWN IMPORTED)
+    set_target_properties(ffts PROPERTIES
+      IMPORTED_LOCATION "${FFTS_LIBRARY}"
+      INTERFACE_INCLUDE_DIRECTORIES "${FFTS_INCLUDE_DIR}"
+    )
+    message(STATUS "vv-dsp: FFTS backend enabled")
+  else()
+    message(WARNING "vv-dsp: FFTS requested but not found, disabling FFTS backend")
+    set(VV_DSP_WITH_FFTS OFF CACHE BOOL "" FORCE)
+  endif()
+endif()
+
+# Update compile definitions after library detection
+if(VV_DSP_WITH_FFTW AND FFTW3F_FOUND)
+  add_compile_definitions(VV_DSP_BACKEND_FFT_fftw)
+endif()
+if(VV_DSP_WITH_FFTS AND FFTS_FOUND)
+  add_compile_definitions(VV_DSP_BACKEND_FFT_ffts)
+endif()
 
 # FastApprox - Fast approximations to common mathematical functions
 if(VV_DSP_USE_FASTAPPROX)

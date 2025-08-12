@@ -91,13 +91,15 @@ static void dft_naive(const vv_dsp_cpx* in, vv_dsp_cpx* out, size_t n, int sign)
     }
 }
 
-vv_dsp_status vv_dsp_fft_backend_make(const struct vv_dsp_fft_plan* spec, void** backend) {
-    (void)spec; (void)backend; // stateless baseline
+// KissFFT backend implementation using vtable interface
+static vv_dsp_status kiss_make_plan(const struct vv_dsp_fft_plan* spec, void** backend_data) {
+    (void)spec; // KissFFT is stateless
+    *backend_data = NULL; // No backend-specific data needed
     return VV_DSP_OK;
 }
 
-vv_dsp_status vv_dsp_fft_backend_exec(const struct vv_dsp_fft_plan* spec, void* backend, const void* in, void* out) {
-    (void)backend;
+static vv_dsp_status kiss_execute(const struct vv_dsp_fft_plan* spec, void* backend_data, const void* in, void* out) {
+    (void)backend_data;
     if (!spec || !in || !out) return VV_DSP_ERROR_NULL_POINTER;
     const size_t n = spec->n;
 
@@ -154,6 +156,41 @@ vv_dsp_status vv_dsp_fft_backend_exec(const struct vv_dsp_fft_plan* spec, void* 
     return VV_DSP_ERROR_OUT_OF_RANGE;
 }
 
+static void kiss_free_plan(void* backend_data) {
+    (void)backend_data; // Nothing to free for stateless KissFFT
+}
+
+static int kiss_is_available(void) {
+    return 1; // KissFFT is always available
+}
+
+// KissFFT vtable
+const vv_dsp_fft_backend_vtable vv_dsp_fft_kiss_vtable = {
+    .make_plan = kiss_make_plan,
+    .execute = kiss_execute,
+    .free_plan = kiss_free_plan,
+    .is_available = kiss_is_available,
+    .name = "KissFFT"
+};
+
+// Legacy backend interface compatibility
+vv_dsp_status vv_dsp_fft_backend_make(const struct vv_dsp_fft_plan* spec, void** backend) {
+    if (!spec || spec->backend >= 3) return VV_DSP_ERROR_OUT_OF_RANGE;
+    const vv_dsp_fft_backend_vtable* vtable = g_fft_backends[spec->backend];
+    if (!vtable || !vtable->is_available()) return VV_DSP_ERROR_UNSUPPORTED;
+    return vtable->make_plan(spec, backend);
+}
+
+vv_dsp_status vv_dsp_fft_backend_exec(const struct vv_dsp_fft_plan* spec, void* backend, const void* in, void* out) {
+    if (!spec || spec->backend >= 3) return VV_DSP_ERROR_OUT_OF_RANGE;
+    const vv_dsp_fft_backend_vtable* vtable = g_fft_backends[spec->backend];
+    if (!vtable || !vtable->is_available()) return VV_DSP_ERROR_UNSUPPORTED;
+    return vtable->execute(spec, backend, in, out);
+}
+
 void vv_dsp_fft_backend_free(void* backend) {
+    // Note: We need to know which backend this came from to call the right free function
+    // For now, we'll defer to the plan's backend type during vv_dsp_fft_destroy
+    // This function is kept for legacy compatibility
     (void)backend;
 }

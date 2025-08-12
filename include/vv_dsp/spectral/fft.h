@@ -23,6 +23,108 @@ extern "C" {
  * @{
  */
 
+/** @name FFT Backend Management
+ * @{
+ */
+
+/**
+ * @brief FFT backend identifier
+ * @details Specifies which FFT implementation to use for computations
+ */
+typedef enum vv_dsp_fft_backend {
+    VV_DSP_FFT_BACKEND_KISS = 0,  /**< KissFFT backend (built-in, always available) */
+    VV_DSP_FFT_BACKEND_FFTW = 1,  /**< FFTW3 backend (requires FFTW3 library) */
+    VV_DSP_FFT_BACKEND_FFTS = 2   /**< FFTS backend (requires FFTS library) */
+} vv_dsp_fft_backend;
+
+/**
+ * @brief FFTW planner flags
+ * @details Controls the planning strategy for FFTW backend, balancing planning time vs execution speed
+ */
+typedef enum vv_dsp_fftw_flag {
+    VV_DSP_FFTW_ESTIMATE = 0, /**< Fast planning, decent performance */
+    VV_DSP_FFTW_MEASURE = 1,  /**< Slower planning, better performance */
+    VV_DSP_FFTW_PATIENT = 2   /**< Very slow planning, best performance */
+} vv_dsp_fftw_flag;
+
+/**
+ * @brief Set the active FFT backend for new plans
+ * @param backend Backend to use for new FFT plans
+ * @return VV_DSP_OK on success, VV_DSP_ERROR_UNSUPPORTED if backend not available
+ *
+ * @details Changes the global FFT backend setting. Existing plans continue to use
+ * their original backend. Only affects plans created after this call.
+ *
+ * @code{.c}
+ * // Switch to FFTW backend if available
+ * vv_dsp_status status = vv_dsp_fft_set_backend(VV_DSP_FFT_BACKEND_FFTW);
+ * if (status == VV_DSP_OK) {
+ *     // FFTW backend is now active
+ * } else if (status == VV_DSP_ERROR_UNSUPPORTED) {
+ *     // FFTW not available, fallback to default
+ * }
+ * @endcode
+ *
+ * @note Thread-safe operation
+ * @see vv_dsp_fft_get_backend(), vv_dsp_fft_is_backend_available()
+ */
+VV_DSP_NODISCARD vv_dsp_status vv_dsp_fft_set_backend(vv_dsp_fft_backend backend);
+
+/**
+ * @brief Get the currently active FFT backend
+ * @return Current backend identifier
+ *
+ * @details Returns the backend that will be used for new FFT plans.
+ * Existing plans are not affected by backend changes.
+ *
+ * @see vv_dsp_fft_set_backend()
+ */
+vv_dsp_fft_backend vv_dsp_fft_get_backend(void);
+
+/**
+ * @brief Check if a specific FFT backend is available
+ * @param backend Backend to check
+ * @return 1 if available, 0 if not available
+ *
+ * @details Checks whether the specified backend was compiled into the library
+ * and is ready for use.
+ *
+ * @code{.c}
+ * if (vv_dsp_fft_is_backend_available(VV_DSP_FFT_BACKEND_FFTW)) {
+ *     vv_dsp_fft_set_backend(VV_DSP_FFT_BACKEND_FFTW);
+ * } else {
+ *     // Use default KissFFT backend
+ * }
+ * @endcode
+ */
+int vv_dsp_fft_is_backend_available(vv_dsp_fft_backend backend);
+
+/**
+ * @brief Configure FFTW planner behavior (FFTW backend only)
+ * @param flag Planning strategy flag
+ * @return VV_DSP_OK on success, VV_DSP_ERROR_UNSUPPORTED if FFTW not available
+ *
+ * @details Controls how FFTW optimizes FFT plans. More aggressive planning
+ * takes longer but produces faster execution.
+ *
+ * @note Only affects new plans created after this call
+ * @see vv_dsp_fftw_flag
+ */
+VV_DSP_NODISCARD vv_dsp_status vv_dsp_fft_set_fftw_flag(vv_dsp_fftw_flag flag);
+
+/**
+ * @brief Clear FFTW plan cache to free memory (FFTW backend only)
+ * @return VV_DSP_OK on success, VV_DSP_ERROR_UNSUPPORTED if FFTW not available
+ *
+ * @details Flushes all cached FFTW plans to reclaim memory. Future operations
+ * may be slower until new plans are created and cached.
+ *
+ * @warning Should not be called while FFTW plans are being executed
+ */
+VV_DSP_NODISCARD vv_dsp_status vv_dsp_fft_flush_fftw_cache(void);
+
+/** @} */ // End of FFT Backend Management
+
 /** @name FFT Planning and Execution
  * @{
  */
