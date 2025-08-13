@@ -30,7 +30,7 @@ protected:
     // Helper function to generate test signal (real-valued sine wave)
     void generateSineWave(std::vector<vv_dsp_real>& signal, vv_dsp_real freq, vv_dsp_real sample_rate) {
         for (size_t i = 0; i < signal.size(); ++i) {
-            signal[i] = std::sin(2.0 * M_PI * freq * i / sample_rate);
+            signal[i] = static_cast<vv_dsp_real>(std::sin(2.0 * M_PI * static_cast<double>(freq) * static_cast<double>(i) / static_cast<double>(sample_rate)));
         }
     }
 
@@ -40,7 +40,7 @@ protected:
         for (size_t i = 0; i < signal.size(); ++i) {
             vv_dsp_real t = static_cast<vv_dsp_real>(i) / sample_rate;
             vv_dsp_real freq = f0 + (f1 - f0) * t / duration;
-            signal[i] = std::sin(2.0 * M_PI * freq * t);
+            signal[i] = static_cast<vv_dsp_real>(std::sin(2.0 * M_PI * static_cast<double>(freq) * static_cast<double>(t)));
         }
     }
 
@@ -303,7 +303,7 @@ TEST_F(STFTTest, SpectrogramGeneration) {
 
     // Simple sine wave instead of chirp
     for (size_t i = 0; i < signal_length; ++i) {
-        test_signal[i] = std::sin(2.0 * M_PI * static_cast<double>(i) / 8.0);
+        test_signal[i] = static_cast<vv_dsp_real>(std::sin(2.0 * M_PI * static_cast<double>(i) / 8.0));
     }
 
     // Test manual frame processing instead of spectrogram function
@@ -465,9 +465,9 @@ TEST_F(STFTTest, PerfectReconstructionConditions) {
 
     // Multi-tone signal
     for (size_t i = 0; i < signal_length; ++i) {
-        original_signal[i] = 0.5 * std::sin(2.0 * M_PI * 5.0 * i / fft_size) +
+        original_signal[i] = static_cast<vv_dsp_real>(0.5 * std::sin(2.0 * M_PI * 5.0 * i / fft_size) +
                             0.3 * std::sin(2.0 * M_PI * 13.0 * i / fft_size) +
-                            0.2 * std::sin(2.0 * M_PI * 23.0 * i / fft_size);
+                            0.2 * std::sin(2.0 * M_PI * 23.0 * i / fft_size));
     }
 
     // STFT analysis-synthesis

@@ -26,7 +26,7 @@ protected:
     // Helper function to check if all values are between 0 and 1
     bool isNormalized(const std::vector<vv_dsp_real>& window) {
         return std::all_of(window.begin(), window.end(),
-                          [](vv_dsp_real val) { return val >= 0.0 && val <= 1.0; });
+                          [](vv_dsp_real val) { return val >= static_cast<vv_dsp_real>(0.0) && val <= static_cast<vv_dsp_real>(1.0); });
     }
 
     // Helper function to check symmetry
@@ -161,14 +161,14 @@ TEST_F(WindowTest, HannWindowSpecificValues) {
     // Expected values for N=8 Hann window (computed analytically)
     // w[n] = 0.5 - 0.5*cos(2*pi*n/(N-1))
     std::vector<vv_dsp_real> expected = {
-        0.0,                           // n=0
-        0.5 - 0.5*std::cos(2*M_PI*1/7), // n=1
-        0.5 - 0.5*std::cos(2*M_PI*2/7), // n=2
-        0.5 - 0.5*std::cos(2*M_PI*3/7), // n=3
-        0.5 - 0.5*std::cos(2*M_PI*4/7), // n=4
-        0.5 - 0.5*std::cos(2*M_PI*5/7), // n=5
-        0.5 - 0.5*std::cos(2*M_PI*6/7), // n=6
-        0.0                            // n=7
+        static_cast<vv_dsp_real>(0.0),                           // n=0
+        static_cast<vv_dsp_real>(0.5 - 0.5*std::cos(2*M_PI*1/7)), // n=1
+        static_cast<vv_dsp_real>(0.5 - 0.5*std::cos(2*M_PI*2/7)), // n=2
+        static_cast<vv_dsp_real>(0.5 - 0.5*std::cos(2*M_PI*3/7)), // n=3
+        static_cast<vv_dsp_real>(0.5 - 0.5*std::cos(2*M_PI*4/7)), // n=4
+        static_cast<vv_dsp_real>(0.5 - 0.5*std::cos(2*M_PI*5/7)), // n=5
+        static_cast<vv_dsp_real>(0.5 - 0.5*std::cos(2*M_PI*6/7)), // n=6
+        static_cast<vv_dsp_real>(0.0)                            // n=7
     };
 
     for (size_t i = 0; i < N; ++i) {
@@ -188,14 +188,14 @@ TEST_F(WindowTest, HammingWindowSpecificValues) {
     // Expected values for N=8 Hamming window
     // w[n] = 0.54 - 0.46*cos(2*pi*n/(N-1))
     std::vector<vv_dsp_real> expected = {
-        0.54 - 0.46*std::cos(2*M_PI*0/7), // n=0
-        0.54 - 0.46*std::cos(2*M_PI*1/7), // n=1
-        0.54 - 0.46*std::cos(2*M_PI*2/7), // n=2
-        0.54 - 0.46*std::cos(2*M_PI*3/7), // n=3
-        0.54 - 0.46*std::cos(2*M_PI*4/7), // n=4
-        0.54 - 0.46*std::cos(2*M_PI*5/7), // n=5
-        0.54 - 0.46*std::cos(2*M_PI*6/7), // n=6
-        0.54 - 0.46*std::cos(2*M_PI*7/7)  // n=7
+        static_cast<vv_dsp_real>(0.54 - 0.46*std::cos(2*M_PI*0/7)), // n=0
+        static_cast<vv_dsp_real>(0.54 - 0.46*std::cos(2*M_PI*1/7)), // n=1
+        static_cast<vv_dsp_real>(0.54 - 0.46*std::cos(2*M_PI*2/7)), // n=2
+        static_cast<vv_dsp_real>(0.54 - 0.46*std::cos(2*M_PI*3/7)), // n=3
+        static_cast<vv_dsp_real>(0.54 - 0.46*std::cos(2*M_PI*4/7)), // n=4
+        static_cast<vv_dsp_real>(0.54 - 0.46*std::cos(2*M_PI*5/7)), // n=5
+        static_cast<vv_dsp_real>(0.54 - 0.46*std::cos(2*M_PI*6/7)), // n=6
+        static_cast<vv_dsp_real>(0.54 - 0.46*std::cos(2*M_PI*7/7))  // n=7
     };
 
     for (size_t i = 0; i < N; ++i) {

@@ -1,6 +1,13 @@
 /**
  * @file test_fft.cpp
- * @brief Google Test suite for vv-dsp FFT functionality
+ * @brief     // Helper function to generate complex signal (complex sine wave)
+    void generateComplexSineWave(std::vector<vv_dsp_cpx>& signal, vv_dsp_real freq, vv_dsp_real sample_rate) {
+        for (size_t i = 0; i < signal.size(); ++i) {
+            vv_dsp_real phase = static_cast<vv_dsp_real>(2.0 * M_PI * static_cast<double>(freq) * static_cast<double>(i) / static_cast<double>(sample_rate));
+            signal[i].re = static_cast<vv_dsp_real>(std::cos(static_cast<double>(phase)));
+            signal[i].im = static_cast<vv_dsp_real>(std::sin(static_cast<double>(phase)));
+        }
+    }est suite for vv-dsp FFT functionality
  */
 
 #include <gtest/gtest.h>
@@ -30,7 +37,7 @@ protected:
     // Helper function to generate test signal (real-valued sine wave)
     void generateSineWave(std::vector<vv_dsp_real>& signal, vv_dsp_real freq, vv_dsp_real sample_rate) {
         for (size_t i = 0; i < signal.size(); ++i) {
-            signal[i] = std::sin(2.0 * M_PI * freq * i / sample_rate);
+            signal[i] = static_cast<vv_dsp_real>(std::sin(2.0 * M_PI * static_cast<double>(freq) * static_cast<double>(i) / static_cast<double>(sample_rate)));
         }
     }
 
@@ -105,7 +112,7 @@ TEST_F(FFTTest, BackendManagement) {
     }
 
     // Reset to KissFFT for remaining tests
-    vv_dsp_fft_set_backend(VV_DSP_FFT_BACKEND_KISS);
+    EXPECT_EQ(vv_dsp_fft_set_backend(VV_DSP_FFT_BACKEND_KISS), VV_DSP_OK);
 }
 
 // Test basic plan creation and destruction
@@ -331,7 +338,7 @@ TEST_P(FFTBackendTest, BackendConsistency) {
     ASSERT_EQ(vv_dsp_fft_execute(plan, input.data(), output_backend.data()), VV_DSP_OK);
 
     // Compare with KissFFT reference
-    vv_dsp_fft_set_backend(VV_DSP_FFT_BACKEND_KISS);
+    ASSERT_EQ(vv_dsp_fft_set_backend(VV_DSP_FFT_BACKEND_KISS), VV_DSP_OK);
     std::vector<vv_dsp_cpx> output_kiss(N);
     vv_dsp_fft_plan* kiss_plan = nullptr;
     ASSERT_EQ(vv_dsp_fft_make_plan(N, VV_DSP_FFT_C2C, VV_DSP_FFT_FORWARD, &kiss_plan), VV_DSP_OK);

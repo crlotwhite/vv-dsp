@@ -9,15 +9,26 @@
 #include <time.h>
 #include <math.h>
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 #include "vv_dsp/core/vv_dsp_vectorized_math.h"
 #include "vv_dsp/vv_dsp_math.h"
 #include "vv_dsp/vv_dsp_types.h"
 
 // Simple timing utility
 static double get_time_seconds(void) {
+#ifdef _WIN32
+    LARGE_INTEGER frequency, counter;
+    QueryPerformanceFrequency(&frequency);
+    QueryPerformanceCounter(&counter);
+    return (double)counter.QuadPart / (double)frequency.QuadPart;
+#else
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return ts.tv_sec + ts.tv_nsec * 1e-9;
+#endif
 }
 
 // Reference scalar window apply implementation
