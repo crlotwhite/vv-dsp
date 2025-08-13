@@ -1935,5 +1935,464 @@
       "updated": "2025-08-12T15:37:02.409Z",
       "description": "Tasks for master context"
     }
+  },
+  "dsp-improvements": {
+    "tasks": [
+      {
+        "id": 1,
+        "title": "Setup Development Environment & Benchmarking Suite",
+        "description": "Establish the development environment, integrate existing vv-dsp codebase, and create a comprehensive performance benchmarking suite to measure current performance and track improvements.",
+        "details": "Set up the build system for C99, ensuring cross-platform compatibility (Windows, macOS, Linux). Integrate the existing vv-dsp codebase. Implement initial performance tests for existing DSP functions (e.g., FFT, basic filters) to establish a baseline. Design the benchmarking framework to support future feature testing, focusing on latency, memory usage, and CPU utilization.",
+        "testStrategy": "Run baseline performance tests on target platforms (Windows, macOS, Linux). Verify the benchmarking suite accurately measures CPU, memory, and latency for existing functions. Ensure the suite can generate reproducible results.",
+        "priority": "high",
+        "dependencies": [],
+        "status": "not_started",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Setup Cross-Platform C99 Build System",
+            "description": "Configure a build system using CMake to support C99 compilation across Windows (MSVC), macOS (Clang), and Linux (GCC), establishing the foundation for all future development.",
+            "dependencies": [],
+            "details": "Create a root CMakeLists.txt file and necessary module files. Define project settings, C99 standard requirements, and compiler flags. Set up build configurations for Debug and Release. Ensure the system can generate native build files (e.g., Visual Studio solutions, Makefiles) for each target platform.",
+            "status": "pending",
+            "testStrategy": "Verify successful compilation and linking of a simple 'hello world' executable on Windows, macOS, and Linux. Confirm that both Debug and Release configurations build without errors."
+          },
+          {
+            "id": 2,
+            "title": "Integrate Existing vv-dsp Codebase into Build System",
+            "description": "Incorporate the current vv-dsp source code into the CMake build system, ensuring it compiles cleanly as a library on all target platforms.",
+            "dependencies": [
+              "1.1"
+            ],
+            "details": "Add the vv-dsp source and header files to the CMake configuration as a static library target. Resolve any platform-specific compilation warnings or errors. Organize the project directory structure to separate the library source from applications and tests.",
+            "status": "pending",
+            "testStrategy": "Compile the vv-dsp codebase as a static library on Windows, macOS, and Linux. Link the library against a test application to ensure all public symbols are correctly exported and accessible."
+          },
+          {
+            "id": 3,
+            "title": "Design and Implement Core Benchmarking Harness",
+            "description": "Develop the core infrastructure for the benchmarking suite, providing mechanisms to measure latency, memory usage, and CPU utilization in a cross-platform manner.",
+            "dependencies": [
+              "1.2"
+            ],
+            "details": "Create a small, self-contained benchmarking library. Implement high-precision timers using platform-specific APIs (e.g., `clock_gettime`, `QueryPerformanceCounter`). Develop simple wrappers to track memory allocation. Design a C API for defining, registering, and running benchmark cases. Results should be printable to the console in a structured format.",
+            "status": "pending",
+            "testStrategy": "Unit test the timer and memory measurement utilities for accuracy and low overhead. Create a sample benchmark for a simple function (e.g., `memcpy`) to validate the harness's functionality."
+          },
+          {
+            "id": 4,
+            "title": "Implement Baseline Performance Tests for Core DSP Functions",
+            "description": "Using the new benchmarking harness, create initial performance tests for existing key functions (e.g., FFT, IIR/FIR filters) to establish a performance baseline.",
+            "dependencies": [
+              "1.3"
+            ],
+            "details": "Write benchmark test cases for the primary functions currently in the vv-dsp library. The tests should cover typical use cases with varying data sizes (e.g., FFT sizes of 256, 1024, 4096). Execute these tests to generate the first set of performance data.",
+            "status": "pending",
+            "testStrategy": "Run the complete benchmark suite on all three target platforms. Ensure the results are stable and reproducible across multiple runs. Document the baseline performance metrics (latency, memory) for each tested function on each platform."
+          },
+          {
+            "id": 5,
+            "title": "Automate Builds and Benchmark Execution with CI",
+            "description": "Set up a Continuous Integration (CI) pipeline (e.g., using GitHub Actions) to automate the build and benchmark execution process for every code change.",
+            "dependencies": [
+              "1.1",
+              "1.4"
+            ],
+            "details": "Create a CI workflow configuration file that defines build matrices for Windows, macOS, and Linux. Each job in the matrix should check out the code, configure the build using CMake, compile the project, and run the benchmark executable. The workflow should be triggered on pushes and pull requests to the main branch.",
+            "status": "pending",
+            "testStrategy": "Trigger the CI pipeline by pushing a test commit. Verify that all build and test jobs pass successfully across all three operating systems. Confirm that the benchmark output is correctly captured in the CI logs."
+          }
+        ]
+      },
+      {
+        "id": 2,
+        "title": "Implement Type-Safe DSP Parameter Handling",
+        "description": "Introduce type-safe mechanisms for DSP parameters like frequency, duration, and amplitude to improve code robustness and prevent common errors.",
+        "details": "Define new C types (e.g., `vv_frequency_hz_t`, `vv_duration_s_t`, `vv_amplitude_t`) using `typedef` and potentially opaque structs for better encapsulation. Implement compile-time unit validation where possible (e.g., using `_Static_assert` or macros for basic checks). Develop automatic unit conversion functions. Integrate range checking for DSP parameter validation. Update relevant existing API functions to utilize the new type-safe parameters.",
+        "testStrategy": "Create unit tests for each new type, verifying correct initialization, unit conversions, and range checking. Verify that invalid parameter usage (e.g., out-of-range values) results in expected compile-time or runtime errors/assertions. Test integration with existing functions.",
+        "priority": "high",
+        "dependencies": [
+          1
+        ],
+        "status": "not_started",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Define Core DSP Parameter Types and Initialization",
+            "description": "Establish the fundamental C types for DSP parameters like frequency, duration, and amplitude using typedefs or opaque structs to provide a foundation for type safety.",
+            "dependencies": [],
+            "details": "Define new C types such as `vv_frequency_hz_t`, `vv_duration_s_t`, and `vv_amplitude_t`. Use `typedef` over base types (e.g., float) or opaque structs for stronger encapsulation. Create associated initialization functions or macros (e.g., `vv_frequency_from_hz(float value)`) to construct these types from primitive values.",
+            "status": "pending",
+            "testStrategy": "Create unit tests to verify that each new type can be correctly initialized from primitive values and that the underlying value is stored as expected."
+          },
+          {
+            "id": 2,
+            "title": "Implement Unit Conversion Functions",
+            "description": "Develop a set of functions to handle automatic and explicit conversions between related physical units, such as seconds to milliseconds or Hertz to radians per second.",
+            "dependencies": [
+              "2.1"
+            ],
+            "details": "Create functions for common unit conversions, for example: `vv_duration_s_to_ms()`, `vv_duration_ms_to_samples(uint32_t sample_rate)`, and `vv_frequency_hz_to_radians_per_sample(uint32_t sample_rate)`. Ensure conversions are mathematically correct and handle floating-point precision issues.",
+            "status": "pending",
+            "testStrategy": "Write unit tests for each conversion function, verifying the output accuracy against pre-calculated, known-good values for a variety of inputs."
+          },
+          {
+            "id": 3,
+            "title": "Integrate Compile-Time and Runtime Parameter Validation",
+            "description": "Implement validation checks to enforce constraints on parameter values, using both compile-time assertions for static checks and runtime validation for dynamic range checking.",
+            "dependencies": [
+              "2.1"
+            ],
+            "details": "Use C11 `_Static_assert` or preprocessor macros to check for invalid static conditions where possible. Implement runtime range checking within the type initialization functions (e.g., assert that frequency is non-negative, amplitude is within [-1.0, 1.0]). The validation should trigger a compile-time error or a runtime assertion/error code upon failure.",
+            "status": "pending",
+            "testStrategy": "Create test cases that should fail at compile-time to validate static assertions. Write unit tests that attempt to create parameters with out-of-range values and verify that the expected runtime assertion is triggered or an error is returned."
+          },
+          {
+            "id": 4,
+            "title": "Refactor Core API Functions to Use New Types",
+            "description": "Update a foundational set of existing API functions, such as signal generators and basic filters, to use the new type-safe parameter types instead of primitive types.",
+            "dependencies": [
+              "2.1",
+              "2.2",
+              "2.3"
+            ],
+            "details": "Identify a small group of core DSP functions (e.g., sine wave generator, biquad filter setup). Refactor their function signatures to accept `vv_frequency_hz_t`, `vv_amplitude_t`, etc. Update the internal logic of these functions to correctly use the new types, including any necessary internal unit conversions.",
+            "status": "pending",
+            "testStrategy": "Modify the existing unit tests for the refactored functions to use the new types. Add new tests to confirm that passing incorrect types (e.g., a duration type where a frequency is expected) results in a compile-time error. Verify functional correctness is maintained."
+          },
+          {
+            "id": 5,
+            "title": "Propagate Type-Safe Parameters to Dependent Feature APIs",
+            "description": "Systematically update the APIs for features that depend on Task 2, such as windowing and transforms, to ensure they are built upon the new type-safe foundation.",
+            "dependencies": [
+              "2.4"
+            ],
+            "details": "Review and refactor the function signatures for APIs related to upcoming tasks (Tasks 3, 8, 9, 10), including window functions, signal conditioning, and pitch detection algorithms. This ensures consistency and prevents the re-introduction of type-related errors in new code.",
+            "status": "pending",
+            "testStrategy": "Update the unit tests for all affected modules. Perform integration tests to ensure that components using the new types still work together correctly (e.g., a refactored signal generator feeding into a refactored window function)."
+          }
+        ]
+      },
+      {
+        "id": 3,
+        "title": "Implement Advanced Window Functions",
+        "description": "Expand the library's window function variety to include Bartlett, Blackman, Blackman-Harris, Flat-top, and Kaiser windows, matching CMSIS-DSP standards.",
+        "details": "Implement functions for generating coefficients for Bartlett, Blackman, Blackman-Harris, Flat-top, and Kaiser windows. Ensure parameterized generation for Kaiser (beta parameter) and Blackman-Harris variants. Optimize window coefficient computation for performance while maintaining C99 compatibility. Provide internal documentation on window properties and selection guidance.",
+        "testStrategy": "Unit tests for each new window type, verifying coefficient values against known reference implementations (e.g., SciPy, MATLAB). Test parameterized variants with different input parameters. Ensure generated windows meet expected spectral characteristics.",
+        "priority": "high",
+        "dependencies": [
+          2
+        ],
+        "status": "not_started",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Bartlett and Blackman Window Functions",
+            "description": "Implement the coefficient generation functions for the Bartlett (triangular) and standard Blackman windows, ensuring they conform to C99 standards and match CMSIS-DSP reference formulas.",
+            "dependencies": [],
+            "details": "Create C99-compatible functions for generating Bartlett and Blackman window coefficients. The functions should take a destination buffer and window length as input. Initial implementations should prioritize correctness over performance, with coefficients verified against a known reference like SciPy.",
+            "status": "pending",
+            "testStrategy": "Unit test generated coefficients against known values from SciPy for various window sizes (e.g., 64, 256, 1024). Ensure edge cases like small or odd-sized windows are handled correctly."
+          },
+          {
+            "id": 2,
+            "title": "Implement Blackman-Harris and Flat-top Window Functions",
+            "description": "Implement the coefficient generation functions for the more complex Blackman-Harris and Flat-top windows, which are designed for high dynamic range and amplitude accuracy, respectively.",
+            "dependencies": [],
+            "details": "Create C99-compatible functions for Blackman-Harris and Flat-top windows. These windows use more cosine terms in their definitions; pay close attention to the standard coefficients used in signal processing libraries to ensure accuracy. The implementation should follow the CMSIS-DSP standard where applicable.",
+            "status": "pending",
+            "testStrategy": "Unit test generated coefficients against known values from a MATLAB or SciPy reference for various window sizes. Verify the higher side-lobe attenuation of Blackman-Harris compared to Blackman."
+          },
+          {
+            "id": 3,
+            "title": "Implement Parameterized Kaiser Window Function",
+            "description": "Implement the coefficient generation function for the Kaiser window, which includes support for the configurable 'beta' parameter to control the trade-off between main-lobe width and side-lobe attenuation.",
+            "dependencies": [],
+            "details": "Create a C99-compatible function that accepts a buffer, window length, and a 'beta' parameter. This requires an efficient and accurate C99 implementation of the zeroth-order modified Bessel function of the first kind (I_0), which is central to the Kaiser window formula.",
+            "status": "pending",
+            "testStrategy": "Unit test generated coefficients against a reference implementation for various window sizes and several beta values (e.g., 4.0, 8.6, 12.0). Verify that the spectral characteristics change as expected with the beta parameter."
+          },
+          {
+            "id": 4,
+            "title": "Optimize Window Coefficient Computation and Verify Spectral Characteristics",
+            "description": "Profile and optimize the performance of all new window functions and perform a final verification of their spectral characteristics against theoretical values.",
+            "dependencies": [
+              "3.1",
+              "3.2",
+              "3.3"
+            ],
+            "details": "Review the initial implementations for performance bottlenecks. Apply C99-compliant optimizations, such as reducing redundant trigonometric calculations or using window symmetry. After optimization, generate the frequency response for each window using an FFT to validate key spectral metrics like main-lobe width and peak side-lobe level.",
+            "status": "pending",
+            "testStrategy": "Benchmark the execution time of each window function before and after optimization. Plot the frequency response of each generated window and compare main-lobe width and side-lobe attenuation against documented values from signal processing literature or reference libraries."
+          },
+          {
+            "id": 5,
+            "title": "Create Internal Documentation and Selection Guidance",
+            "description": "Develop internal documentation for the newly added window functions, including their mathematical properties, typical use cases, and guidance for selection.",
+            "dependencies": [
+              "3.4"
+            ],
+            "details": "For each window (Bartlett, Blackman, Blackman-Harris, Flat-top, Kaiser), document its key properties (e.g., main-lobe width, max side-lobe level, scallop loss). Create a summary table or guide that helps developers choose the appropriate window for a given application, such as spectral analysis, filter design, or transient detection.",
+            "status": "pending",
+            "testStrategy": "Review the documentation for clarity, accuracy, and completeness. Ensure the selection guidance is practical and aligns with common signal processing practices. Verify that all function signatures and parameters are correctly documented."
+          }
+        ]
+      },
+      {
+        "id": 4,
+        "title": "Develop Real-Time Streaming Architecture",
+        "description": "Implement a block-based processing pipeline with circular buffer management to support real-time audio streaming and variable buffer sizes.",
+        "details": "Design and implement a robust circular buffer data structure suitable for audio samples. Develop a block-based processing framework that can handle variable buffer sizes and manage data flow. Focus on latency optimization to meet the <1ms target. Provide basic streaming audio I/O examples (e.g., dummy input/output, file-based processing, or simple platform-specific audio device integration).",
+        "testStrategy": "Unit tests for circular buffer operations (read, write, overflow, underflow, peek). Integration tests for the block processing pipeline with different block sizes and data rates. Measure end-to-end latency under various processing loads to ensure the <1ms target is met.",
+        "priority": "high",
+        "dependencies": [
+          2
+        ],
+        "status": "not_started",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Design and Implement a Lock-Free Circular Buffer",
+            "description": "Create a high-performance, lock-free circular buffer (ring buffer) data structure optimized for single-producer, single-consumer (SPSC) audio data streams to ensure thread-safe data exchange without mutexes.",
+            "dependencies": [],
+            "details": "The implementation must be in C99 and use atomic operations for read and write pointers to prevent race conditions and avoid the unpredictable latency of locks. The buffer should be designed to store audio samples (e.g., 32-bit floats) and provide an API for writing, reading, peeking, and querying the number of available samples for reading and writing.",
+            "status": "pending",
+            "testStrategy": "Unit test all buffer operations, including write, read, peek, available_read, and available_write. Create specific tests to verify correct behavior under boundary conditions, such as buffer full (overflow), buffer empty (underflow), and pointer wrap-around."
+          },
+          {
+            "id": 2,
+            "title": "Develop a Modular Block-Based Processing Framework",
+            "description": "Implement a core framework that manages the flow of audio data through a user-defined chain of processing blocks, using the circular buffer for data transport between the I/O threads and the processing thread.",
+            "dependencies": [
+              "4.1"
+            ],
+            "details": "Define a standard C99 interface for a 'processing block' (e.g., a struct with a function pointer for a `process` method). The framework will be responsible for pulling data from an input circular buffer, passing it to the processing chain, and pushing the result to an output circular buffer. It must be designed to facilitate the connection of multiple blocks in a pipeline.",
+            "status": "pending",
+            "testStrategy": "Create integration tests with a simple pipeline (e.g., input -> gain block -> output) to verify data integrity and correct sequencing. Test the framework's ability to connect and manage multiple processing blocks in series."
+          },
+          {
+            "id": 3,
+            "title": "Implement Variable Buffer Size Adaptation Logic",
+            "description": "Add functionality to the processing framework to handle mismatches between the audio hardware's buffer size and the desired internal processing block size, ensuring seamless data flow.",
+            "dependencies": [
+              "4.2"
+            ],
+            "details": "Implement resampling or re-blocking logic at the interface between the I/O and the circular buffers. This logic will accumulate data from smaller hardware buffers until a full processing block is available, or segment larger hardware buffers into multiple smaller processing blocks. This ensures the internal pipeline can operate on a consistent block size regardless of the audio driver's behavior.",
+            "status": "pending",
+            "testStrategy": "Test the adaptation logic by simulating input from a source that provides data in chunks of varying sizes (e.g., 64, 128, 513 samples) while the internal processing block size is fixed (e.g., 256). Verify that no data is lost or corrupted through the re-blocking process."
+          },
+          {
+            "id": 4,
+            "title": "Profile and Optimize End-to-End Latency",
+            "description": "Systematically measure, profile, and optimize the latency of the entire streaming pipeline to ensure the end-to-end processing time meets the <1ms target under typical loads.",
+            "dependencies": [
+              "4.1",
+              "4.2",
+              "4.3"
+            ],
+            "details": "Utilize the benchmarking suite established in Task 1 to perform high-resolution timing of the data path, from the moment a sample is written to the input buffer to the moment it is read from the output buffer. Identify and refactor performance bottlenecks in the circular buffer, block management, and data copying operations.",
+            "status": "pending",
+            "testStrategy": "Develop a specific latency benchmark test that simulates a real-time audio callback. Run this benchmark under various processing loads (e.g., with 1, 3, and 5 dummy processing blocks in the pipeline) on all target platforms. The primary success criterion is consistently achieving an average latency below 1ms."
+          },
+          {
+            "id": 5,
+            "title": "Create Basic Streaming I/O Examples",
+            "description": "Develop simple, functional examples to demonstrate the streaming architecture's capabilities and provide a starting point for developers.",
+            "dependencies": [
+              "4.2",
+              "4.4"
+            ],
+            "details": "Implement two key examples: 1) A file-to-file processor that reads audio from a WAV file, passes it through the pipeline with a simple gain block, and writes the output to a new WAV file. 2) A dummy real-time processor that generates a sine wave, processes it through the pipeline, and discards the output, serving as a template for real-time application integration and profiling.",
+            "status": "pending",
+            "testStrategy": "Verify that both examples compile and run correctly on all target platforms (Windows, macOS, Linux). For the file-based example, perform an audio diff on the output file to ensure it matches an expected result. For the real-time example, use profiling tools to confirm it runs without audio glitches or excessive CPU usage."
+          }
+        ]
+      },
+      {
+        "id": 5,
+        "title": "Implement LMS and NLMS Adaptive Filters",
+        "description": "Add Least Mean Squares (LMS) and Normalized LMS (NLMS) adaptive filtering capabilities to the library.",
+        "details": "Implement the core LMS algorithm, including coefficient update rules. Extend the implementation to NLMS, incorporating variable step size for improved stability and convergence. Ensure the design supports real-time coefficient adaptation. Provide basic examples demonstrating noise cancellation using these algorithms.",
+        "testStrategy": "Unit tests for LMS and NLMS convergence with synthetic signals (e.g., system identification, noise cancellation). Verify coefficient adaptation behavior and stability under different learning rates and noise conditions.",
+        "priority": "medium",
+        "dependencies": [
+          2,
+          4
+        ],
+        "status": "not_started",
+        "subtasks": [
+          {
+            "id": 1,
+            "title": "Implement Core LMS Filter Algorithm",
+            "description": "Create the fundamental structure and processing logic for the Least Mean Squares (LMS) adaptive filter.",
+            "dependencies": [],
+            "details": "Define a data structure to hold the filter's state, including coefficients and the input signal buffer (taps). Implement the core filtering operation (convolution) and the standard LMS coefficient update rule: w(n+1) = w(n) + mu * e(n) * x(n). The implementation must be designed for single-sample processing to support real-time adaptation.",
+            "status": "pending",
+            "testStrategy": "Unit test the filter's output for a single step with known inputs, coefficients, and error. Verify that the coefficient update is calculated correctly according to the LMS formula."
+          },
+          {
+            "id": 2,
+            "title": "Extend LMS to Support Normalized LMS (NLMS)",
+            "description": "Modify the LMS implementation to include the NLMS variant, which normalizes the step size by the input signal power for improved stability.",
+            "dependencies": [
+              "5.1"
+            ],
+            "details": "Build upon the LMS structure. Modify the coefficient update rule to incorporate normalization: w(n+1) = w(n) + (mu / (epsilon + x(n)^T * x(n))) * e(n) * x(n). Include a small constant 'epsilon' to prevent division by zero. Ensure the calculation of the input signal power within the tap buffer is efficient.",
+            "status": "pending",
+            "testStrategy": "Unit test the NLMS update rule specifically. Verify that the step size is correctly normalized based on the input signal energy. Test stability with high-variance input signals and compare against the standard LMS implementation."
+          },
+          {
+            "id": 3,
+            "title": "Design and Refine Public API for LMS/NLMS Filters",
+            "description": "Create a clear and efficient public API for initializing, configuring, processing data with, and resetting the LMS and NLMS filters.",
+            "dependencies": [
+              "5.1",
+              "5.2"
+            ],
+            "details": "Design `init`, `process`, and `reset` functions for the filter structures. The `init` function should accept parameters like filter order and step size (mu). The `process` function should accept the input sample and desired signal sample, returning the filtered output and the error. Ensure the API is consistent and suitable for integration into a real-time processing loop.",
+            "status": "pending",
+            "testStrategy": "Test the API functions to ensure correct state management. Verify that `init` correctly sets up the filter state, `reset` clears coefficients and buffers, and `process` functions correctly in a simulated real-time stream."
+          },
+          {
+            "id": 4,
+            "title": "Develop Unit Tests for Filter Convergence and Stability",
+            "description": "Create a comprehensive suite of unit tests to validate the convergence properties and stability of both LMS and NLMS filters in a system identification scenario.",
+            "dependencies": [
+              "5.3"
+            ],
+            "details": "Implement a system identification test case. Generate a known 'unknown' system (e.g., a simple FIR filter). Feed a signal through both the unknown system and the adaptive filter. The adaptive filter's goal is to learn the coefficients of the unknown system. Measure the Mean Squared Error (MSE) over time to verify convergence. Test with different step sizes (mu) and input signal characteristics to check stability boundaries.",
+            "status": "pending",
+            "testStrategy": "The primary output is a set of passing unit tests. The tests will programmatically verify that the MSE converges below a defined threshold and that the final adapted coefficients are close to the known system's coefficients."
+          },
+          {
+            "id": 5,
+            "title": "Implement a Noise Cancellation Example Application",
+            "description": "Develop a clear, well-documented example demonstrating the use of the LMS and NLMS filters for a practical adaptive noise cancellation (ANC) scenario.",
+            "dependencies": [
+              "5.4"
+            ],
+            "details": "Create a standalone example program using the filter API. Synthesize a clean signal (e.g., sine wave) and a noise signal (e.g., white noise). The filter's primary input will be the noise signal, and its goal is to predict and subtract the noise from a combined signal (clean + noise). Document the setup and provide a method to evaluate the output, such as printing the Signal-to-Noise Ratio (SNR) before and after filtering.",
+            "status": "pending",
+            "testStrategy": "Run the example and programmatically verify that the noise level is significantly reduced in the output signal. The test will pass if the SNR improvement is above a predefined threshold."
+          }
+        ]
+      },
+      {
+        "id": 6,
+        "title": "Implement RLS Adaptive Filter and Advanced Examples",
+        "description": "Implement Recursive Least Squares (RLS) adaptive filter and provide comprehensive examples for noise and echo cancellation.",
+        "details": "Implement the RLS algorithm, focusing on its faster convergence properties compared to LMS/NLMS. Develop practical, well-documented examples demonstrating noise cancellation and echo cancellation using LMS, NLMS, and RLS, highlighting their respective strengths and weaknesses.",
+        "testStrategy": "Unit tests for RLS convergence and stability with various input signals. Integration tests for noise and echo cancellation examples, evaluating performance metrics such as Signal-to-Noise Ratio (SNR) improvement and echo reduction.",
+        "priority": "medium",
+        "dependencies": [
+          5
+        ],
+        "status": "not_started",
+        "subtasks": []
+      },
+      {
+        "id": 7,
+        "title": "Enhance MFCC Implementation",
+        "description": "Upgrade the MFCC implementation with configurable mel-scale filters, delta/delta-delta coefficients, energy normalization, and different DCT types.",
+        "details": "Add functionality to configure the number of mel-scale filters (40-128). Implement computation of delta and delta-delta (acceleration) coefficients. Include options for energy normalization. Support Type-II and Type-III Discrete Cosine Transform (DCT). Implement cepstral mean normalization (CMN) for robust feature extraction.",
+        "testStrategy": "Unit tests for each new MFCC component (mel filterbank, delta/delta-delta, CMN, DCT types). Compare output with known reference implementations (e.g., Librosa, HTK) using standard audio samples. Verify feature vector dimensions and values.",
+        "priority": "medium",
+        "dependencies": [
+          2,
+          3
+        ],
+        "status": "not_started",
+        "subtasks": []
+      },
+      {
+        "id": 8,
+        "title": "Implement Advanced Signal Conditioning Features",
+        "description": "Add DC removal filters, Automatic Gain Control (AGC), dynamic range compression, and noise gating functionality.",
+        "details": "Implement DC removal filters (e.g., high-pass IIR filter). Develop an Automatic Gain Control (AGC) algorithm. Implement dynamic range compression (compressor/expander) with configurable parameters. Add noise gating functionality. Consider including basic signal quality metrics.",
+        "testStrategy": "Unit tests for each conditioning feature, verifying output with synthetic signals and known parameters. Integration tests to ensure features work correctly in sequence within the streaming pipeline. Measure the effect on signal characteristics (e.g., gain, dynamic range, noise floor).",
+        "priority": "medium",
+        "dependencies": [
+          2,
+          4
+        ],
+        "status": "not_started",
+        "subtasks": []
+      },
+      {
+        "id": 9,
+        "title": "Implement Wavelet Transform Support",
+        "description": "Add support for Daubechies (db1-db10) and Haar wavelet transforms, including Continuous Wavelet Transform (CWT) and scalogram generation.",
+        "details": "Implement discrete wavelet transform (DWT) for Haar and Daubechies wavelets (db1-db10). Implement Continuous Wavelet Transform (CWT) for time-frequency analysis. Develop functions for scalogram generation. Provide tools for visualizing and analyzing time-frequency representations.",
+        "testStrategy": "Unit tests for DWT and CWT, verifying coefficients and transform results against known reference implementations (e.g., PyWavelets, MATLAB). Test scalogram generation visually and numerically for correctness. Ensure reconstruction properties are maintained.",
+        "priority": "low",
+        "dependencies": [
+          2
+        ],
+        "status": "not_started",
+        "subtasks": []
+      },
+      {
+        "id": 10,
+        "title": "Implement Modern Pitch Detection Algorithms",
+        "description": "Integrate YIN, autocorrelation-based, and Harmonic Product Spectrum (HPS) algorithms for fundamental frequency detection and pitch tracking.",
+        "details": "Implement the YIN algorithm for fundamental frequency estimation. Implement autocorrelation-based pitch detection. Implement Harmonic Product Spectrum (HPS) for robust pitch estimation. Add functionality for pitch tracking over time. Provide musical note detection based on detected pitch.",
+        "testStrategy": "Unit tests for each algorithm using synthetic and real-world audio samples (e.g., single notes, voice). Compare detected pitch with ground truth. Test pitch tracking accuracy over time for varying pitch contours. Verify musical note mapping.",
+        "priority": "medium",
+        "dependencies": [
+          2,
+          4
+        ],
+        "status": "not_started",
+        "subtasks": []
+      },
+      {
+        "id": 11,
+        "title": "Performance Optimization and SIMD Integration",
+        "description": "Optimize critical DSP functions for performance, ensuring SIMD optimization opportunities are leveraged and latency targets are met.",
+        "details": "Profile existing and newly implemented functions to identify performance bottlenecks. Implement SIMD (Single Instruction, Multiple Data) intrinsics (e.g., SSE/AVX for x86, NEON for ARM) for core DSP operations such as FFT, filtering, windowing, and general vector math. Ensure optimizations maintain C99 compatibility and cross-platform support. Focus on achieving the <1ms latency target and minimizing memory allocation during processing.",
+        "testStrategy": "Run comprehensive performance benchmarks (from Task 1) before and after optimization. Verify that CPU usage is minimized and memory allocation is controlled. Confirm <1ms latency for real-time processing and overall performance overhead remains below 10%.",
+        "priority": "high",
+        "dependencies": [
+          1,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10
+        ],
+        "status": "not_started",
+        "subtasks": []
+      },
+      {
+        "id": 12,
+        "title": "Develop Comprehensive Documentation and Examples",
+        "description": "Create detailed developer documentation, API references, and practical examples for all new features, including usage guidance and best practices.",
+        "details": "Write clear, concise API documentation for all new functions, types, and modules. Develop practical, runnable examples for each major new feature (e.g., adaptive filter noise cancellation, MFCC feature extraction, streaming audio processing, pitch detection, wavelet analysis). Include window selection guidance and best practices for using type-safe parameters. Ensure documentation is user-friendly, covers common use cases, and is easily accessible.",
+        "testStrategy": "Conduct a thorough documentation review for clarity, accuracy, and completeness. Verify all provided examples compile and run correctly on target platforms. Ensure the documentation aligns with the implemented features and API.",
+        "priority": "high",
+        "dependencies": [
+          2,
+          3,
+          4,
+          5,
+          6,
+          7,
+          8,
+          9,
+          10,
+          11
+        ],
+        "status": "not_started",
+        "subtasks": []
+      }
+    ],
+    "metadata": {
+      "created": "2025-08-13T07:44:31.709Z",
+      "updated": "2025-08-13T07:45:58.594Z",
+      "description": "Tasks for dsp-improvements context"
+    }
   }
 }
