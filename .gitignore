@@ -58,8 +58,3 @@ __pycache__/
 
 .cache/
 
-.vscode
-
-# Task files
-# tasks.json
-# tasks/ 
