@@ -43,7 +43,26 @@ endif()
 # Build options
 option(VV_DSP_BUILD_TESTS "Build vv-dsp tests" ON)
 option(VV_DSP_BUILD_EXAMPLES "Build vv-dsp examples" ON)
-option(VV_DSP_BUILD_BENCHMARKS "Build vv-dsp performance benchmarks" OFF)
+
+# Build benchmarks only on Ubuntu/Linux
+if(CMAKE_SYSTEM_NAME MATCHES "Linux" AND EXISTS "/etc/lsb-release")
+  # Check if this is Ubuntu by looking for lsb-release
+  file(READ "/etc/lsb-release" LSB_RELEASE_CONTENT)
+  if(LSB_RELEASE_CONTENT MATCHES "DISTRIB_ID=Ubuntu")
+    option(VV_DSP_BUILD_BENCHMARKS "Build vv-dsp performance benchmarks" OFF)
+    set(VV_DSP_BENCHMARK_AVAILABLE TRUE)
+    message(STATUS "vv-dsp: Benchmarks available on Ubuntu platform")
+  else()
+    set(VV_DSP_BUILD_BENCHMARKS OFF CACHE BOOL "Build vv-dsp performance benchmarks (Ubuntu only)" FORCE)
+    set(VV_DSP_BENCHMARK_AVAILABLE FALSE)
+    message(STATUS "vv-dsp: Benchmarks disabled (Ubuntu only)")
+  endif()
+else()
+  set(VV_DSP_BUILD_BENCHMARKS OFF CACHE BOOL "Build vv-dsp performance benchmarks (Ubuntu only)" FORCE)
+  set(VV_DSP_BENCHMARK_AVAILABLE FALSE)
+  message(STATUS "vv-dsp: Benchmarks disabled (Ubuntu only)")
+endif()
+
 option(VV_DSP_USE_GTEST "Enable Google Test and Google Benchmark for modern testing" OFF)
 option(VV_DSP_USE_SIMD "Enable SIMD optimizations where available" OFF)
 option(VV_DSP_ENABLE_AUDIO_IO "Enable WAV audio file I/O utilities" OFF)
@@ -360,8 +379,10 @@ endif()
 add_subdirectory(tools)
 
 # Benchmarks
-if(VV_DSP_BUILD_BENCHMARKS)
+if(VV_DSP_BUILD_BENCHMARKS AND VV_DSP_BENCHMARK_AVAILABLE)
   add_subdirectory(bench)
+elseif(VV_DSP_BUILD_BENCHMARKS)
+  message(WARNING "vv-dsp: Benchmarks are only supported on Ubuntu platforms")
 endif()
 
 # Umbrella interface target that aggregates module libraries

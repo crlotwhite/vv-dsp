@@ -3,7 +3,23 @@ cmake_minimum_required(VERSION 3.15)
 
 # Check if building benchmarks is enabled
 if(NOT VV_DSP_BUILD_BENCHMARKS)
+    message(STATUS "vv-dsp: Benchmarks disabled via VV_DSP_BUILD_BENCHMARKS")
     return()
+endif()
+
+# Verify we're on Ubuntu (double-check from parent CMakeLists.txt)
+if(NOT CMAKE_SYSTEM_NAME MATCHES "Linux")
+    message(WARNING "vv-dsp: Benchmarks are only supported on Linux systems")
+    return()
+endif()
+
+if(EXISTS "/etc/lsb-release")
+    file(READ "/etc/lsb-release" LSB_RELEASE_CONTENT)
+    if(NOT LSB_RELEASE_CONTENT MATCHES "DISTRIB_ID=Ubuntu")
+        message(WARNING "vv-dsp: Benchmarks are optimized for Ubuntu platforms")
+    endif()
+else()
+    message(WARNING "vv-dsp: Cannot verify Ubuntu platform, proceeding with benchmark build")
 endif()
 
 # Benchmark executable

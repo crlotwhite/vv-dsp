@@ -62,7 +62,7 @@ ctest --test-dir build --output-on-failure
 # Run only Google Test unit tests
 ctest --test-dir build -L gtest --output-on-failure
 
-# Run performance benchmarks (non-failing)
+# Run performance benchmarks (non-failing) - Ubuntu only
 ctest --test-dir build -L benchmark --output-on-failure
 
 # Run traditional C tests only
@@ -96,9 +96,11 @@ VV-DSP supports extensive configuration through CMake options:
 
 - **`VV_DSP_BUILD_TESTS`** (default: ON) — Build comprehensive test suite
 - **`VV_DSP_BUILD_EXAMPLES`** (default: ON) — Build usage examples
-- **`VV_DSP_BUILD_BENCHMARKS`** (default: OFF) — Build performance benchmarks
+- **`VV_DSP_BUILD_BENCHMARKS`** (default: OFF) — Build performance benchmarks (Ubuntu only)
 - **`VV_DSP_USE_SIMD`** (default: OFF) — Enable SIMD optimizations
 - **`VV_DSP_SINGLE_FILE`** (default: OFF) — Generate single-header build
+
+> **Note on Benchmarks**: Performance benchmarks are only available on Ubuntu platforms to ensure consistent timing and platform-specific optimizations. On other Linux distributions or platforms, benchmark builds are automatically disabled to prevent timing inconsistencies and compilation issues.
 
 ### FFT Backend Selection
 
