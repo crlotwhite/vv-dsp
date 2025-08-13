@@ -79,13 +79,16 @@ static int verify_window_apply(size_t n) {
 
     // Initialize with test data
     for (size_t i = 0; i < n; ++i) {
-        in[i] = (vv_dsp_real)sin(2.0 * M_PI * i / n);
-        window[i] = (vv_dsp_real)(0.5 - 0.5 * cos(2.0 * M_PI * i / n)); // Hann window
+        in[i] = (vv_dsp_real)sin(2.0 * M_PI * (double)i / (double)n);
+        window[i] = (vv_dsp_real)(0.5 - 0.5 * cos(2.0 * M_PI * (double)i / (double)n)); // Hann window
     }
 
     // Compute both implementations
     scalar_window_apply(in, window, out_scalar, n);
-    vv_dsp_vectorized_window_apply(in, window, out_vector, n);
+    if (vv_dsp_vectorized_window_apply(in, window, out_vector, n) != VV_DSP_OK) {
+        free(in); free(window); free(out_scalar); free(out_vector);
+        return 0;
+    }
 
     // Verify results match within tolerance
     const vv_dsp_real tolerance = 1e-6f;
@@ -94,7 +97,7 @@ static int verify_window_apply(size_t n) {
         vv_dsp_real diff = (vv_dsp_real)fabs(out_scalar[i] - out_vector[i]);
         if (diff > tolerance) {
             printf("Window apply verification failed at index %zu: scalar=%f, vector=%f, diff=%f\n",
-                   i, out_scalar[i], out_vector[i], diff);
+                   i, (double)out_scalar[i], (double)out_vector[i], (double)diff);
             passed = 0;
             break;
         }
@@ -117,8 +120,8 @@ static void benchmark_window_apply(size_t n, int iterations) {
 
     // Initialize data
     for (size_t i = 0; i < n; ++i) {
-        in[i] = (vv_dsp_real)sin(2.0 * M_PI * i / n);
-        window[i] = (vv_dsp_real)(0.5 - 0.5 * cos(2.0 * M_PI * i / n));
+        in[i] = (vv_dsp_real)sin(2.0 * M_PI * (double)i / (double)n);
+        window[i] = (vv_dsp_real)(0.5 - 0.5 * cos(2.0 * M_PI * (double)i / (double)n));
     }
 
     printf("Window Apply Benchmark (size=%zu, iterations=%d):\n", n, iterations);
@@ -133,14 +136,14 @@ static void benchmark_window_apply(size_t n, int iterations) {
     // Benchmark vectorized implementation
     double vector_start = get_time_seconds();
     for (int iter = 0; iter < iterations; ++iter) {
-        vv_dsp_vectorized_window_apply(in, window, out, n);
+        if (vv_dsp_vectorized_window_apply(in, window, out, n) != VV_DSP_OK) break;
     }
     double vector_time = get_time_seconds() - vector_start;
 
     printf("  Scalar:     %.6f seconds (%.2f ns/sample)\n",
-           scalar_time, scalar_time * 1e9 / (iterations * n));
+           scalar_time, scalar_time * 1e9 / ((double)iterations * (double)n));
     printf("  Vectorized: %.6f seconds (%.2f ns/sample)\n",
-           vector_time, vector_time * 1e9 / (iterations * n));
+           vector_time, vector_time * 1e9 / ((double)iterations * (double)n));
     printf("  Speedup:    %.2fx\n", scalar_time / vector_time);
     printf("\n");
 
@@ -160,10 +163,10 @@ static void benchmark_complex_multiply(size_t n, int iterations) {
 
     // Initialize data
     for (size_t i = 0; i < n; ++i) {
-        a[i].re = (vv_dsp_real)cos(2.0 * M_PI * i / n);
-        a[i].im = (vv_dsp_real)sin(2.0 * M_PI * i / n);
-        b[i].re = (vv_dsp_real)cos(2.0 * M_PI * (i + n/4) / n);
-        b[i].im = (vv_dsp_real)sin(2.0 * M_PI * (i + n/4) / n);
+        a[i].re = (vv_dsp_real)cos(2.0 * M_PI * (double)i / (double)n);
+        a[i].im = (vv_dsp_real)sin(2.0 * M_PI * (double)i / (double)n);
+        b[i].re = (vv_dsp_real)cos(2.0 * M_PI * (double)(i + n/4) / (double)n);
+        b[i].im = (vv_dsp_real)sin(2.0 * M_PI * (double)(i + n/4) / (double)n);
     }
 
     printf("Complex Multiply Benchmark (size=%zu, iterations=%d):\n", n, iterations);
@@ -178,14 +181,14 @@ static void benchmark_complex_multiply(size_t n, int iterations) {
     // Benchmark vectorized implementation
     double vector_start = get_time_seconds();
     for (int iter = 0; iter < iterations; ++iter) {
-        vv_dsp_vectorized_complex_multiply(a, b, result, n);
+        if (vv_dsp_vectorized_complex_multiply(a, b, result, n) != VV_DSP_OK) break;
     }
     double vector_time = get_time_seconds() - vector_start;
 
     printf("  Scalar:     %.6f seconds (%.2f ns/sample)\n",
-           scalar_time, scalar_time * 1e9 / (iterations * n));
+           scalar_time, scalar_time * 1e9 / ((double)iterations * (double)n));
     printf("  Vectorized: %.6f seconds (%.2f ns/sample)\n",
-           vector_time, vector_time * 1e9 / (iterations * n));
+           vector_time, vector_time * 1e9 / ((double)iterations * (double)n));
     printf("  Speedup:    %.2fx\n", scalar_time / vector_time);
     printf("\n");
 
@@ -204,7 +207,7 @@ static void benchmark_trig_apply(size_t n, int iterations, int func_type) {
 
     // Initialize data
     for (size_t i = 0; i < n; ++i) {
-        in[i] = (vv_dsp_real)(2.0 * M_PI * i / n - M_PI); // Range [-π, π]
+        in[i] = (vv_dsp_real)(2.0 * M_PI * (double)i / (double)n - M_PI); // Range [-π, π]
     }
 
     const char* func_names[] = {"sin", "cos", "tan"};
@@ -220,14 +223,14 @@ static void benchmark_trig_apply(size_t n, int iterations, int func_type) {
     // Benchmark vectorized implementation
     double vector_start = get_time_seconds();
     for (int iter = 0; iter < iterations; ++iter) {
-        vv_dsp_vectorized_trig_apply(in, out, n, func_type);
+        if (vv_dsp_vectorized_trig_apply(in, out, n, func_type) != VV_DSP_OK) break;
     }
     double vector_time = get_time_seconds() - vector_start;
 
     printf("  Scalar:     %.6f seconds (%.2f ns/sample)\n",
-           scalar_time, scalar_time * 1e9 / (iterations * n));
+           scalar_time, scalar_time * 1e9 / ((double)iterations * (double)n));
     printf("  Vectorized: %.6f seconds (%.2f ns/sample)\n",
-           vector_time, vector_time * 1e9 / (iterations * n));
+           vector_time, vector_time * 1e9 / ((double)iterations * (double)n));
     printf("  Speedup:    %.2fx\n", scalar_time / vector_time);
     printf("\n");
 
