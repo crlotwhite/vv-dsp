@@ -32,8 +32,8 @@ static vv_dsp_status apply_window(vv_dsp_real* w, size_t N, vv_dsp_window_type t
         case VV_DSP_WINDOW_BLACKMAN: {
             const double a0 = 0.42, a1 = 0.5, a2 = 0.08;
             for (size_t n = 0; n < N; ++n) {
-                double c1 = VV_DSP_COS(VV_DSP_TWO_PI_D * (double)n / (double)(N - 1));
-                double c2 = VV_DSP_COS(2.0 * VV_DSP_TWO_PI_D * (double)n / (double)(N - 1));
+                double c1 = (vv_dsp_real)VV_DSP_COS((vv_dsp_real)(VV_DSP_TWO_PI_D * (double)n / (double)(N - 1)));
+                double c2 = (vv_dsp_real)VV_DSP_COS((vv_dsp_real)(2.0 * VV_DSP_TWO_PI_D * (double)n / (double)(N - 1)));
                 w[n] = (vv_dsp_real)(a0 - a1 * c1 + a2 * c2);
             }
             break;

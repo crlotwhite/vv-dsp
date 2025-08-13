@@ -31,7 +31,7 @@ static void test_fir_apply_impulse(void) {
     // First N samples should equal h mirrored with history behavior starting from t=0
     // For this simple test, we just verify that we get finite energy output
     // Energy must be positive, and check we have at least N taps worth of response
-    double e = 0; 
+    double e = 0;
     size_t check_len = (L > N) ? N : L;  // Use N to validate we have expected tap count
     for (size_t i=0;i<L;++i) e += (double)y[i]*(double)y[i];
     assert(check_len > 0);  // Ensure we're checking something meaningful

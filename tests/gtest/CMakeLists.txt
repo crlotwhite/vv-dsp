@@ -48,13 +48,13 @@ if(MSVC)
   add_test(NAME WindowTest.HammingWindowSpecificValues COMMAND vv-dsp-gtest-window --gtest_filter=WindowTest.HammingWindowSpecificValues)
   add_test(NAME WindowTest.EdgeCases COMMAND vv-dsp-gtest-window --gtest_filter=WindowTest.EdgeCases)
   add_test(NAME AllWindowTypesTest.AllWindowTypesBasicFunctionality COMMAND vv-dsp-gtest-window --gtest_filter=AllWindowTypesTest.AllWindowTypesBasicFunctionality)
-  
+
   add_test(NAME FFTTest.BackendManagement COMMAND vv-dsp-gtest-fft --gtest_filter=FFTTest.BackendManagement)
   add_test(NAME FFTTest.PlanLifecycle COMMAND vv-dsp-gtest-fft --gtest_filter=FFTTest.PlanLifecycle)
   add_test(NAME FFTTest.InvalidPlanCreation COMMAND vv-dsp-gtest-fft --gtest_filter=FFTTest.InvalidPlanCreation)
   add_test(NAME FFTTest.EdgeCases COMMAND vv-dsp-gtest-fft --gtest_filter=FFTTest.EdgeCases)
   add_test(NAME FFTTest.BasicPerformanceCheck COMMAND vv-dsp-gtest-fft --gtest_filter=FFTTest.BasicPerformanceCheck)
-  
+
   add_test(NAME STFTTest.STFTLifecycle COMMAND vv-dsp-gtest-stft --gtest_filter=STFTTest.STFTLifecycle)
   add_test(NAME STFTTest.InvalidSTFTCreation COMMAND vv-dsp-gtest-stft --gtest_filter=STFTTest.InvalidSTFTCreation)
   add_test(NAME STFTTest.SpectrogramGeneration COMMAND vv-dsp-gtest-stft --gtest_filter=STFTTest.SpectrogramGeneration)
@@ -62,9 +62,9 @@ if(MSVC)
   add_test(NAME STFTTest.EdgeCases COMMAND vv-dsp-gtest-stft --gtest_filter=STFTTest.EdgeCases)
   add_test(NAME STFTTest.MinimalSizes COMMAND vv-dsp-gtest-stft --gtest_filter=STFTTest.MinimalSizes)
   add_test(NAME STFTTest.PerfectReconstructionConditions COMMAND vv-dsp-gtest-stft --gtest_filter=STFTTest.PerfectReconstructionConditions)
-  
+
   # Set labels for the manually added tests
-  set_tests_properties(WindowTest.HannWindowBasicProperties WindowTest.HammingWindowBasicProperties 
+  set_tests_properties(WindowTest.HannWindowBasicProperties WindowTest.HammingWindowBasicProperties
                       WindowTest.BlackmanWindowBasicProperties WindowTest.BoxcarWindowProperties
                       WindowTest.HannWindowSpecificValues WindowTest.HammingWindowSpecificValues
                       WindowTest.EdgeCases AllWindowTypesTest.AllWindowTypesBasicFunctionality
