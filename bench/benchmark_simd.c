@@ -9,15 +9,28 @@
 #include <string.h>
 #include <math.h>
 
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <sys/time.h>
+#endif
+
 #include "vv_dsp/core.h"
 
 #define BENCHMARK_SIZE 10000
 #define BENCHMARK_ITERATIONS 1000
 
 static double get_time_ms(void) {
+#ifdef _WIN32
+    LARGE_INTEGER frequency, counter;
+    QueryPerformanceFrequency(&frequency);
+    QueryPerformanceCounter(&counter);
+    return (double)counter.QuadPart * 1000.0 / (double)frequency.QuadPart;
+#else
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return ts.tv_sec * 1000.0 + ts.tv_nsec / 1e6;
+#endif
 }
 
 // Scalar reference implementations

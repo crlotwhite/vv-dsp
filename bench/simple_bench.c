@@ -1,7 +1,11 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <time.h>
-#include <unistd.h>  // For alarm() function
+#ifdef _WIN32
+#include <windows.h>  // For Windows-specific timing functions
+#else
+#include <unistd.h>  // For alarm() function (POSIX only)
+#endif
 #include "bench_framework.h"
 
 // Forward declaration

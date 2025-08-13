@@ -9,15 +9,28 @@
 #include <time.h>
 #include <math.h>
 
+#ifdef _WIN32
+#include <windows.h>
+#else
+#include <sys/time.h>
+#endif
+
 #include "vv_dsp/core/vv_dsp_vectorized_math.h"
 #include "vv_dsp/vv_dsp_math.h"
 #include "vv_dsp/vv_dsp_types.h"
 
 // Simple timing utility
 static double get_time_seconds(void) {
+#ifdef _WIN32
+    LARGE_INTEGER frequency, counter;
+    QueryPerformanceFrequency(&frequency);
+    QueryPerformanceCounter(&counter);
+    return (double)counter.QuadPart / (double)frequency.QuadPart;
+#else
     struct timespec ts;
     clock_gettime(CLOCK_MONOTONIC, &ts);
     return ts.tv_sec + ts.tv_nsec * 1e-9;
+#endif
 }
 
 // Accuracy metrics structure
@@ -47,8 +60,8 @@ static accuracy_metrics_t calculate_accuracy_metrics(const vv_dsp_real* referenc
         sum_squared_error += error * error;
     }
 
-    metrics.mean_abs_error = sum_abs_error / n;
-    metrics.rmse = sqrt(sum_squared_error / n);
+    metrics.mean_abs_error = sum_abs_error / (double)n;
+    metrics.rmse = sqrt(sum_squared_error / (double)n);
 
     return metrics;
 }
