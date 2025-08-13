@@ -10,7 +10,7 @@ Enhance the vv-dsp library with modern DSP techniques, advanced algorithms, and 
 ## Background & Motivation
 Current vv-dsp is a solid C99 DSP library but lacks several modern features found in contemporary DSP frameworks:
 - Limited window function variety (only Hanning/Hamming vs CMSIS-DSP's 9 types)
-- No adaptive filtering capabilities 
+- No adaptive filtering capabilities
 - Basic MFCC implementation without advanced features
 - No type safety mechanisms for DSP parameters
 - Limited real-time streaming support
@@ -121,7 +121,7 @@ Current vv-dsp is a solid C99 DSP library but lacks several modern features foun
 
 ## Timeline Expectations
 - Phase 1 (Foundation): 2-3 weeks
-- Phase 2 (Core Features): 3-4 weeks  
+- Phase 2 (Core Features): 3-4 weeks
 - Phase 3 (Streaming & Conditioning): 2-3 weeks
 - Phase 4 (Advanced Features): 3-4 weeks
 - Phase 5 (Optimization & Docs): 1-2 weeks
@@ -134,7 +134,7 @@ Current vv-dsp is a solid C99 DSP library but lacks several modern features foun
 
 ## Risk Assessment
 - Complexity of adaptive algorithms may require iteration
-- Type safety system design needs careful API consideration  
+- Type safety system design needs careful API consideration
 - Real-time streaming requires extensive testing
 - Wavelet transforms are mathematically complex
 - Performance optimization may conflict with readability
